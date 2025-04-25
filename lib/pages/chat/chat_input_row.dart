@@ -116,7 +116,8 @@ class ChatInputRow extends StatelessWidget {
               AnimatedContainer(
                 duration: FluffyThemes.animationDuration,
                 curve: FluffyThemes.animationCurve,
-                width: controller.sendController.text.isNotEmpty ? 0 : height,
+                width:
+                    controller.sendController.text.isNotEmpty ? 0 : height - 10,
                 height: height,
                 alignment: Alignment.center,
                 decoration: const BoxDecoration(),
@@ -185,7 +186,9 @@ class ChatInputRow extends StatelessWidget {
                 AnimatedContainer(
                   duration: FluffyThemes.animationDuration,
                   curve: FluffyThemes.animationCurve,
-                  width: controller.sendController.text.isNotEmpty ? 0 : height,
+                  width: controller.sendController.text.isNotEmpty
+                      ? 0
+                      : height - 10,
                   height: height,
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(),
@@ -227,7 +230,7 @@ class ChatInputRow extends StatelessWidget {
                 ),
               Container(
                 height: height,
-                width: height,
+                width: height - 10,
                 alignment: Alignment.center,
                 child: IconButton(
                   tooltip: L10n.of(context).emojis,
@@ -256,6 +259,36 @@ class ChatInputRow extends StatelessWidget {
                   onPressed: controller.emojiPickerAction,
                 ),
               ),
+              if (!controller.showEmojiPicker)
+                Container(
+                  height: height,
+                  width: height,
+                  alignment: Alignment.center,
+                  child: IconButton(
+                    tooltip: L10n.of(context).stickers,
+                    color: theme.colorScheme.onPrimaryContainer,
+                    icon: PageTransitionSwitcher(
+                      transitionBuilder: (
+                        Widget child,
+                        Animation<double> primaryAnimation,
+                        Animation<double> secondaryAnimation,
+                      ) {
+                        return SharedAxisTransition(
+                          animation: primaryAnimation,
+                          secondaryAnimation: secondaryAnimation,
+                          transitionType: SharedAxisTransitionType.scaled,
+                          fillColor: Colors.transparent,
+                          child: child,
+                        );
+                      },
+                      child: Icon(
+                        Icons.settings_system_daydream_outlined,
+                        key: ValueKey(controller.showEmojiPicker),
+                      ),
+                    ),
+                    onPressed: controller.stickerPickerAction,
+                  ),
+                ),
               if (Matrix.of(context).isMultiAccount &&
                   Matrix.of(context).hasComplexBundles &&
                   Matrix.of(context).currentBundle!.length > 1)
