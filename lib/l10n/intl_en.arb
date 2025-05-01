@@ -3132,6 +3132,8 @@
   "version": "Version",
   "website": "Website",
   "compress": "Compress",
+  "spoilerText": "Spoiler text",
+  "quoteText": "Quote text",
   "boldText": "Bold text",
   "italicText": "Italic text",
   "strikeThrough": "Strikethrough",
