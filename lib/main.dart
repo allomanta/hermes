@@ -14,7 +14,7 @@ import 'utils/background_push.dart';
 import 'widgets/hermes_app.dart';
 
 void main() async {
-  Logs().i('Welcome to ${AppConfig.applicationName} <3');
+  Logs().i('Welcome to ${AppConfig.applicationName}');
 
   // Our background push shared isolate accesses flutter-internal things very early in the startup proccess
   // To make sure that the parts of flutter needed are started up already, we need to ensure that the
