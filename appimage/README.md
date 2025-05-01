@@ -1,6 +1,6 @@
-# FluffyChat AppImage
+# Hermes AppImage
 
-FluffyChat is provided as AppImage too. To Download, visit fluffychat.im.
+Hermes is provided as AppImage too. To Download, visit hermes.im.
 
 ## Building
 
@@ -10,15 +10,15 @@ FluffyChat is provided as AppImage too. To Download, visit fluffychat.im.
 flutter build linux
 
 # copy binaries to appimage dir
-cp -r build/linux/{x64,arm64}/release/bundle appimage/FluffyChat.AppDir
+cp -r build/linux/{x64,arm64}/release/bundle appimage/Hermes.AppDir
 cd appimage
 
 # prepare AppImage files
-cp FluffyChat.desktop FluffyChat.AppDir/
-mkdir -p FluffyChat.AppDir/usr/share/icons
-cp ../assets/logo.svg FluffyChat.AppDir/fluffychat.svg
-cp AppRun FluffyChat.AppDir
+cp Hermes.desktop Hermes.AppDir/
+mkdir -p Hermes.AppDir/usr/share/icons
+cp ../assets/logo.svg Hermes.AppDir/hermes.svg
+cp AppRun Hermes.AppDir
 
 # build the AppImage
-appimagetool FluffyChat.AppDir
+appimagetool Hermes.AppDir
 ```
