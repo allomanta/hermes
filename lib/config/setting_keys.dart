@@ -21,7 +21,7 @@ abstract class SettingKeys {
   static const String unifiedPushEndpoint = 'chat.fluffy.unifiedpush.endpoint';
   static const String ownStatusMessage = 'chat.fluffy.status_msg';
   static const String dontAskForBootstrapKey =
-      'chat.fluffychat.dont_ask_bootstrap';
+      'chat.hermes.dont_ask_bootstrap';
   static const String autoplayImages = 'chat.fluffy.autoplay_images';
   static const String sendTypingNotifications =
       'chat.fluffy.send_typing_notifications';
@@ -46,7 +46,7 @@ enum AppSettings<T> {
   audioRecordingSamplingRate<int>('audioRecordingSamplingRate', 44100),
   pushNotificationsGatewayUrl<String>(
     'pushNotificationsGatewayUrl',
-    'https://push.fluffychat.im/_matrix/push/v1/notify',
+    'https://push.hermes.im/_matrix/push/v1/notify',
   ),
   pushNotificationsPusherFormat<String>(
     'pushNotificationsPusherFormat',

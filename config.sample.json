@@ -1,9 +1,9 @@
 {
-  "application_name": "FluffyChat",
+  "application_name": "Hermes",
   "application_welcome_message": null,
   "default_homeserver": "matrix.org",
-  "web_base_url": "https://fluffychat.im/web",
-  "privacy_url": "https://fluffychat.im/en/privacy.html",
+  "web_base_url": "https://hermes.im/web",
+  "privacy_url": "https://hermes.im/en/privacy.html",
   "render_html": false,
   "hide_redacted_events": false,
   "hide_unknown_events": false
