@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/add_widget_tile.dart';
+import 'package:hermes/pages/chat/add_widget_tile.dart';
 
 class AddWidgetTileView extends StatelessWidget {
   final AddWidgetTileState controller;

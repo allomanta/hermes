@@ -9,8 +9,10 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:hermes/config/app_config.dart';
+import 'package:hermes/utils/client_manager.dart';
+import 'package:hermes/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
+import 'package:hermes/utils/platform_infos.dart';
 import 'cipher.dart';
 
 import 'sqlcipher_stub.dart'
