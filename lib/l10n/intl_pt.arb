@@ -999,7 +999,7 @@
     }
   },
   "@callingPermissions": {},
-  "@newMessageInFluffyChat": {
+  "@newMessageInHermes": {
     "type": "String",
     "placeholders": {}
   },
@@ -1458,7 +1458,7 @@
     "placeholders": {}
   },
   "@unverified": {},
-  "@fluffychat": {
+  "@hermes": {
     "type": "String",
     "placeholders": {}
   },

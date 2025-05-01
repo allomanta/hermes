@@ -1,15 +1,15 @@
 {
   "project_info": {
     "project_number": "865731724731",
-    "project_id": "fluffychat-ef3e8",
-    "storage_bucket": "fluffychat-ef3e8.appspot.com"
+    "project_id": "hermes-ef3e8",
+    "storage_bucket": "hermes-ef3e8.appspot.com"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:865731724731:android:ec427b3b1dcd4a1e64309e",
         "android_client_info": {
-          "package_name": "chat.fluffy.fluffychat"
+          "package_name": "chat.fluffy.hermes"
         }
       },
       "oauth_client": [
@@ -34,7 +34,7 @@
               "client_id": "865731724731-ofdr7e6m04murgb1bvchlj9oaos0q5i3.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "im.fluffychat.app"
+                "bundle_id": "im.hermes.app"
               }
             }
           ]
