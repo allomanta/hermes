@@ -1,4 +1,4 @@
-name: fluffychat
+name: hermes
 description: Chat with your friends.
 publish_to: none
 # On version bump also increase the build number for F-Droid
@@ -115,15 +115,15 @@ flutter:
     - assets/vodozemac/
 
 msix_config:
-  display_name: FluffyChat
-  publisher_display_name: FluffyChat
-  publisher: CN=FluffyChat, O=Head of bad integration tests, L=Matrix, S=Internet, C=EU
-  identity_name: chat.fluffy.fluffychat
+  display_name: Hermes
+  publisher_display_name: Hermes
+  publisher: CN=Hermes, O=Head of bad integration tests, L=Matrix, S=Internet, C=EU
+  identity_name: chat.fluffy.hermes
   logo_path: assets\logo.png
   capabilities: internetClient, location, microphone, webcam
   protocol_activation: https
-  app_uri_handler_hosts: fluffychat.im, matrix.to
-  execution_alias: fluffychat
+  app_uri_handler_hosts: hermes.im, matrix.to
+  execution_alias: hermes
   sign_msix: false
   install_certificate: false
 
