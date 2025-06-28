@@ -18,7 +18,6 @@ import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/utils/custom_http_client.dart';
 import 'package:hermes/utils/custom_image_resizer.dart';
 import 'package:hermes/utils/init_with_restore.dart';
-import 'package:hermes/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 
