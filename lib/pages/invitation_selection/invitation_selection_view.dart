@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/invitation_selection/invitation_selection.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';

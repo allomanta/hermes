@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/layouts/login_scaffold.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'login.dart';

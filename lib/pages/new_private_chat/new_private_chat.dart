@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/new_private_chat/new_private_chat_view.dart';
 import 'package:hermes/pages/new_private_chat/qr_scanner_modal.dart';
 import 'package:hermes/utils/adaptive_bottom_sheet.dart';
