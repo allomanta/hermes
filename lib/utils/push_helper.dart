@@ -10,12 +10,13 @@ import 'package:flutter_shortcuts_new/flutter_shortcuts_new.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hermes/l10n/l10n.dart';
-const notificationAvatarDimension = 128;
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/client_download_content_extension.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/platform_infos.dart';
+
+const notificationAvatarDimension = 128;
 
 Future<void> pushHelper(
   PushNotification notification, {

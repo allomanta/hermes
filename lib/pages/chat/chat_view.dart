@@ -8,8 +8,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:hermes/l10n/l10n.dart';
 
-import 'package:flutter/services.dart';
-
 import 'package:hermes/config/app_config.dart';
 
 import 'package:hermes/config/themes.dart';
@@ -25,8 +23,6 @@ import 'package:hermes/pages/chat/chat_event_list.dart';
 import 'package:hermes/pages/chat/encryption_button.dart';
 
 import 'package:hermes/pages/chat/pinned_events.dart';
-
-import 'package:hermes/pages/chat/reactions_picker.dart';
 
 import 'package:hermes/pages/chat/reply_display.dart';
 

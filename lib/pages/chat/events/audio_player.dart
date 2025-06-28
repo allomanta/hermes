@@ -84,7 +84,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
               content: StreamBuilder(
                 stream: audioPlayer.positionStream.asBroadcastStream(),
                 builder: (context, _) => GestureDetector(
-                  onTap: () => hermesApp.router.go(
+                  onTap: () => HermesApp.router.go(
                     '/rooms/${widget.event.room.id}?event=${widget.event.eventId}',
                   ),
                   child: Text(

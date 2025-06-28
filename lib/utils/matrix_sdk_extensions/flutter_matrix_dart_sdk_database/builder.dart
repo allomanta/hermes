@@ -10,7 +10,6 @@ import 'package:universal_html/html.dart' as html;
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/client_manager.dart';
-import 'package:hermes/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'cipher.dart';
 
