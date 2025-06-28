@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart' as sdk;
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/new_group/new_group_view.dart';
 import 'package:hermes/utils/file_selector.dart';
 import 'package:hermes/widgets/matrix.dart';

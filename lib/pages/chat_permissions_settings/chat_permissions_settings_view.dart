@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:hermes/pages/chat_permissions_settings/permission_list_tile.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
