@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+
+import 'package:flutter/services.dart';
+
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/chat_search/chat_search_files_tab.dart';
 import 'package:hermes/pages/chat_search/chat_search_images_tab.dart';
@@ -108,3 +111,5 @@ class ChatSearchView extends StatelessWidget {
     );
   }
 }
+
+class BackIntent extends Intent {}
