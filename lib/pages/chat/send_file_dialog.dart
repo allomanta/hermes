@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';

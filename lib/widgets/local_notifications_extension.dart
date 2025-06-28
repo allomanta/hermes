@@ -8,9 +8,9 @@ import 'package:desktop_notifications/desktop_notifications.dart';
 import 'package:image/image.dart';
 import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/push_helper.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/push_helper.dart';
+import 'package:hermes/widgets/hermes_app.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/client_download_content_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -140,7 +140,7 @@ extension LocalNotificationsExtension on MatrixState {
             );
             break;
           case DesktopNotificationActions.openChat:
-            FluffyChatApp.router.go('/rooms/${event.room.id}');
+            HermesApp.router.go('/rooms/${event.room.id}');
             break;
         }
       });

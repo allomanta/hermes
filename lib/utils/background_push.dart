@@ -31,7 +31,7 @@ import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 import 'package:unifiedpush_ui/unifiedpush_ui.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/push_helper.dart';
 import 'package:hermes/widgets/hermes_app.dart';
 import '../config/app_config.dart';

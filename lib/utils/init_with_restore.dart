@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/platform_infos.dart';

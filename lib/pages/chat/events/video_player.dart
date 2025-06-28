@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:hermes/widgets/mxc_image.dart';
 import '../../image_viewer/image_viewer.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/pages/chat/events/image_bubble.dart';

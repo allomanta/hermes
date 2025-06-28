@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/new_group/new_group.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';

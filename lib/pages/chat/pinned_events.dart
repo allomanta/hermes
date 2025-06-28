@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat/chat.dart';
 import 'package:hermes/pages/chat/chat_app_bar_list_tile.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
