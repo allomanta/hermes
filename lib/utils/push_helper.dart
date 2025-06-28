@@ -23,6 +23,8 @@ import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/platform_infos.dart';
 
+const notificationAvatarDimension = 128;
+
 Future<void> pushHelper(
   PushNotification notification, {
   Client? client,
