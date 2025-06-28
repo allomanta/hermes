@@ -7,7 +7,7 @@ import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/settings_emotes/settings_emotes.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';

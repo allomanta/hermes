@@ -3,7 +3,7 @@ import 'package:flutter/material.dart' hide Visibility;
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_access_settings/chat_access_settings_page.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_modal_action_popup.dart';

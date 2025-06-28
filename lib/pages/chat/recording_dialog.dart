@@ -8,7 +8,7 @@ import 'package:path/path.dart' as path_lib;
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/utils/platform_infos.dart';

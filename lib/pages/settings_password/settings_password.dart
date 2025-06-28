@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/settings_password/settings_password_view.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/widgets/matrix.dart';

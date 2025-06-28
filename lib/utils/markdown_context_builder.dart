@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 
 Widget markdownContextBuilder(

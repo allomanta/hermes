@@ -5,7 +5,7 @@ import 'package:image/image.dart';
 import 'package:matrix/matrix.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:qr_image/qr_image.dart';
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/fluffy_share.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';

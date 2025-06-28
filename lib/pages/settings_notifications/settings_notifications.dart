@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/pages/settings_notifications/push_rule_extensions.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';

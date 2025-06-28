@@ -18,7 +18,7 @@ import 'package:hermes/utils/file_description.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/utils/url_launcher.dart';
 import '../../../utils/matrix_sdk_extensions/event_extension.dart';
-import '../../../widgets/fluffy_chat_app.dart';
+import '../../../widgets/hermes_app.dart';
 import '../../../widgets/matrix.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
@@ -84,7 +84,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
               content: StreamBuilder(
                 stream: audioPlayer.positionStream.asBroadcastStream(),
                 builder: (context, _) => GestureDetector(
-                  onTap: () => FluffyChatApp.router.go(
+                  onTap: () => hermesApp.router.go(
                     '/rooms/${widget.event.room.id}?event=${widget.event.eventId}',
                   ),
                   child: Text(

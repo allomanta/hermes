@@ -6,7 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/file_selector.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_modal_action_popup.dart';

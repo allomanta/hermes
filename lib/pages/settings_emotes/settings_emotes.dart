@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' hide Client;
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/file_selector.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';

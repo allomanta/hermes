@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'package:hermes/widgets/mxc_image.dart';

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:share_plus/share_plus.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import '../widgets/matrix.dart';
 

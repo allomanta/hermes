@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/utils/date_time_extension.dart';
 import 'package:hermes/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
