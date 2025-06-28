@@ -4,7 +4,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_details/chat_details.dart';
 import 'package:hermes/pages/chat_details/participant_list_item.dart';
 import 'package:hermes/utils/fluffy_share.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import '../../utils/date_time_extension.dart';

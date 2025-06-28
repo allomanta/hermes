@@ -17,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/init_with_restore.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';

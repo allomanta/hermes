@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/device_settings/device_settings.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';

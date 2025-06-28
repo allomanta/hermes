@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/image_viewer/video_player.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/image_viewer/video_player.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/hover_builder.dart';
 import 'package:hermes/widgets/mxc_image.dart';
