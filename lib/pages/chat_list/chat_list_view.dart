@@ -31,18 +31,19 @@ class ChatListView extends StatelessWidget {
       },
       child: Row(
         children: [
-          if (FluffyThemes.isColumnMode(context) ||
-              AppConfig.displayNavigationRail) ...[
-            SpacesNavigationRail(
-              activeSpaceId: controller.activeSpaceId,
-              onGoToChats: controller.clearActiveSpace,
-              onGoToSpaceId: controller.setActiveSpace,
-            ),
-            Container(
-              color: Theme.of(context).dividerColor,
-              width: 1,
-            ),
-          ],
+          // if (FluffyThemes.isColumnMode(context) ||
+          //     AppConfig.displayNavigationRail)
+          // ...[
+          SpacesNavigationRail(
+            activeSpaceId: controller.activeSpaceId,
+            onGoToChats: controller.clearActiveSpace,
+            onGoToSpaceId: controller.setActiveSpace,
+          ),
+          Container(
+            color: Theme.of(context).dividerColor,
+            width: 1,
+          ),
+          // ],
           Expanded(
             child: GestureDetector(
               onTap: FocusManager.instance.primaryFocus?.unfocus,
