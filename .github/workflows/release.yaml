@@ -100,8 +100,6 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-      - name: Apply Google Services Patch
-        run: git apply ./scripts/enable-android-google-services.patch
       - uses: moonrepo/setup-rust@v1
       - run: flutter pub get
       - name: Prepare Android Release Build
