@@ -128,7 +128,7 @@ class ChatInputRow extends StatelessWidget {
                   onSelected: controller.onAddPopupMenuButtonSelected,
                   itemBuilder: (BuildContext context) =>
                       <PopupMenuEntry<String>>[
-                    if (PlatformInfos.isMobile)
+                    if (PlatformInfos.isMobile) ...[
                       PopupMenuItem<String>(
                         value: 'location',
                         child: ListTile(
@@ -142,6 +142,20 @@ class ChatInputRow extends StatelessWidget {
                           contentPadding: const EdgeInsets.all(0),
                         ),
                       ),
+                      PopupMenuItem<String>(
+                        value: 'camera',
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor:
+                                theme.colorScheme.onPrimaryContainer,
+                            foregroundColor: theme.colorScheme.primaryContainer,
+                            child: const Icon(Icons.camera_alt_outlined),
+                          ),
+                          title: Text(L10n.of(context).takeAPhoto),
+                          contentPadding: const EdgeInsets.all(0),
+                        ),
+                      ),
+                    ],
                     PopupMenuItem<String>(
                       value: 'image',
                       child: ListTile(
@@ -154,6 +168,20 @@ class ChatInputRow extends StatelessWidget {
                         contentPadding: const EdgeInsets.all(0),
                       ),
                     ),
+                    if (PlatformInfos.isMobile)
+                      PopupMenuItem<String>(
+                        value: 'camera-video',
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor:
+                                theme.colorScheme.onPrimaryContainer,
+                            foregroundColor: theme.colorScheme.primaryContainer,
+                            child: const Icon(Icons.videocam_outlined),
+                          ),
+                          title: Text(L10n.of(context).recordAVideo),
+                          contentPadding: const EdgeInsets.all(0),
+                        ),
+                      ),
                     PopupMenuItem<String>(
                       value: 'video',
                       child: ListTile(
@@ -181,52 +209,6 @@ class ChatInputRow extends StatelessWidget {
                   ],
                 ),
               ),
-              if (PlatformInfos.isMobile)
-                AnimatedContainer(
-                  duration: FluffyThemes.animationDuration,
-                  curve: FluffyThemes.animationCurve,
-                  width: controller.sendController.text.isNotEmpty
-                      ? 0
-                      : height - 10,
-                  height: height,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(),
-                  clipBehavior: Clip.hardEdge,
-                  child: PopupMenuButton(
-                    useRootNavigator: true,
-                    icon: const Icon(Icons.camera_alt_outlined),
-                    onSelected: controller.onAddPopupMenuButtonSelected,
-                    iconColor: theme.colorScheme.onPrimaryContainer,
-                    itemBuilder: (context) => [
-                      PopupMenuItem<String>(
-                        value: 'camera-video',
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor:
-                                theme.colorScheme.onPrimaryContainer,
-                            foregroundColor: theme.colorScheme.primaryContainer,
-                            child: const Icon(Icons.videocam_outlined),
-                          ),
-                          title: Text(L10n.of(context).recordAVideo),
-                          contentPadding: const EdgeInsets.all(0),
-                        ),
-                      ),
-                      PopupMenuItem<String>(
-                        value: 'camera',
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor:
-                                theme.colorScheme.onPrimaryContainer,
-                            foregroundColor: theme.colorScheme.primaryContainer,
-                            child: const Icon(Icons.camera_alt_outlined),
-                          ),
-                          title: Text(L10n.of(context).takeAPhoto),
-                          contentPadding: const EdgeInsets.all(0),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               Container(
                 height: height,
                 width: height - 10,
