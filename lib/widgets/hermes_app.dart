@@ -68,9 +68,10 @@ class HermesApp extends StatelessWidget {
       builder: (context, themeMode, primaryColor) => MaterialApp.router(
         title: AppConfig.applicationName,
         themeMode: themeMode,
-        theme: FluffyThemes.buildTheme(context, Brightness.light, primaryColor),
+        theme:
+            PantheonThemes.buildTheme(context, Brightness.light, primaryColor),
         darkTheme:
-            FluffyThemes.buildTheme(context, Brightness.dark, primaryColor),
+            PantheonThemes.buildTheme(context, Brightness.dark, primaryColor),
         scrollBehavior: CustomScrollBehavior(),
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
