@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/themes.dart';
-import 'package:hermes/utils/fluffy_share.dart';
+import 'package:hermes/utils/pantheon_share.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
@@ -33,7 +33,7 @@ class SettingsView extends StatelessWidget {
         ?.tryGet<String>('account');
     return Row(
       children: [
-        if (FluffyThemes.isColumnMode(context)) ...[
+        if (PantheonThemes.isColumnMode(context)) ...[
           SpacesNavigationRail(
             activeSpaceId: null,
             onGoToChats: () => context.go('/rooms'),
@@ -46,7 +46,7 @@ class SettingsView extends StatelessWidget {
         ],
         Expanded(
           child: Scaffold(
-            appBar: FluffyThemes.isColumnMode(context)
+            appBar: PantheonThemes.isColumnMode(context)
                 ? null
                 : AppBar(
                     title: Text(L10n.of(context).settings),
@@ -131,7 +131,7 @@ class SettingsView extends StatelessWidget {
                                 ),
                                 TextButton.icon(
                                   onPressed: () =>
-                                      FluffyShare.share(mxid, context),
+                                      PantheonShare.share(mxid, context),
                                   icon: const Icon(
                                     Icons.copy_outlined,
                                     size: 14,
