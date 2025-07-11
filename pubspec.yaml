@@ -127,7 +127,7 @@ msix_config:
   display_name: Hermes
   publisher_display_name: Hermes
   publisher: CN=Hermes, O=Head of bad integration tests, L=Matrix, S=Internet, C=EU
-  identity_name: chat.fluffy.hermes
+  identity_name: chat.pantheon.hermes
   logo_path: assets\logo.png
   capabilities: internetClient, location, microphone, webcam
   protocol_activation: https

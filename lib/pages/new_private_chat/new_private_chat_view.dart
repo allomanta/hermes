@@ -99,7 +99,7 @@ class NewPrivateChatView extends StatelessWidget {
             ),
             Expanded(
               child: AnimatedCrossFade(
-                duration: FluffyThemes.animationDuration,
+                duration: PantheonThemes.animationDuration,
                 crossFadeState: searchResponse == null
                     ? CrossFadeState.showFirst
                     : CrossFadeState.showSecond,

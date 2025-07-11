@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'app_config.dart';
 
-abstract class FluffyThemes {
+abstract class PantheonThemes {
   static const double columnWidth = 380.0;
 
   static const double maxTimelineWidth = columnWidth * 2;
@@ -17,7 +17,7 @@ abstract class FluffyThemes {
       isColumnModeByWidth(MediaQuery.of(context).size.width);
 
   static bool isThreeColumnMode(BuildContext context) =>
-      MediaQuery.of(context).size.width > FluffyThemes.columnWidth * 3.5;
+      MediaQuery.of(context).size.width > PantheonThemes.columnWidth * 3.5;
 
   static LinearGradient backgroundGradient(
     BuildContext context,
@@ -47,7 +47,7 @@ abstract class FluffyThemes {
       brightness: brightness,
       seedColor: seed ?? AppConfig.colorSchemeSeed ?? AppConfig.primaryColor,
     );
-    final isColumnMode = FluffyThemes.isColumnMode(context);
+    final isColumnMode = PantheonThemes.isColumnMode(context);
     return ThemeData(
       visualDensity: VisualDensity.standard,
       useMaterial3: true,
@@ -117,7 +117,7 @@ abstract class FluffyThemes {
       snackBarTheme: isColumnMode
           ? const SnackBarThemeData(
               behavior: SnackBarBehavior.floating,
-              width: FluffyThemes.columnWidth * 1.5,
+              width: PantheonThemes.columnWidth * 1.5,
             )
           : const SnackBarThemeData(behavior: SnackBarBehavior.floating),
       elevatedButtonTheme: ElevatedButtonThemeData(
