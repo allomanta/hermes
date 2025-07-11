@@ -26,18 +26,13 @@ class SpacesNavigationRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
-    final isSettings = GoRouter.of(context)
-        .routeInformationProvider
-        .value
-        .uri
-        .path
-        .startsWith('/rooms/settings');
+    final isSettings = GoRouter.of(
+      context,
+    ).routeInformationProvider.value.uri.path.startsWith('/rooms/settings');
     return Material(
       child: SafeArea(
         child: StreamBuilder(
-          key: ValueKey(
-            client.userID.toString(),
-          ),
+          key: ValueKey(client.userID.toString()),
           stream: client.onSync.stream
               .where((s) => s.hasRoomUpdate)
               .rateLimit(const Duration(seconds: 1)),
@@ -46,16 +41,15 @@ class SpacesNavigationRail extends StatelessWidget {
             final rootSpaces = allSpaces
                 .where(
                   (space) => !allSpaces.any(
-                    (parentSpace) => parentSpace.spaceChildren
-                        .any((child) => child.roomId == space.id),
+                    (parentSpace) => parentSpace.spaceChildren.any(
+                      (child) => child.roomId == space.id,
+                    ),
                   ),
                 )
                 .toList();
 
             return SizedBox(
-              width: FluffyThemes.isColumnMode(context)
-                  ? FluffyThemes.navRailWidth
-                  : FluffyThemes.navRailWidth * 0.75,
+              width: PantheonThemes.navRailWidth,
               child: Column(
                 children: [
                   Expanded(
@@ -92,12 +86,13 @@ class SpacesNavigationRail extends StatelessWidget {
                           );
                         }
                         final space = rootSpaces[i];
-                        final displayname =
-                            rootSpaces[i].getLocalizedDisplayname(
-                          MatrixLocals(L10n.of(context)),
-                        );
-                        final spaceChildrenIds =
-                            space.spaceChildren.map((c) => c.roomId).toSet();
+                        final displayname = rootSpaces[i]
+                            .getLocalizedDisplayname(
+                              MatrixLocals(L10n.of(context)),
+                            );
+                        final spaceChildrenIds = space.spaceChildren
+                            .map((c) => c.roomId)
+                            .toSet();
                         return NaviRailItem(
                           toolTip: displayname,
                           isSelected: activeSpaceId == space.id,

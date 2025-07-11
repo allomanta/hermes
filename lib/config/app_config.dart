@@ -39,8 +39,7 @@ abstract class AppConfig {
   static String _webBaseUrl = 'https://hermes.im/web';
 
   static String get webBaseUrl => _webBaseUrl;
-  static const String sourceCodeUrl =
-      'https://github.com/krille-chan/hermes';
+  static const String sourceCodeUrl = 'https://github.com/krille-chan/hermes';
   static const String supportUrl =
       'https://github.com/krille-chan/hermes/issues';
   static const String changelogUrl =
@@ -67,7 +66,7 @@ abstract class AppConfig {
   static const String deepLinkPrefix = 'im.hermes://chat/';
   static const String schemePrefix = 'matrix:';
   static const String pushNotificationsChannelId = 'hermes_push';
-  static const String pushNotificationsAppId = 'chat.fluffy.hermes';
+  static const String pushNotificationsAppId = 'chat.pantheon.hermes';
   static const double borderRadius = 18.0;
   static const double columnWidth = 360.0;
   static final Uri homeserverList = Uri(
