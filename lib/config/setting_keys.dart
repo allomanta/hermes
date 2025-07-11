@@ -1,39 +1,39 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SettingKeys {
-  static const String renderHtml = 'chat.fluffy.renderHtml';
-  static const String hideRedactedEvents = 'chat.fluffy.hideRedactedEvents';
-  static const String hideUnknownEvents = 'chat.fluffy.hideUnknownEvents';
+  static const String renderHtml = 'chat.pantheon.renderHtml';
+  static const String hideRedactedEvents = 'chat.pantheon.hideRedactedEvents';
+  static const String hideUnknownEvents = 'chat.pantheon.hideUnknownEvents';
   static const String hideUnimportantStateEvents =
-      'chat.fluffy.hideUnimportantStateEvents';
-  static const String separateChatTypes = 'chat.fluffy.separateChatTypes';
+      'chat.pantheon.hideUnimportantStateEvents';
+  static const String separateChatTypes = 'chat.pantheon.separateChatTypes';
   static const String sentry = 'sentry';
   static const String theme = 'theme';
   static const String amoledEnabled = 'amoled_enabled';
   static const String codeLanguage = 'code_language';
-  static const String showNoGoogle = 'chat.fluffy.show_no_google';
-  static const String fontSizeFactor = 'chat.fluffy.font_size_factor';
-  static const String showNoPid = 'chat.fluffy.show_no_pid';
+  static const String showNoGoogle = 'chat.pantheon.show_no_google';
+  static const String fontSizeFactor = 'chat.pantheon.font_size_factor';
+  static const String showNoPid = 'chat.pantheon.show_no_pid';
   static const String databasePassword = 'database-password';
-  static const String appLockKey = 'chat.fluffy.app_lock';
+  static const String appLockKey = 'chat.pantheon.app_lock';
   static const String unifiedPushRegistered =
-      'chat.fluffy.unifiedpush.registered';
-  static const String unifiedPushEndpoint = 'chat.fluffy.unifiedpush.endpoint';
-  static const String ownStatusMessage = 'chat.fluffy.status_msg';
-  static const String dontAskForBootstrapKey =
-      'chat.hermes.dont_ask_bootstrap';
-  static const String autoplayImages = 'chat.fluffy.autoplay_images';
+      'chat.pantheon.unifiedpush.registered';
+  static const String unifiedPushEndpoint =
+      'chat.pantheon.unifiedpush.endpoint';
+  static const String ownStatusMessage = 'chat.pantheon.status_msg';
+  static const String dontAskForBootstrapKey = 'chat.hermes.dont_ask_bootstrap';
+  static const String autoplayImages = 'chat.pantheon.autoplay_images';
   static const String sendTypingNotifications =
-      'chat.fluffy.send_typing_notifications';
+      'chat.pantheon.send_typing_notifications';
   static const String sendPublicReadReceipts =
-      'chat.fluffy.send_public_read_receipts';
-  static const String sendOnEnter = 'chat.fluffy.send_on_enter';
+      'chat.pantheon.send_public_read_receipts';
+  static const String sendOnEnter = 'chat.pantheon.send_on_enter';
   static const String swipeRightToLeftToReply =
-      'chat.fluffy.swipeRightToLeftToReply';
-  static const String experimentalVoip = 'chat.fluffy.experimental_voip';
-  static const String showPresences = 'chat.fluffy.show_presences';
+      'chat.pantheon.swipeRightToLeftToReply';
+  static const String experimentalVoip = 'chat.pantheon.experimental_voip';
+  static const String showPresences = 'chat.pantheon.show_presences';
   static const String displayNavigationRail =
-      'chat.fluffy.display_navigation_rail';
+      'chat.pantheon.display_navigation_rail';
 }
 
 enum AppSettings<T> {
@@ -52,16 +52,16 @@ enum AppSettings<T> {
     'pushNotificationsPusherFormat',
     'event_id_only',
   ),
-  shareKeysWith<String>('chat.fluffy.share_keys_with_2', 'all'),
+  shareKeysWith<String>('chat.pantheon.share_keys_with_2', 'all'),
   noEncryptionWarningShown<bool>(
-    'chat.fluffy.no_encryption_warning_shown',
+    'chat.pantheon.no_encryption_warning_shown',
     false,
   ),
   displayChatDetailsColumn(
-    'chat.fluffy.display_chat_details_column',
+    'chat.pantheon.display_chat_details_column',
     false,
   ),
-  enableSoftLogout<bool>('chat.fluffy.enable_soft_logout', false);
+  enableSoftLogout<bool>('chat.pantheon.enable_soft_logout', false);
 
   final String key;
   final T defaultValue;
