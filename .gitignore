@@ -54,6 +54,7 @@ lib/l10n/*.dart
 ios/Flutter/.last_build_id
 ios/Podfile.lock
 ios/Runner.ipa
+**/ephemeral
 
 /windows/out
 /winuwp/out
