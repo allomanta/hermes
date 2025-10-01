@@ -3,7 +3,7 @@ name: Create Release on Version Change
 on:
   push:
     branches:
-      # - main
+      - main
     paths:
       - 'pubspec.yaml'
 
@@ -16,6 +16,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  if: false
   create_release:
     runs-on: ubuntu-latest
     permissions:
