@@ -89,6 +89,19 @@ jobs:
           echo "RELEASE_NAME=Hermes ${VERSION_NAME} (${BUILD_NUMBER})" >> $GITHUB_ENV
           echo "VERSION_FULL=${VERSION_LINE}" >> $GITHUB_ENV
 
+      - name: Build Android APK (Play Services)
+        run: |
+          flutter build apk --release \
+            --build-name $FLUTTER_VERSION_NAME \
+            --build-number $FLUTTER_BUILD_NUMBER
+
+      - name: Prepare Android artifact
+        run: |
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          OUTPUT_APK="build/app/outputs/flutter-apk/Hermes-android-gms-${FLUTTER_VERSION_NAME}-${FLUTTER_BUILD_NUMBER}.apk"
+          mv "$APK_PATH" "$OUTPUT_APK"
+          echo "ANDROID_APK=$OUTPUT_APK" >> $GITHUB_ENV
+
       - name: Build macOS app
         id: build_macos
         continue-on-error: true
@@ -105,19 +118,6 @@ jobs:
           cd "$OUTPUT_DIR"
           zip -r "$ARCHIVE_NAME" Hermes.app
           echo "MACOS_ARCHIVE=$OUTPUT_DIR/$ARCHIVE_NAME" >> $GITHUB_ENV
-
-      - name: Build Android APK (Play Services)
-        run: |
-          flutter build apk --release \
-            --build-name $FLUTTER_VERSION_NAME \
-            --build-number $FLUTTER_BUILD_NUMBER
-
-      - name: Prepare Android artifact
-        run: |
-          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
-          OUTPUT_APK="build/app/outputs/flutter-apk/Hermes-android-gms-${FLUTTER_VERSION_NAME}-${FLUTTER_BUILD_NUMBER}.apk"
-          mv "$APK_PATH" "$OUTPUT_APK"
-          echo "ANDROID_APK=$OUTPUT_APK" >> $GITHUB_ENV
 
       - name: Assemble release file list
         run: |
