@@ -74,12 +74,11 @@ jobs:
         run: |
           FILES="${ANDROID_APK}"
           if [ -n "${MACOS_ARCHIVE}" ] && [ -f "${MACOS_ARCHIVE}" ]; then
-            FILES="${MACOS_ARCHIVE}
-${FILES}"
+            FILES="${MACOS_ARCHIVE}"$'\n'"${FILES}"
           fi
           {
             echo 'UPLOAD_FILES<<EOF'
-            echo "${FILES}"
+            printf '%s\n' "${FILES}"
             echo 'EOF'
           } >> "$GITHUB_ENV"
 
