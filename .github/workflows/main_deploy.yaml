@@ -3,7 +3,7 @@ name: Main Deploy Workflow
 on:
   push:
     branches:
-      # - main
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -11,6 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  if: false
   deploy_web:
     runs-on: ubuntu-latest
     steps:
