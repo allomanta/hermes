@@ -99,6 +99,7 @@ class BackgroundPush {
         const InitializationSettings(
           android: AndroidInitializationSettings('notifications_icon'),
           iOS: DarwinInitializationSettings(),
+          macOS: DarwinInitializationSettings(),
         ),
         onDidReceiveNotificationResponse: (response) => notificationTap(
           response,
@@ -108,6 +109,12 @@ class BackgroundPush {
         onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
       );
       Logs().v('Flutter Local Notifications initialized');
+      if (PlatformInfos.isMacOS) {
+        _flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                MacOSFlutterLocalNotificationsPlugin>()
+            ?.requestPermissions(alert: true, badge: true, sound: true);
+      }
       //<GOOGLE_SERVICES>firebase.setListeners(
       //<GOOGLE_SERVICES>  onMessage: (message) => pushHelper(
       //<GOOGLE_SERVICES>    PushNotification.fromJson(
@@ -183,6 +190,12 @@ class BackgroundPush {
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
+    }
+    if (PlatformInfos.isMacOS) {
+      _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              MacOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
     }
     final clientName = PlatformInfos.clientName;
     oldTokens ??= <String>{};
