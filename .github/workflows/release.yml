@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -32,7 +34,22 @@ jobs:
         run: |
           VERSION_LINE=$(grep '^version:' pubspec.yaml | head -n 1 | awk '{print $2}')
           VERSION_NAME=${VERSION_LINE%%+*}
-          BUILD_NUMBER=$(date -u +%Y%m%d%H%M)
+          BASE_BUILD=${VERSION_LINE##*+}
+          if [[ "$VERSION_LINE" == "$BASE_BUILD" ]]; then
+            BASE_BUILD=0
+          fi
+
+          git fetch --tags --force >/dev/null 2>&1 || true
+          LAST_TAG_BUILD=$(git tag -l 'v*-*' | sed -E 's/.*-([0-9]+)$/\1/' | sort -n | tail -n1 || echo "")
+          if [[ -z "$LAST_TAG_BUILD" ]]; then
+            LAST_TAG_BUILD=$BASE_BUILD
+          fi
+
+          if (( BASE_BUILD > LAST_TAG_BUILD )); then
+            LAST_TAG_BUILD=$BASE_BUILD
+          fi
+
+          BUILD_NUMBER=$((LAST_TAG_BUILD + 1))
 
           echo "FLUTTER_VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
           echo "FLUTTER_BUILD_NUMBER=${BUILD_NUMBER}" >> $GITHUB_ENV
