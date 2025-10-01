@@ -338,7 +338,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       onBlurSub = html.window.onBlur.listen((_) => webHasFocus = false);
     }
 
-    if (PlatformInfos.isMobile) {
+    if (PlatformInfos.isMobile || PlatformInfos.isMacOS) {
       backgroundPush = BackgroundPush(
         this,
         onFcmError: (errorMsg, {Uri? link}) async {
