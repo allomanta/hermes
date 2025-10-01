@@ -22,32 +22,31 @@ abstract class AppConfig {
   static const Color primaryColorLight = Color(0xFFCCBDEA);
   static const Color secondaryColor = Color(0xFF41a2bc);
   static String _privacyUrl =
-      'https://github.com/krille-chan/hermes/blob/main/PRIVACY.md';
+      'https://github.com/allomanta/hermes/blob/main/PRIVACY.md';
 
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
 
   static String get privacyUrl => _privacyUrl;
   static const String website = 'https://hermes.im';
   static const String enablePushTutorial =
-      'https://github.com/krille-chan/hermes/wiki/Push-Notifications-without-Google-Services';
+      'https://github.com/allomanta/hermes/wiki/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =
-      'https://github.com/krille-chan/hermes/wiki/How-to-use-end-to-end-encryption-in-Hermes';
+      'https://github.com/allomanta/hermes/wiki/How-to-use-end-to-end-encryption-in-Hermes';
   static const String startChatTutorial =
-      'https://github.com/krille-chan/hermes/wiki/How-to-Find-Users-in-Hermes';
+      'https://github.com/allomanta/hermes/wiki/How-to-Find-Users-in-Hermes';
   static const String appId = 'im.hermes.Hermes';
   static const String appOpenUrlScheme = 'im.hermes';
   static String _webBaseUrl = 'https://hermes.im/web';
 
   static String get webBaseUrl => _webBaseUrl;
-  static const String sourceCodeUrl = 'https://github.com/krille-chan/hermes';
-  static const String supportUrl =
-      'https://github.com/krille-chan/hermes/issues';
+  static const String sourceCodeUrl = 'https://github.com/allomanta/hermes';
+  static const String supportUrl = 'https://github.com/allomanta/hermes/issues';
   static const String changelogUrl =
-      'https://github.com/krille-chan/hermes/blob/main/CHANGELOG.md';
+      'https://github.com/allomanta/hermes/blob/main/CHANGELOG.md';
   static final Uri newIssueUrl = Uri(
     scheme: 'https',
     host: 'github.com',
-    path: '/krille-chan/hermes/issues/new',
+    path: '/allomanta/hermes/issues/new',
   );
   static bool renderHtml = true;
   static bool hideRedactedEvents = false;
