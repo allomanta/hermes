@@ -42,7 +42,7 @@ jobs:
 
       - name: Build macOS app
         run: |
-          flutter build macos --release \
+          flutter build macos --release --no-codesign \
             --build-name $FLUTTER_VERSION_NAME \
             --build-number $FLUTTER_BUILD_NUMBER
 
