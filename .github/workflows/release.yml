@@ -1,0 +1,82 @@
+name: Release Builds
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-release:
+    runs-on: macos-14
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable desktop support
+        run: flutter config --enable-macos-desktop
+
+      - name: Fetch dependencies
+        run: flutter pub get
+
+      - name: Derive version metadata
+        id: version
+        run: |
+          VERSION_LINE=$(grep '^version:' pubspec.yaml | head -n 1 | awk '{print $2}')
+          VERSION_NAME=${VERSION_LINE%%+*}
+          BUILD_NUMBER=$(date -u +%Y%m%d%H%M)
+
+          echo "FLUTTER_VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
+          echo "FLUTTER_BUILD_NUMBER=${BUILD_NUMBER}" >> $GITHUB_ENV
+          echo "RELEASE_TAG=v${VERSION_NAME}-${BUILD_NUMBER}" >> $GITHUB_ENV
+          echo "RELEASE_NAME=Hermes ${VERSION_NAME} (${BUILD_NUMBER})" >> $GITHUB_ENV
+          echo "VERSION_FULL=${VERSION_LINE}" >> $GITHUB_ENV
+
+      - name: Build macOS app
+        run: |
+          flutter build macos --release \
+            --build-name $FLUTTER_VERSION_NAME \
+            --build-number $FLUTTER_BUILD_NUMBER
+
+      - name: Archive macOS app bundle
+        run: |
+          OUTPUT_DIR="build/macos/Build/Products/Release"
+          ARCHIVE_NAME="Hermes-macos-${FLUTTER_VERSION_NAME}-${FLUTTER_BUILD_NUMBER}.zip"
+          cd "$OUTPUT_DIR"
+          zip -r "$ARCHIVE_NAME" Hermes.app
+          echo "MACOS_ARCHIVE=$OUTPUT_DIR/$ARCHIVE_NAME" >> $GITHUB_ENV
+
+      - name: Build Android APK (Play Services)
+        run: |
+          flutter build apk --release \
+            --build-name $FLUTTER_VERSION_NAME \
+            --build-number $FLUTTER_BUILD_NUMBER
+
+      - name: Prepare Android artifact
+        run: |
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          OUTPUT_APK="build/app/outputs/flutter-apk/Hermes-android-gms-${FLUTTER_VERSION_NAME}-${FLUTTER_BUILD_NUMBER}.apk"
+          mv "$APK_PATH" "$OUTPUT_APK"
+          echo "ANDROID_APK=$OUTPUT_APK" >> $GITHUB_ENV
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ env.RELEASE_NAME }}
+          body: |
+            Automated release triggered by push to `main`.
+
+            * Flutter version: `${{ env.VERSION_FULL }}`
+            * Android build number: `${{ env.FLUTTER_BUILD_NUMBER }}`
+          files: |
+            ${{ env.MACOS_ARCHIVE }}
+            ${{ env.ANDROID_APK }}
