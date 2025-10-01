@@ -41,12 +41,15 @@ jobs:
           echo "VERSION_FULL=${VERSION_LINE}" >> $GITHUB_ENV
 
       - name: Build macOS app
+        id: build_macos
+        continue-on-error: true
         run: |
-          flutter build macos --release --no-codesign \
+          flutter build macos --release \
             --build-name $FLUTTER_VERSION_NAME \
             --build-number $FLUTTER_BUILD_NUMBER
 
       - name: Archive macOS app bundle
+        if: steps.build_macos.outcome == 'success'
         run: |
           OUTPUT_DIR="build/macos/Build/Products/Release"
           ARCHIVE_NAME="Hermes-macos-${FLUTTER_VERSION_NAME}-${FLUTTER_BUILD_NUMBER}.zip"
@@ -67,6 +70,19 @@ jobs:
           mv "$APK_PATH" "$OUTPUT_APK"
           echo "ANDROID_APK=$OUTPUT_APK" >> $GITHUB_ENV
 
+      - name: Assemble release file list
+        run: |
+          FILES="${ANDROID_APK}"
+          if [ -n "${MACOS_ARCHIVE}" ] && [ -f "${MACOS_ARCHIVE}" ]; then
+            FILES="${MACOS_ARCHIVE}
+${FILES}"
+          fi
+          {
+            echo 'UPLOAD_FILES<<EOF'
+            echo "${FILES}"
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
+
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
@@ -77,6 +93,4 @@ jobs:
 
             * Flutter version: `${{ env.VERSION_FULL }}`
             * Android build number: `${{ env.FLUTTER_BUILD_NUMBER }}`
-          files: |
-            ${{ env.MACOS_ARCHIVE }}
-            ${{ env.ANDROID_APK }}
+          files: ${{ env.UPLOAD_FILES }}
