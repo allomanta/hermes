@@ -1,38 +1,70 @@
-import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
-class InteractivePageTransition extends Page {
-  final Widget child;
-  final bool isLeftToRight;
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 
-  const InteractivePageTransition({
-    required LocalKey super.key,
+class SwipePopPage<T> extends Page<T> {
+  const SwipePopPage({
     required this.child,
+    this.duration = const Duration(milliseconds: 280),
+    this.curve = Curves.decelerate,
+    this.reverseCurve = Curves.easeOutCubic,
+    this.enableFullScreenDrag = true,
+    this.minimumDragFraction = 0.3,
+    this.velocityThreshold = 350.0,
+    super.key,
+    super.name,
+    super.arguments,
     super.restorationId,
-    this.isLeftToRight = true,
   });
 
+  final Widget child;
+  final Duration duration;
+  final Curve curve;
+  final Curve reverseCurve;
+  final bool enableFullScreenDrag;
+  final double minimumDragFraction;
+  final double velocityThreshold;
+
   @override
-  Route createRoute(BuildContext context) {
-    return InteractivePageRoute(
+  Route<T> createRoute(BuildContext context) {
+    return SwipePopPageRoute<T>(
+      builder: (_) => child,
+      duration: duration,
+      curve: curve,
+      reverseCurve: reverseCurve,
+      enableFullScreenDrag: enableFullScreenDrag,
+      minimumDragFraction: minimumDragFraction,
+      velocityThreshold: velocityThreshold,
       settings: this,
-      builder: (BuildContext context) => child,
-      isLeftToRight: isLeftToRight,
     );
   }
 }
 
-class InteractivePageRoute extends PageRoute {
-  final WidgetBuilder builder;
-  final bool isLeftToRight;
-
-  InteractivePageRoute({
+class SwipePopPageRoute<T> extends PageRoute<T> {
+  SwipePopPageRoute({
     required this.builder,
-    required this.isLeftToRight,
+    this.duration = const Duration(milliseconds: 280),
+    this.curve = Curves.decelerate,
+    this.reverseCurve = Curves.easeOutCubic,
+    this.enableFullScreenDrag = true,
+    this.minimumDragFraction = 0.3,
+    this.velocityThreshold = 350.0,
     super.settings,
-  }) : super(fullscreenDialog: false);
+  }) {
+    assert(minimumDragFraction >= 0 && minimumDragFraction <= 1);
+  }
+
+  final WidgetBuilder builder;
+  final Duration duration;
+  final Curve curve;
+  final Curve reverseCurve;
+  final bool enableFullScreenDrag;
+  final double minimumDragFraction;
+  final double velocityThreshold;
 
   @override
-  bool get opaque => false;
+  bool get opaque => true;
 
   @override
   bool get barrierDismissible => false;
@@ -47,37 +79,13 @@ class InteractivePageRoute extends PageRoute {
   bool get maintainState => true;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
+  Duration get transitionDuration => duration;
 
   @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return SwipeBackDetector(
-      isLeftToRight: isLeftToRight,
-      onSwipeBack: () {
-        if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
-        }
-      },
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin:
-              isLeftToRight ? const Offset(1.0, 0.0) : const Offset(-1.0, 0.0),
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInOut,
-          ),
-        ),
-        child: child,
-      ),
-    );
-  }
+  Duration get reverseTransitionDuration => duration;
+
+  @override
+  bool get popGestureEnabled => enableFullScreenDrag;
 
   @override
   Widget buildPage(
@@ -87,156 +95,283 @@ class InteractivePageRoute extends PageRoute {
   ) {
     return builder(context);
   }
-}
-
-class SwipeBackDetector extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onSwipeBack;
-  final bool isLeftToRight;
-
-  const SwipeBackDetector({
-    super.key,
-    required this.child,
-    required this.onSwipeBack,
-    this.isLeftToRight = true,
-  });
 
   @override
-  State<SwipeBackDetector> createState() => _SwipeBackDetectorState();
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final wrappedChild = enableFullScreenDrag
+        ? _FullScreenPopGestureDetector<T>(
+            route: this,
+            minimumDragFraction: minimumDragFraction,
+            velocityThreshold: velocityThreshold,
+            child: child,
+          )
+        : child;
+
+    return CupertinoPageTransition(
+      primaryRouteAnimation: animation,
+      secondaryRouteAnimation: secondaryAnimation,
+      linearTransition: navigator?.userGestureInProgress ?? false,
+      child: wrappedChild,
+    );
+  }
+
+  AnimationController get popGestureController => controller!;
+
+  NavigatorState get popGestureNavigator => navigator!;
 }
 
-class _SwipeBackDetectorState extends State<SwipeBackDetector>
-    with SingleTickerProviderStateMixin {
-  static const double _kSwipeThreshold = 0.2;
-  static const double _kMaxSlideDistance = 0.75;
+class _FullScreenPopGestureDetector<T> extends StatefulWidget {
+  const _FullScreenPopGestureDetector({
+    required this.route,
+    required this.child,
+    required this.minimumDragFraction,
+    required this.velocityThreshold,
+  });
 
-  late AnimationController _controller;
-  double _dragExtent = 0.0;
-  bool _dragging = false;
+  final SwipePopPageRoute<T> route;
+  final Widget child;
+  final double minimumDragFraction;
+  final double velocityThreshold;
+
+  @override
+  State<_FullScreenPopGestureDetector<T>> createState() =>
+      _FullScreenPopGestureDetectorState<T>();
+}
+
+class _FullScreenPopGestureDetectorState<T>
+    extends State<_FullScreenPopGestureDetector<T>> {
+  _FullScreenPopGestureController<T>? _controller;
+  late _RightSwipeDragGestureRecognizer _recognizer;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _controller.addStatusListener(_handleAnimationStatusChanged);
+    _recognizer = _RightSwipeDragGestureRecognizer(debugOwner: this)
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd
+      ..onCancel = _handleDragCancel;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _recognizer.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    _recognizer.contextTextDirection = Directionality.of(context);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _recognizer.dispose();
+    if (_controller != null) {
+      final navigator = _controller!.navigator;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (navigator.mounted) {
+          navigator.didStopUserGesture();
+        }
+      });
+      _controller = null;
+    }
     super.dispose();
   }
 
-  void _handleAnimationStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed && _controller.value == 1.0) {
-      widget.onSwipeBack();
+  void _handlePointerDown(PointerDownEvent event) {
+    if (widget.route.popGestureEnabled) {
+      _recognizer.addPointer(event);
     }
   }
 
   void _handleDragStart(DragStartDetails details) {
-    if (widget.isLeftToRight) {
-      setState(() {
-        _dragging = true;
-        _dragExtent = 0.0;
-      });
-    }
+    widget.route.popGestureController.stop();
+    _controller = _FullScreenPopGestureController<T>(
+      route: widget.route,
+      duration: widget.route.duration,
+      forwardCurve: widget.route.curve,
+      reverseCurve: widget.route.reverseCurve,
+      minimumDragFraction: widget.minimumDragFraction,
+      velocityThreshold: widget.velocityThreshold,
+    );
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (!_dragging) return;
-
-    final screenWidth = MediaQuery.of(context).size.width;
-    final delta = details.primaryDelta ?? 0.0;
-
-    // if ((widget.isLeftToRight && delta > 0) ||
-    //     (!widget.isLeftToRight && delta < 0)) {
-    setState(() {
-      _dragExtent += delta;
-      // Normalize to [0, 1] range with damping as we approach maxDistance
-      final normalizedDragExtent =
-          (_dragExtent / screenWidth).clamp(0.0, _kMaxSlideDistance);
-      _controller.value = normalizedDragExtent;
-    });
-    // }
+    if (_controller == null) return;
+    final size = context.size;
+    if (size == null || size.width == 0) return;
+    final delta = _convertToLogical((details.primaryDelta ?? 0) / size.width);
+    if (delta == 0) return;
+    _controller!.dragUpdate(delta);
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (!_dragging) return;
+    if (_controller == null) return;
+    final velocity = _convertToLogical(details.velocity.pixelsPerSecond.dx);
+    final progress = 1 - widget.route.popGestureController.value;
+    _controller!.dragEnd(
+      velocity: velocity,
+      dragFraction: progress,
+    );
+    _controller = null;
+  }
 
-    final thresholdMet = _controller.value > _kSwipeThreshold;
+  void _handleDragCancel() {
+    _controller?.dragCancel();
+    _controller = null;
+  }
 
-    if (thresholdMet) {
-      _controller.animateTo(1.0, curve: Curves.easeOut);
-    } else {
-      _controller.animateTo(0.0, curve: Curves.easeIn);
-    }
-
-    setState(() {
-      _dragging = false;
-    });
+  double _convertToLogical(double value) {
+    final textDirection = Directionality.of(context);
+    return textDirection == TextDirection.rtl ? -value : value;
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onHorizontalDragStart: _handleDragStart,
-      onHorizontalDragUpdate: _handleDragUpdate,
-      onHorizontalDragEnd: _handleDragEnd,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          final slideAmount = _controller.value;
-
-          return Stack(
-            children: [
-              // Background (room list) becoming visible as we slide
-              if (slideAmount > 0)
-                Positioned.fill(
-                  child: FractionalTranslation(
-                    translation: Offset(-1 + slideAmount, 0),
-                    child: Container(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                    ),
-                  ),
-                ),
-
-              // Foreground (current chat room) sliding away
-              Transform.translate(
-                offset:
-                    Offset(MediaQuery.of(context).size.width * slideAmount, 0),
-                child: widget.child,
-              ),
-
-              // Shadow effect along the left edge when sliding
-              if (slideAmount > 0)
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 5.0,
-                  child: Opacity(
-                    opacity: slideAmount,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 5.0,
-                            spreadRadius: 2.0,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          );
-        },
-        child: widget.child,
-      ),
+    return Listener(
+      onPointerDown: _handlePointerDown,
+      behavior: HitTestBehavior.translucent,
+      child: widget.child,
     );
+  }
+}
+
+class _RightSwipeDragGestureRecognizer extends HorizontalDragGestureRecognizer {
+  _RightSwipeDragGestureRecognizer({super.debugOwner});
+
+  double _accumulatedDelta = 0.0;
+  bool _resolvedDirection = false;
+  TextDirection? _textDirection;
+
+  set contextTextDirection(TextDirection direction) {
+    _textDirection = direction;
+  }
+
+  TextDirection get _effectiveTextDirection =>
+      _textDirection ?? TextDirection.ltr;
+
+  @override
+  void addPointer(PointerDownEvent event) {
+    _accumulatedDelta = 0.0;
+    _resolvedDirection = false;
+    super.addPointer(event);
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event is PointerMoveEvent && !_resolvedDirection) {
+      final direction = _effectiveTextDirection;
+      final logicalDelta =
+          direction == TextDirection.rtl ? -event.delta.dx : event.delta.dx;
+      _accumulatedDelta += logicalDelta;
+      if (_accumulatedDelta.abs() > kTouchSlop) {
+        _resolvedDirection = true;
+        if (_accumulatedDelta < 0) {
+          resolve(GestureDisposition.rejected);
+          stopTrackingPointer(event.pointer);
+          return;
+        }
+      }
+    }
+    super.handleEvent(event);
+  }
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {
+    _resolvedDirection = false;
+    _accumulatedDelta = 0.0;
+    super.didStopTrackingLastPointer(pointer);
+  }
+}
+
+class _FullScreenPopGestureController<T> {
+  _FullScreenPopGestureController({
+    required SwipePopPageRoute<T> route,
+    required this.duration,
+    required this.forwardCurve,
+    required this.reverseCurve,
+    required this.minimumDragFraction,
+    required this.velocityThreshold,
+  })  : controller = route.popGestureController,
+        navigator = route.popGestureNavigator {
+    getIsCurrent = () => route.isCurrent;
+    getIsActive = () => route.isActive;
+    navigator.didStartUserGesture();
+  }
+
+  final AnimationController controller;
+  final NavigatorState navigator;
+  final Duration duration;
+  final Curve forwardCurve;
+  final Curve reverseCurve;
+  final double minimumDragFraction;
+  final double velocityThreshold;
+  late final bool Function() getIsCurrent;
+  late final bool Function() getIsActive;
+
+  void dragUpdate(double delta) {
+    controller.value = (controller.value - delta).clamp(0.0, 1.0);
+  }
+
+  void dragEnd({required double velocity, required double dragFraction}) {
+    if (!getIsCurrent()) {
+      controller.animateTo(
+        1.0,
+        duration: _scaledDuration(1.0),
+        curve: forwardCurve,
+      );
+      _listenUntilSettled();
+      return;
+    }
+    final bool shouldPop;
+    if (velocity > velocityThreshold) {
+      shouldPop = true;
+    } else if (velocity < -velocityThreshold) {
+      shouldPop = false;
+    } else {
+      shouldPop = dragFraction > minimumDragFraction;
+    }
+
+    if (shouldPop) {
+      navigator.pop();
+      _listenUntilSettled();
+    } else {
+      controller.animateTo(
+        1.0,
+        duration: _scaledDuration(1.0),
+        curve: forwardCurve,
+      );
+      _listenUntilSettled();
+    }
+  }
+
+  void dragCancel() {
+    controller.animateTo(
+      1.0,
+      duration: _scaledDuration(1.0),
+      curve: forwardCurve,
+    );
+    _listenUntilSettled();
+  }
+
+  void _listenUntilSettled() {
+    void listener(AnimationStatus status) {
+      if (status == AnimationStatus.completed ||
+          status == AnimationStatus.dismissed) {
+        navigator.didStopUserGesture();
+        controller.removeStatusListener(listener);
+      }
+    }
+
+    controller.addStatusListener(listener);
+  }
+
+  Duration _scaledDuration(double target) {
+    final distance = (controller.value - target).abs();
+    final int milliseconds =
+        math.max(1, (duration.inMilliseconds * distance).round());
+    return Duration(milliseconds: milliseconds);
   }
 }

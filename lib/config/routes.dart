@@ -347,10 +347,9 @@ abstract class AppRoutes {
                 }
 
                 if (!PantheonThemes.isColumnMode(context)) {
-                  return InteractivePageTransition(
+                  return SwipePopPage(
                     key: state.pageKey,
                     restorationId: state.pageKey.value,
-                    isLeftToRight: true,
                     child: ChatPage(
                       roomId: state.pathParameters['roomid']!,
                       shareItems: shareItems,
