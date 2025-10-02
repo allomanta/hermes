@@ -56,6 +56,10 @@ abstract class AppConfig {
   static bool sendTypingNotifications = true;
   static bool sendPublicReadReceipts = true;
   static bool swipeRightToLeftToReply = true;
+  static bool swipePopEnableFullScreenDrag = true;
+  static int swipePopDurationMs = 280;
+  static double swipePopMinimumDragFraction = 0.3;
+  static double swipePopVelocityThreshold = 350.0;
   static bool? sendOnEnter;
   static bool showPresences = true;
   static bool displayNavigationRail = false;
@@ -73,6 +77,9 @@ abstract class AppConfig {
     host: 'servers.joinmatrix.org',
     path: 'servers.json',
   );
+
+  static Duration get swipePopDuration =>
+      Duration(milliseconds: swipePopDurationMs);
 
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {

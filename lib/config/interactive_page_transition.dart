@@ -2,21 +2,28 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
+import 'package:hermes/config/app_config.dart';
 
 class SwipePopPage<T> extends Page<T> {
-  const SwipePopPage({
+  SwipePopPage({
     required this.child,
-    this.duration = const Duration(milliseconds: 280),
+    Duration? duration,
     this.curve = Curves.decelerate,
     this.reverseCurve = Curves.easeOutCubic,
-    this.enableFullScreenDrag = true,
-    this.minimumDragFraction = 0.3,
-    this.velocityThreshold = 350.0,
+    bool? enableFullScreenDrag,
+    double? minimumDragFraction,
+    double? velocityThreshold,
     super.key,
     super.name,
     super.arguments,
     super.restorationId,
-  });
+  })  : duration = duration ?? AppConfig.swipePopDuration,
+        enableFullScreenDrag =
+            enableFullScreenDrag ?? AppConfig.swipePopEnableFullScreenDrag,
+        minimumDragFraction =
+            minimumDragFraction ?? AppConfig.swipePopMinimumDragFraction,
+        velocityThreshold =
+            velocityThreshold ?? AppConfig.swipePopVelocityThreshold;
 
   final Widget child;
   final Duration duration;
@@ -44,16 +51,14 @@ class SwipePopPage<T> extends Page<T> {
 class SwipePopPageRoute<T> extends PageRoute<T> {
   SwipePopPageRoute({
     required this.builder,
-    this.duration = const Duration(milliseconds: 280),
-    this.curve = Curves.decelerate,
-    this.reverseCurve = Curves.easeOutCubic,
-    this.enableFullScreenDrag = true,
-    this.minimumDragFraction = 0.3,
-    this.velocityThreshold = 350.0,
+    required this.duration,
+    required this.curve,
+    required this.reverseCurve,
+    required this.enableFullScreenDrag,
+    required this.minimumDragFraction,
+    required this.velocityThreshold,
     super.settings,
-  }) {
-    assert(minimumDragFraction >= 0 && minimumDragFraction <= 1);
-  }
+  }) : assert(minimumDragFraction >= 0 && minimumDragFraction <= 1);
 
   final WidgetBuilder builder;
   final Duration duration;
@@ -85,7 +90,7 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
   Duration get reverseTransitionDuration => duration;
 
   @override
-  bool get popGestureEnabled => enableFullScreenDrag;
+  bool get popGestureEnabled => enableFullScreenDrag && super.popGestureEnabled;
 
   @override
   Widget buildPage(
