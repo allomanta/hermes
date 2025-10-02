@@ -200,7 +200,7 @@ abstract class AppRoutes {
               routes: [
                 GoRoute(
                   path: 'settings',
-                  pageBuilder: (context, state) => defaultPageBuilder(
+                  pageBuilder: (context, state) => swipePopPageBuilder(
                     context,
                     state,
                     PantheonThemes.isColumnMode(context)
@@ -210,7 +210,7 @@ abstract class AppRoutes {
                   routes: [
                     GoRoute(
                       path: 'notifications',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         const SettingsNotifications(),
@@ -219,7 +219,7 @@ abstract class AppRoutes {
                     ),
                     GoRoute(
                       path: 'style',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         const SettingsStyle(),
@@ -228,7 +228,7 @@ abstract class AppRoutes {
                     ),
                     GoRoute(
                       path: 'devices',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         const DevicesSettings(),
@@ -237,7 +237,7 @@ abstract class AppRoutes {
                     ),
                     GoRoute(
                       path: 'chat',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         const SettingsChat(),
@@ -245,7 +245,7 @@ abstract class AppRoutes {
                       routes: [
                         GoRoute(
                           path: 'emotes',
-                          pageBuilder: (context, state) => defaultPageBuilder(
+                          pageBuilder: (context, state) => swipePopPageBuilder(
                             context,
                             state,
                             const EmotesSettings(),
@@ -257,7 +257,7 @@ abstract class AppRoutes {
                     GoRoute(
                       path: 'addaccount',
                       redirect: loggedOutRedirect,
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         const HomeserverPicker(addMultiAccount: true),
@@ -265,7 +265,7 @@ abstract class AppRoutes {
                       routes: [
                         GoRoute(
                           path: 'login',
-                          pageBuilder: (context, state) => defaultPageBuilder(
+                          pageBuilder: (context, state) => swipePopPageBuilder(
                             context,
                             state,
                             Login(client: state.extra as Client),
@@ -277,7 +277,7 @@ abstract class AppRoutes {
                     GoRoute(
                       path: 'homeserver',
                       pageBuilder: (context, state) {
-                        return defaultPageBuilder(
+                        return swipePopPageBuilder(
                           context,
                           state,
                           const SettingsHomeserver(),
@@ -288,7 +288,7 @@ abstract class AppRoutes {
                     GoRoute(
                       path: 'security',
                       redirect: loggedOutRedirect,
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         const SettingsSecurity(),
@@ -297,7 +297,7 @@ abstract class AppRoutes {
                         GoRoute(
                           path: 'password',
                           pageBuilder: (context, state) {
-                            return defaultPageBuilder(
+                            return swipePopPageBuilder(
                               context,
                               state,
                               const SettingsPassword(),
@@ -308,7 +308,7 @@ abstract class AppRoutes {
                         GoRoute(
                           path: 'ignorelist',
                           pageBuilder: (context, state) {
-                            return defaultPageBuilder(
+                            return swipePopPageBuilder(
                               context,
                               state,
                               SettingsIgnoreList(
@@ -320,7 +320,7 @@ abstract class AppRoutes {
                         ),
                         GoRoute(
                           path: '3pid',
-                          pageBuilder: (context, state) => defaultPageBuilder(
+                          pageBuilder: (context, state) => swipePopPageBuilder(
                             context,
                             state,
                             const Settings3Pid(),
@@ -382,7 +382,7 @@ abstract class AppRoutes {
               routes: [
                 GoRoute(
                   path: 'search',
-                  pageBuilder: (context, state) => defaultPageBuilder(
+                  pageBuilder: (context, state) => swipePopPageBuilder(
                     context,
                     state,
                     ChatSearchPage(
@@ -393,7 +393,7 @@ abstract class AppRoutes {
                 ),
                 GoRoute(
                   path: 'encryption',
-                  pageBuilder: (context, state) => defaultPageBuilder(
+                  pageBuilder: (context, state) => swipePopPageBuilder(
                     context,
                     state,
                     const ChatEncryptionSettings(),
@@ -402,7 +402,7 @@ abstract class AppRoutes {
                 ),
                 GoRoute(
                   path: 'invite',
-                  pageBuilder: (context, state) => defaultPageBuilder(
+                  pageBuilder: (context, state) => swipePopPageBuilder(
                     context,
                     state,
                     InvitationSelection(
@@ -413,7 +413,7 @@ abstract class AppRoutes {
                 ),
                 GoRoute(
                   path: 'details',
-                  pageBuilder: (context, state) => defaultPageBuilder(
+                  pageBuilder: (context, state) => swipePopPageBuilder(
                     context,
                     state,
                     ChatDetails(
@@ -423,7 +423,7 @@ abstract class AppRoutes {
                   routes: [
                     GoRoute(
                       path: 'access',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         ChatAccessSettings(
@@ -434,7 +434,7 @@ abstract class AppRoutes {
                     ),
                     GoRoute(
                       path: 'members',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         ChatMembersPage(
@@ -445,7 +445,7 @@ abstract class AppRoutes {
                     ),
                     GoRoute(
                       path: 'permissions',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         const ChatPermissionsSettings(),
@@ -454,7 +454,7 @@ abstract class AppRoutes {
                     ),
                     GoRoute(
                       path: 'invite',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         InvitationSelection(
@@ -465,7 +465,7 @@ abstract class AppRoutes {
                     ),
                     GoRoute(
                       path: 'multiple_emotes',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         const MultipleEmotesSettings(),
@@ -474,7 +474,7 @@ abstract class AppRoutes {
                     ),
                     GoRoute(
                       path: 'emotes',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         const EmotesSettings(),
@@ -483,7 +483,7 @@ abstract class AppRoutes {
                     ),
                     GoRoute(
                       path: 'emotes/:state_key',
-                      pageBuilder: (context, state) => defaultPageBuilder(
+                      pageBuilder: (context, state) => swipePopPageBuilder(
                         context,
                         state,
                         const EmotesSettings(),
@@ -524,4 +524,19 @@ abstract class AppRoutes {
               restorationId: state.pageKey.value,
               child: child,
             );
+
+  static Page swipePopPageBuilder(
+    BuildContext context,
+    GoRouterState state,
+    Widget child,
+  ) {
+    if (PantheonThemes.isColumnMode(context)) {
+      return defaultPageBuilder(context, state, child);
+    }
+    return SwipePopPage(
+      key: state.pageKey,
+      restorationId: state.pageKey.value,
+      child: child,
+    );
+  }
 }
