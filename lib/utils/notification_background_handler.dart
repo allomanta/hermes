@@ -9,12 +9,12 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/push_helper.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
+import 'package:hermes/utils/client_manager.dart';
 
 bool _vodInitialized = false;
 
@@ -120,7 +120,7 @@ Future<void> notificationTap(
             : '/rooms/$roomId',
       );
     case NotificationResponseType.selectedNotificationAction:
-      final actionType = FluffyChatNotificationActions.values.singleWhereOrNull(
+      final actionType = HermesNotificationActions.values.singleWhereOrNull(
         (action) => action.name == notificationResponse.actionId,
       );
       if (actionType == null) {
@@ -140,13 +140,13 @@ Future<void> notificationTap(
         );
       }
       switch (actionType) {
-        case FluffyChatNotificationActions.markAsRead:
+        case HermesNotificationActions.markAsRead:
           await room.setReadMarker(
             payload.eventId ?? room.lastEvent!.eventId,
             mRead: payload.eventId ?? room.lastEvent!.eventId,
             public: AppConfig.sendPublicReadReceipts,
           );
-        case FluffyChatNotificationActions.reply:
+        case HermesNotificationActions.reply:
           final input = notificationResponse.input;
           if (input == null || input.isEmpty) {
             throw Exception(
@@ -216,4 +216,4 @@ Future<void> notificationTap(
   }
 }
 
-enum FluffyChatNotificationActions { markAsRead, reply }
+enum HermesNotificationActions { markAsRead, reply }
