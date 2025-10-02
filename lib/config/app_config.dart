@@ -25,7 +25,6 @@ abstract class AppConfig {
       'https://github.com/allomanta/hermes/blob/main/PRIVACY.md';
 
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
-
   static String get privacyUrl => _privacyUrl;
   static const String website = 'https://hermes.im';
   static const String enablePushTutorial =
@@ -55,9 +54,16 @@ abstract class AppConfig {
   static bool autoplayImages = true;
   static bool sendTypingNotifications = true;
   static bool sendPublicReadReceipts = true;
+
   static bool swipeRightToLeftToReply = true;
+
+  static bool swipePopEnableFullScreenDrag = true;
+  static int swipePopDurationMs = 280;
+  static double swipePopMinimumDragFraction = 0.3;
+  static double swipePopVelocityThreshold = 350.0;
+
   static bool? sendOnEnter;
-  static bool showPresences = true;
+  static bool showPresences = false;
   static bool displayNavigationRail = false;
   static bool experimentalVoip = false;
   static const bool hideTypingUsernames = false;
@@ -73,6 +79,10 @@ abstract class AppConfig {
     host: 'servers.joinmatrix.org',
     path: 'servers.json',
   );
+
+  static Duration get swipePopDuration =>
+      Duration(milliseconds: swipePopDurationMs);
+
 
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {

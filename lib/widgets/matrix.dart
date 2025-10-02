@@ -403,6 +403,22 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         store.getBool(SettingKeys.swipeRightToLeftToReply) ??
             AppConfig.swipeRightToLeftToReply;
 
+    AppConfig.swipePopEnableFullScreenDrag =
+        store.getBool(SettingKeys.swipePopEnableFullScreenDrag) ??
+            AppConfig.swipePopEnableFullScreenDrag;
+
+    AppConfig.swipePopDurationMs =
+        store.getInt(SettingKeys.swipePopDurationMs) ??
+            AppConfig.swipePopDurationMs;
+
+    AppConfig.swipePopMinimumDragFraction =
+        store.getDouble(SettingKeys.swipePopMinimumDragFraction) ??
+            AppConfig.swipePopMinimumDragFraction;
+
+    AppConfig.swipePopVelocityThreshold =
+        store.getDouble(SettingKeys.swipePopVelocityThreshold) ??
+            AppConfig.swipePopVelocityThreshold;
+
     AppConfig.hideRedactedEvents =
         store.getBool(SettingKeys.hideRedactedEvents) ??
             AppConfig.hideRedactedEvents;

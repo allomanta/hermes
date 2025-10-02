@@ -30,6 +30,15 @@ abstract class SettingKeys {
   static const String sendOnEnter = 'chat.pantheon.send_on_enter';
   static const String swipeRightToLeftToReply =
       'chat.pantheon.swipeRightToLeftToReply';
+
+  static const String swipePopEnableFullScreenDrag =
+      'chat.pantheon.swipePopEnableFullScreenDrag';
+  static const String swipePopDurationMs = 'chat.pantheon.swipePopDurationMs';
+  static const String swipePopMinimumDragFraction =
+      'chat.pantheon.swipePopMinimumDragFraction';
+  static const String swipePopVelocityThreshold =
+      'chat.pantheon.swipePopVelocityThreshold';
+
   static const String experimentalVoip = 'chat.pantheon.experimental_voip';
   static const String showPresences = 'chat.pantheon.show_presences';
   static const String displayNavigationRail =
