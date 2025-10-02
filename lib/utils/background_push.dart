@@ -90,7 +90,7 @@ class BackgroundPush {
               await notificationTap(
                 NotificationResponseJson.fromJsonString(message),
                 client: client,
-                router: FluffyChatApp.router,
+                router: HermesApp.router,
               );
             } catch (e, s) {
               Logs().wtf('Main Notification Tap crashed', e, s);
@@ -107,7 +107,7 @@ class BackgroundPush {
         onDidReceiveNotificationResponse: (response) => notificationTap(
           response,
           client: client,
-          router: FluffyChatApp.router,
+          router: HermesApp.router,
         ),
         onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
       );
@@ -327,7 +327,7 @@ class BackgroundPush {
         notificationTap(
           response,
           client: client,
-          router: FluffyChatApp.router,
+          router: HermesApp.router,
         );
       }
     });

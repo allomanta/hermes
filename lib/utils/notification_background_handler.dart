@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:fluffychat/utils/client_manager.dart';
+import 'package:hermes/utils/client_manager.dart';
 
 bool _vodInitialized = false;
 
@@ -105,7 +105,7 @@ Future<void> notificationTap(
             : '/rooms/$roomId',
       );
     case NotificationResponseType.selectedNotificationAction:
-      final actionType = FluffyChatNotificationActions.values.singleWhereOrNull(
+      final actionType = HermesNotificationActions.values.singleWhereOrNull(
         (action) => action.name == notificationResponse.actionId,
       );
       if (actionType == null) {
@@ -125,13 +125,13 @@ Future<void> notificationTap(
         );
       }
       switch (actionType) {
-        case FluffyChatNotificationActions.markAsRead:
+        case HermesNotificationActions.markAsRead:
           await room.setReadMarker(
             room.lastEvent!.eventId,
             mRead: room.lastEvent!.eventId,
             public: false, // TODO: Load preference here
           );
-        case FluffyChatNotificationActions.reply:
+        case HermesNotificationActions.reply:
           final input = notificationResponse.input;
           if (input == null || input.isEmpty) {
             throw Exception(
@@ -143,4 +143,4 @@ Future<void> notificationTap(
   }
 }
 
-enum FluffyChatNotificationActions { markAsRead, reply }
+enum HermesNotificationActions { markAsRead, reply }
