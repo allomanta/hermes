@@ -90,7 +90,7 @@ class BackgroundPush {
               await notificationTap(
                 NotificationResponseJson.fromJsonString(message),
                 client: client,
-                router: FluffyChatApp.router,
+                router: HermesApp.router,
                 l10n: l10n,
               );
             } catch (e, s) {
@@ -108,7 +108,7 @@ class BackgroundPush {
         onDidReceiveNotificationResponse: (response) => notificationTap(
           response,
           client: client,
-          router: FluffyChatApp.router,
+          router: HermesApp.router,
           l10n: l10n,
         ),
         onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
@@ -329,7 +329,7 @@ class BackgroundPush {
         notificationTap(
           response,
           client: client,
-          router: FluffyChatApp.router,
+          router: HermesApp.router,
           l10n: l10n,
         );
       }

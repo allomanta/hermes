@@ -86,13 +86,12 @@ class SpacesNavigationRail extends StatelessWidget {
                           );
                         }
                         final space = rootSpaces[i];
-                        final displayname = rootSpaces[i]
-                            .getLocalizedDisplayname(
-                              MatrixLocals(L10n.of(context)),
-                            );
-                        final spaceChildrenIds = space.spaceChildren
-                            .map((c) => c.roomId)
-                            .toSet();
+                        final displayname =
+                            rootSpaces[i].getLocalizedDisplayname(
+                          MatrixLocals(L10n.of(context)),
+                        );
+                        final spaceChildrenIds =
+                            space.spaceChildren.map((c) => c.roomId).toSet();
                         return NaviRailItem(
                           toolTip: displayname,
                           isSelected: activeSpaceId == space.id,

@@ -9,18 +9,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_shortcuts_new/flutter_shortcuts_new.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:hermes/config/app_config.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/client_download_content_extension.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/notification_background_handler.dart';
-import 'package:hermes/utils/platform_infos.dart';
-
-const notificationAvatarDimension = 128;
-import 'package:hermes/config/app_config.dart';
-import 'package:hermes/utils/client_download_content_extension.dart';
-import 'package:hermes/utils/client_manager.dart';
-import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/platform_infos.dart';
 
 const notificationAvatarDimension = 128;
@@ -285,7 +280,7 @@ Future<void> _tryPushHelper(
     groupKey: event.room.spaceParents.firstOrNull?.roomId ?? 'rooms',
     actions: <AndroidNotificationAction>[
       AndroidNotificationAction(
-        FluffyChatNotificationActions.reply.name,
+        HermesNotificationActions.reply.name,
         l10n.reply,
         inputs: [
           AndroidNotificationActionInput(
@@ -297,7 +292,7 @@ Future<void> _tryPushHelper(
         semanticAction: SemanticAction.reply,
       ),
       AndroidNotificationAction(
-        FluffyChatNotificationActions.markAsRead.name,
+        HermesNotificationActions.markAsRead.name,
         l10n.markAsRead,
         semanticAction: SemanticAction.markAsRead,
       ),
@@ -320,24 +315,23 @@ Future<void> _tryPushHelper(
     title,
     body,
     platformChannelSpecifics,
-    payload:
-        FluffyChatPushPayload(client.clientName, event.room.id, event.eventId)
-            .toString(),
+    payload: HermesPushPayload(client.clientName, event.room.id, event.eventId)
+        .toString(),
   );
   Logs().v('Push helper has been completed!');
 }
 
-class FluffyChatPushPayload {
+class HermesPushPayload {
   final String? clientName, roomId, eventId;
 
-  FluffyChatPushPayload(this.clientName, this.roomId, this.eventId);
+  HermesPushPayload(this.clientName, this.roomId, this.eventId);
 
-  factory FluffyChatPushPayload.fromString(String payload) {
+  factory HermesPushPayload.fromString(String payload) {
     final parts = payload.split('|');
     if (parts.length != 3) {
-      return FluffyChatPushPayload(null, null, null);
+      return HermesPushPayload(null, null, null);
     }
-    return FluffyChatPushPayload(parts[0], parts[1], parts[2]);
+    return HermesPushPayload(parts[0], parts[1], parts[2]);
   }
 
   @override
