@@ -419,6 +419,22 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         store.getDouble(SettingKeys.swipePopVelocityThreshold) ??
             AppConfig.swipePopVelocityThreshold;
 
+    AppConfig.replySwipeDismissThreshold =
+        store.getDouble(SettingKeys.replySwipeDismissThreshold) ??
+            AppConfig.replySwipeDismissThreshold;
+
+    AppConfig.replySwipeMaxOffsetFraction =
+        store.getDouble(SettingKeys.replySwipeMaxOffsetFraction) ??
+            AppConfig.replySwipeMaxOffsetFraction;
+
+    AppConfig.replySwipeMovementDurationMs =
+        store.getInt(SettingKeys.replySwipeMovementDurationMs) ??
+            AppConfig.replySwipeMovementDurationMs;
+
+    AppConfig.replySwipeVelocityThreshold =
+        store.getDouble(SettingKeys.replySwipeVelocityThreshold) ??
+            AppConfig.replySwipeVelocityThreshold;
+
     AppConfig.hideRedactedEvents =
         store.getBool(SettingKeys.hideRedactedEvents) ??
             AppConfig.hideRedactedEvents;

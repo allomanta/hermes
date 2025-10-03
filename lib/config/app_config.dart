@@ -26,13 +26,10 @@ abstract class AppConfig {
 
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
 
-  // start new settings
-  static const double replySwipeDismissThreshold = 0.3;
-  static const double replySwipeMaxOffsetFraction = 0.35;
-  static const Duration replySwipeMovementDuration =
-      Duration(milliseconds: 200);
-  static const double replySwipeVelocityThreshold = 450.0;
-  //end of new settings
+  static double replySwipeDismissThreshold = 0.3;
+  static double replySwipeMaxOffsetFraction = 0.35;
+  static int replySwipeMovementDurationMs = 200;
+  static double replySwipeVelocityThreshold = 450.0;
 
   static String get privacyUrl => _privacyUrl;
   static const String website = 'https://hermes.im';
@@ -89,6 +86,9 @@ abstract class AppConfig {
   static Duration get swipePopDuration =>
       Duration(milliseconds: swipePopDurationMs);
 
+  static Duration get replySwipeMovementDuration =>
+      Duration(milliseconds: replySwipeMovementDurationMs);
+
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {
       try {
@@ -123,6 +123,22 @@ abstract class AppConfig {
     }
     if (json['hide_unknown_events'] is bool) {
       hideUnknownEvents = json['hide_unknown_events'];
+    }
+    if (json['reply_swipe_dismiss_threshold'] is num) {
+      replySwipeDismissThreshold =
+          (json['reply_swipe_dismiss_threshold'] as num).toDouble();
+    }
+    if (json['reply_swipe_max_offset_fraction'] is num) {
+      replySwipeMaxOffsetFraction =
+          (json['reply_swipe_max_offset_fraction'] as num).toDouble();
+    }
+    if (json['reply_swipe_movement_duration_ms'] is num) {
+      replySwipeMovementDurationMs =
+          (json['reply_swipe_movement_duration_ms'] as num).round();
+    }
+    if (json['reply_swipe_velocity_threshold'] is num) {
+      replySwipeVelocityThreshold =
+          (json['reply_swipe_velocity_threshold'] as num).toDouble();
     }
   }
 }

@@ -144,6 +144,65 @@ class SettingsChatView extends StatelessWidget {
                 storeKey: SettingKeys.swipeRightToLeftToReply,
                 defaultValue: AppConfig.swipeRightToLeftToReply,
               ),
+              const ListTile(
+                title: Text('Reply swipe sensitivity'),
+                subtitle: Text(
+                  'Tune the gesture used to reply directly from a message.',
+                ),
+              ),
+              ListTile(
+                title: const Text('Swipe distance'),
+                trailing: Text(
+                  '${(controller.replyDismissThreshold * 100).round()}%',
+                ),
+              ),
+              Slider.adaptive(
+                min: 0.05,
+                max: 0.8,
+                divisions: 15,
+                value: controller.replyDismissThreshold.clamp(0.05, 0.8),
+                onChanged: controller.updateReplyDismissThreshold,
+                onChangeEnd: controller.saveReplyDismissThreshold,
+              ),
+              ListTile(
+                title: const Text('Swipe travel distance'),
+                trailing: Text(
+                  '${(controller.replyMaxOffsetFraction * 100).round()}%',
+                ),
+              ),
+              Slider.adaptive(
+                min: 0.1,
+                max: 0.9,
+                divisions: 16,
+                value: controller.replyMaxOffsetFraction.clamp(0.1, 0.9),
+                onChanged: controller.updateReplyMaxOffsetFraction,
+                onChangeEnd: controller.saveReplyMaxOffsetFraction,
+              ),
+              ListTile(
+                title: const Text('Swipe animation duration'),
+                trailing: Text('${controller.replyDurationMs.round()} ms'),
+              ),
+              Slider.adaptive(
+                min: 100,
+                max: 600,
+                divisions: 20,
+                value: controller.replyDurationMs.clamp(100, 600),
+                onChanged: controller.updateReplyDuration,
+                onChangeEnd: controller.saveReplyDuration,
+              ),
+              ListTile(
+                title: const Text('Swipe release velocity'),
+                trailing:
+                    Text('${controller.replyVelocityThreshold.round()} px/s'),
+              ),
+              Slider.adaptive(
+                min: 100,
+                max: 2000,
+                divisions: 38,
+                value: controller.replyVelocityThreshold.clamp(100.0, 2000.0),
+                onChanged: controller.updateReplyVelocity,
+                onChangeEnd: controller.saveReplyVelocity,
+              ),
               Divider(color: theme.dividerColor),
               ListTile(
                 title: Text(

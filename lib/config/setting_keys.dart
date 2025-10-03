@@ -37,6 +37,14 @@ abstract class SettingKeys {
       'chat.pantheon.swipePopMinimumDragFraction';
   static const String swipePopVelocityThreshold =
       'chat.pantheon.swipePopVelocityThreshold';
+  static const String replySwipeDismissThreshold =
+      'chat.pantheon.replySwipeDismissThreshold';
+  static const String replySwipeMaxOffsetFraction =
+      'chat.pantheon.replySwipeMaxOffsetFraction';
+  static const String replySwipeMovementDurationMs =
+      'chat.pantheon.replySwipeMovementDurationMs';
+  static const String replySwipeVelocityThreshold =
+      'chat.pantheon.replySwipeVelocityThreshold';
   static const String experimentalVoip = 'chat.pantheon.experimental_voip';
   static const String showPresences = 'chat.pantheon.show_presences';
   static const String displayNavigationRail =
