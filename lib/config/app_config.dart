@@ -26,6 +26,14 @@ abstract class AppConfig {
 
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
 
+  // start new settings
+  static const double replySwipeDismissThreshold = 0.3;
+  static const double replySwipeMaxOffsetFraction = 0.35;
+  static const Duration replySwipeMovementDuration =
+      Duration(milliseconds: 200);
+  static const double replySwipeVelocityThreshold = 450.0;
+  //end of new settings
+
   static String get privacyUrl => _privacyUrl;
   static const String website = 'https://hermes.im';
   static const String enablePushTutorial =

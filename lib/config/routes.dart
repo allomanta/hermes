@@ -39,7 +39,6 @@ import 'package:hermes/widgets/layouts/two_column_layout.dart';
 import 'package:hermes/widgets/log_view.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/share_scaffold_dialog.dart';
-import 'package:hermes/config/interactive_page_transition.dart';
 
 abstract class AppRoutes {
   static FutureOr<String?> loggedInRedirect(

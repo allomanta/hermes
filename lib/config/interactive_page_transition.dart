@@ -1,8 +1,10 @@
+// transition.dart
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:hermes/config/app_config.dart';
+import 'package:hermes/widgets/reply_swipeable.dart';
 
 class SwipePopPage<T> extends Page<T> {
   SwipePopPage({
@@ -21,7 +23,8 @@ class SwipePopPage<T> extends Page<T> {
         enableFullScreenDrag =
             enableFullScreenDrag ?? AppConfig.swipePopEnableFullScreenDrag,
         minimumDragFraction =
-            minimumDragFraction ?? AppConfig.swipePopMinimumDragFraction,
+            (minimumDragFraction ?? AppConfig.swipePopMinimumDragFraction)
+                .clamp(0.0, 1.0),
         velocityThreshold =
             velocityThreshold ?? AppConfig.swipePopVelocityThreshold;
 
@@ -70,36 +73,29 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
 
   @override
   bool get opaque => true;
-
   @override
   bool get barrierDismissible => false;
-
   @override
   Color? get barrierColor => null;
-
   @override
   String? get barrierLabel => null;
-
   @override
   bool get maintainState => true;
-
   @override
   Duration get transitionDuration => duration;
-
   @override
   Duration get reverseTransitionDuration => duration;
 
   @override
-  bool get popGestureEnabled => enableFullScreenDrag && super.popGestureEnabled;
+  bool get popGestureEnabled => enableFullScreenDrag;
 
   @override
   Widget buildPage(
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-  ) {
-    return builder(context);
-  }
+  ) =>
+      builder(context);
 
   @override
   Widget buildTransitions(
@@ -108,7 +104,7 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final wrappedChild = enableFullScreenDrag
+    final wrapped = enableFullScreenDrag
         ? _FullScreenPopGestureDetector<T>(
             route: this,
             minimumDragFraction: minimumDragFraction,
@@ -121,12 +117,11 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
       primaryRouteAnimation: animation,
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: navigator?.userGestureInProgress ?? false,
-      child: wrappedChild,
+      child: wrapped,
     );
   }
 
   AnimationController get popGestureController => controller!;
-
   NavigatorState get popGestureNavigator => navigator!;
 }
 
@@ -160,7 +155,8 @@ class _FullScreenPopGestureDetectorState<T>
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
-      ..onCancel = _handleDragCancel;
+      ..onCancel = _handleDragCancel
+      ..dragStartBehavior = DragStartBehavior.down;
   }
 
   @override
@@ -176,9 +172,7 @@ class _FullScreenPopGestureDetectorState<T>
     if (_controller != null) {
       final navigator = _controller!.navigator;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (navigator.mounted) {
-          navigator.didStopUserGesture();
-        }
+        if (navigator.mounted) navigator.didStopUserGesture();
       });
       _controller = null;
     }
@@ -186,9 +180,8 @@ class _FullScreenPopGestureDetectorState<T>
   }
 
   void _handlePointerDown(PointerDownEvent event) {
-    if (widget.route.popGestureEnabled) {
-      _recognizer.addPointer(event);
-    }
+    if (!widget.route.popGestureEnabled) return;
+    _recognizer.addPointer(event);
   }
 
   void _handleDragStart(DragStartDetails details) {
@@ -208,7 +201,7 @@ class _FullScreenPopGestureDetectorState<T>
     final size = context.size;
     if (size == null || size.width == 0) return;
     final delta = _convertToLogical((details.primaryDelta ?? 0) / size.width);
-    if (delta == 0) return;
+    if (delta <= 0) return;
     _controller!.dragUpdate(delta);
   }
 
@@ -216,10 +209,7 @@ class _FullScreenPopGestureDetectorState<T>
     if (_controller == null) return;
     final velocity = _convertToLogical(details.velocity.pixelsPerSecond.dx);
     final progress = 1 - widget.route.popGestureController.value;
-    _controller!.dragEnd(
-      velocity: velocity,
-      dragFraction: progress,
-    );
+    _controller!.dragEnd(velocity: velocity, dragFraction: progress);
     _controller = null;
   }
 
@@ -229,8 +219,8 @@ class _FullScreenPopGestureDetectorState<T>
   }
 
   double _convertToLogical(double value) {
-    final textDirection = Directionality.of(context);
-    return textDirection == TextDirection.rtl ? -value : value;
+    final td = Directionality.of(context);
+    return td == TextDirection.rtl ? -value : value;
   }
 
   @override
@@ -267,9 +257,9 @@ class _RightSwipeDragGestureRecognizer extends HorizontalDragGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     if (event is PointerMoveEvent && !_resolvedDirection) {
-      final direction = _effectiveTextDirection;
+      final dir = _effectiveTextDirection;
       final logicalDelta =
-          direction == TextDirection.rtl ? -event.delta.dx : event.delta.dx;
+          dir == TextDirection.rtl ? -event.delta.dx : event.delta.dx;
       _accumulatedDelta += logicalDelta;
       if (_accumulatedDelta.abs() > kTouchSlop) {
         _resolvedDirection = true;
@@ -302,7 +292,6 @@ class _FullScreenPopGestureController<T> {
   })  : controller = route.popGestureController,
         navigator = route.popGestureNavigator {
     getIsCurrent = () => route.isCurrent;
-    getIsActive = () => route.isActive;
     navigator.didStartUserGesture();
   }
 
@@ -314,7 +303,6 @@ class _FullScreenPopGestureController<T> {
   final double minimumDragFraction;
   final double velocityThreshold;
   late final bool Function() getIsCurrent;
-  late final bool Function() getIsActive;
 
   void dragUpdate(double delta) {
     controller.value = (controller.value - delta).clamp(0.0, 1.0);
@@ -322,37 +310,27 @@ class _FullScreenPopGestureController<T> {
 
   void dragEnd({required double velocity, required double dragFraction}) {
     if (!getIsCurrent()) {
-      controller.animateTo(
-        1.0,
-        duration: _scaledDuration(1.0),
-        curve: forwardCurve,
-      );
-      _listenUntilSettled();
+      _animateToPushed();
       return;
     }
-    final bool shouldPop;
-    if (velocity > velocityThreshold) {
-      shouldPop = true;
-    } else if (velocity < -velocityThreshold) {
-      shouldPop = false;
-    } else {
-      shouldPop = dragFraction > minimumDragFraction;
-    }
+
+    final shouldPop = (velocity > velocityThreshold)
+        ? true
+        : (velocity < -velocityThreshold)
+            ? false
+            : (dragFraction > minimumDragFraction);
 
     if (shouldPop) {
       navigator.pop();
       _listenUntilSettled();
     } else {
-      controller.animateTo(
-        1.0,
-        duration: _scaledDuration(1.0),
-        curve: forwardCurve,
-      );
-      _listenUntilSettled();
+      _animateToPushed();
     }
   }
 
-  void dragCancel() {
+  void dragCancel() => _animateToPushed();
+
+  void _animateToPushed() {
     controller.animateTo(
       1.0,
       duration: _scaledDuration(1.0),
@@ -375,8 +353,83 @@ class _FullScreenPopGestureController<T> {
 
   Duration _scaledDuration(double target) {
     final distance = (controller.value - target).abs();
-    final int milliseconds =
-        math.max(1, (duration.inMilliseconds * distance).round());
-    return Duration(milliseconds: milliseconds);
+    final ms = math.max(1, (duration.inMilliseconds * distance).round());
+    return Duration(milliseconds: ms);
   }
+}
+
+class BlockSwipeArea extends StatelessWidget {
+  const BlockSwipeArea({
+    super.key,
+    this.direction = ReplySwipeDirection.startToEnd,
+    required this.child,
+  });
+
+  final ReplySwipeDirection direction;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return RawGestureDetector(
+      behavior: HitTestBehavior.opaque,
+      gestures: {
+        _SwipePopBlockRecognizer:
+            GestureRecognizerFactoryWithHandlers<_SwipePopBlockRecognizer>(
+          () => _SwipePopBlockRecognizer(debugOwner: this),
+          (recognizer) {
+            recognizer
+              ..onStart = (_) {}
+              ..onUpdate = (_) {}
+              ..onEnd = (_) {}
+              ..onCancel = () {}
+              ..gestureSettings = MediaQuery.maybeGestureSettingsOf(context)
+              ..textDirection = Directionality.of(context)
+              ..dragStartBehavior = DragStartBehavior.down
+              ..direction = direction;
+          },
+        ),
+      },
+      child: child,
+    );
+  }
+}
+
+class _SwipePopBlockRecognizer extends HorizontalDragGestureRecognizer {
+  _SwipePopBlockRecognizer({super.debugOwner});
+
+  ReplySwipeDirection direction = ReplySwipeDirection.startToEnd;
+  TextDirection _textDirection = TextDirection.ltr;
+
+  set textDirection(TextDirection value) {
+    _textDirection = value;
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event is PointerMoveEvent &&
+        !hasSufficientGlobalDistanceToAccept(
+          event.kind,
+          gestureSettings?.touchSlop,
+        )) {
+      final logicalDelta = _textDirection == TextDirection.rtl
+          ? -event.delta.dx
+          : event.delta.dx;
+      final sign = direction == ReplySwipeDirection.endToStart ? -1.0 : 1.0;
+      // Block drags moving in the same direction as the pop gesture.
+      if (logicalDelta * sign > 0) {
+        resolve(GestureDisposition.accepted);
+        return;
+      }
+      // Allow opposite drags to pass through to other recognizers.
+      if (logicalDelta * sign < 0) {
+        resolve(GestureDisposition.rejected);
+        stopTrackingPointer(event.pointer);
+        return;
+      }
+    }
+    super.handleEvent(event);
+  }
+
+  @override
+  String get debugDescription => 'swipePopBlocker';
 }

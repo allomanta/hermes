@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'package:swipe_to_action/swipe_to_action.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/adaptive_bottom_sheet.dart';
 import 'package:hermes/config/themes.dart';
@@ -17,6 +16,7 @@ import 'package:hermes/widgets/member_actions_popup_menu_button.dart';
 import '../../../config/app_config.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
+import '../../../widgets/reply_swipeable.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
 
@@ -193,18 +193,22 @@ class Message extends StatelessWidget {
         singleSelected && event.room.canSendDefaultMessages;
 
     return Center(
-      child: Swipeable(
+      child: ReplySwipeable(
         key: ValueKey(event.eventId),
-        background: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Center(
-            child: Icon(Icons.check_outlined),
+        onSwipe: onSwipe,
+        background: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Align(
+            alignment: AppConfig.swipeRightToLeftToReply
+                ? Alignment.centerRight
+                : Alignment.centerLeft,
+            child: const Icon(Icons.check_outlined),
           ),
         ),
         direction: AppConfig.swipeRightToLeftToReply
-            ? SwipeDirection.endToStart
-            : SwipeDirection.startToEnd,
-        onSwipe: (_) => onSwipe(),
+            ? ReplySwipeDirection.endToStart
+            : ReplySwipeDirection.startToEnd,
+        dismissThreshold: 0.28,
         child: Container(
           constraints: const BoxConstraints(
             maxWidth: PantheonThemes.maxTimelineWidth,

@@ -6,6 +6,7 @@ import 'package:hermes/pages/chat/recording_input_row.dart';
 import 'package:hermes/pages/chat/recording_view_model.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
+import 'package:hermes/config/interactive_page_transition.dart';
 import 'package:hermes/utils/other_party_can_receive.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/avatar.dart';
@@ -44,230 +45,199 @@ class ChatInputRow extends StatelessWidget {
 
     return RecordingViewModel(
       builder: (context, recordingViewModel) {
+        Widget content;
         if (recordingViewModel.isRecording) {
-          return RecordingInputRow(
+          content = RecordingInputRow(
             state: recordingViewModel,
             onSend: controller.onVoiceMessageSend,
           );
-        }
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: controller.selectMode
-              ? <Widget>[
-                  if (controller.selectedEvents
-                      .every((event) => event.status == EventStatus.error))
-                    SizedBox(
-                      height: height,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: theme.colorScheme.error,
+        } else {
+          content = Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: controller.selectMode
+                ? <Widget>[
+                    if (controller.selectedEvents
+                        .every((event) => event.status == EventStatus.error))
+                      SizedBox(
+                        height: height,
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: theme.colorScheme.error,
+                          ),
+                          onPressed: controller.deleteErrorEventsAction,
+                          child: Row(
+                            children: <Widget>[
+                              const Icon(Icons.delete_forever_outlined),
+                              Text(L10n.of(context).delete),
+                            ],
+                          ),
                         ),
-                        onPressed: controller.deleteErrorEventsAction,
-                        child: Row(
-                          children: <Widget>[
-                            const Icon(Icons.delete_forever_outlined),
-                            Text(L10n.of(context).delete),
-                          ],
+                      )
+                    else
+                      SizedBox(
+                        height: height,
+                        child: TextButton(
+                          style: selectedTextButtonStyle,
+                          onPressed: controller.forwardEventsAction,
+                          child: Row(
+                            children: <Widget>[
+                              const Icon(Icons.keyboard_arrow_left_outlined),
+                              Text(L10n.of(context).forward),
+                            ],
+                          ),
                         ),
                       ),
-                    )
-                  else
-                    SizedBox(
+                    controller.selectedEvents.length == 1
+                        ? controller.selectedEvents.first
+                                .getDisplayEvent(controller.timeline!)
+                                .status
+                                .isSent
+                            ? SizedBox(
+                                height: height,
+                                child: TextButton(
+                                  style: selectedTextButtonStyle,
+                                  onPressed: controller.replyAction,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text(L10n.of(context).reply),
+                                      const Icon(Icons.keyboard_arrow_right),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : SizedBox(
+                                height: height,
+                                child: TextButton(
+                                  style: selectedTextButtonStyle,
+                                  onPressed: controller.sendAgainAction,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text(L10n.of(context).tryToSendAgain),
+                                      const SizedBox(width: 4),
+                                      const Icon(Icons.send_outlined, size: 16),
+                                    ],
+                                  ),
+                                ),
+                              )
+                        : const SizedBox.shrink(),
+                  ]
+                : <Widget>[
+                    const SizedBox(width: 4),
+                    AnimatedContainer(
+                      duration: PantheonThemes.animationDuration,
+                      curve: PantheonThemes.animationCurve,
+                      width: controller.sendController.text.isNotEmpty
+                          ? 0
+                          : height - 10,
                       height: height,
-                      child: TextButton(
-                        style: selectedTextButtonStyle,
-                        onPressed: controller.forwardEventsAction,
-                        child: Row(
-                          children: <Widget>[
-                            const Icon(Icons.keyboard_arrow_left_outlined),
-                            Text(L10n.of(context).forward),
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(),
+                      clipBehavior: Clip.hardEdge,
+                      child: PopupMenuButton<String>(
+                        useRootNavigator: true,
+                        icon: const Icon(Icons.add_circle_outline),
+                        iconColor: theme.colorScheme.onPrimaryContainer,
+                        onSelected: controller.onAddPopupMenuButtonSelected,
+                        itemBuilder: (BuildContext context) =>
+                            <PopupMenuEntry<String>>[
+                          if (PlatformInfos.isMobile) ...[
+                            PopupMenuItem<String>(
+                              value: 'location',
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor:
+                                      theme.colorScheme.onPrimaryContainer,
+                                  foregroundColor:
+                                      theme.colorScheme.primaryContainer,
+                                  child: const Icon(Icons.gps_fixed_outlined),
+                                ),
+                                title: Text(L10n.of(context).shareLocation),
+                                contentPadding: const EdgeInsets.all(0),
+                              ),
+                            ),
+                            PopupMenuItem<String>(
+                              value: 'camera',
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor:
+                                      theme.colorScheme.onPrimaryContainer,
+                                  foregroundColor:
+                                      theme.colorScheme.primaryContainer,
+                                  child: const Icon(Icons.camera_alt_outlined),
+                                ),
+                                title: Text(L10n.of(context).takeAPhoto),
+                                contentPadding: const EdgeInsets.all(0),
+                              ),
+                            ),
                           ],
-                        ),
-                      ),
-                    ),
-                  controller.selectedEvents.length == 1
-                      ? controller.selectedEvents.first
-                              .getDisplayEvent(controller.timeline!)
-                              .status
-                              .isSent
-                          ? SizedBox(
-                              height: height,
-                              child: TextButton(
-                                style: selectedTextButtonStyle,
-                                onPressed: controller.replyAction,
-                                child: Row(
-                                  children: <Widget>[
-                                    Text(L10n.of(context).reply),
-                                    const Icon(Icons.keyboard_arrow_right),
-                                  ],
-                                ),
-                              ),
-                            )
-                          : SizedBox(
-                              height: height,
-                              child: TextButton(
-                                style: selectedTextButtonStyle,
-                                onPressed: controller.sendAgainAction,
-                                child: Row(
-                                  children: <Widget>[
-                                    Text(L10n.of(context).tryToSendAgain),
-                                    const SizedBox(width: 4),
-                                    const Icon(Icons.send_outlined, size: 16),
-                                  ],
-                                ),
-                              ),
-                            )
-                      : const SizedBox.shrink(),
-                ]
-              : <Widget>[
-                  const SizedBox(width: 4),
-                  AnimatedContainer(
-                    duration: PantheonThemes.animationDuration,
-                    curve: PantheonThemes.animationCurve,
-                    width: controller.sendController.text.isNotEmpty
-                        ? 0
-                        : height - 10,
-                    height: height,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(),
-                    clipBehavior: Clip.hardEdge,
-                    child: PopupMenuButton<String>(
-                      useRootNavigator: true,
-                      icon: const Icon(Icons.add_circle_outline),
-                      iconColor: theme.colorScheme.onPrimaryContainer,
-                      onSelected: controller.onAddPopupMenuButtonSelected,
-                      itemBuilder: (BuildContext context) =>
-                          <PopupMenuEntry<String>>[
-                        if (PlatformInfos.isMobile) ...[
                           PopupMenuItem<String>(
-                            value: 'location',
+                            value: 'image',
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
                                     theme.colorScheme.onPrimaryContainer,
                                 foregroundColor:
                                     theme.colorScheme.primaryContainer,
-                                child: const Icon(Icons.gps_fixed_outlined),
+                                child: const Icon(Icons.photo_outlined),
                               ),
-                              title: Text(L10n.of(context).shareLocation),
+                              title: Text(L10n.of(context).sendImage),
+                              contentPadding: const EdgeInsets.all(0),
+                            ),
+                          ),
+                          if (PlatformInfos.isMobile)
+                            PopupMenuItem<String>(
+                              value: 'camera-video',
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor:
+                                      theme.colorScheme.onPrimaryContainer,
+                                  foregroundColor:
+                                      theme.colorScheme.primaryContainer,
+                                  child: const Icon(Icons.videocam_outlined),
+                                ),
+                                title: Text(L10n.of(context).recordAVideo),
+                                contentPadding: const EdgeInsets.all(0),
+                              ),
+                            ),
+                          PopupMenuItem<String>(
+                            value: 'video',
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor:
+                                    theme.colorScheme.onPrimaryContainer,
+                                foregroundColor:
+                                    theme.colorScheme.primaryContainer,
+                                child: const Icon(
+                                    Icons.video_camera_back_outlined),
+                              ),
+                              title: Text(L10n.of(context).sendVideo),
                               contentPadding: const EdgeInsets.all(0),
                             ),
                           ),
                           PopupMenuItem<String>(
-                            value: 'camera',
+                            value: 'file',
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
                                     theme.colorScheme.onPrimaryContainer,
                                 foregroundColor:
                                     theme.colorScheme.primaryContainer,
-                                child: const Icon(Icons.camera_alt_outlined),
+                                child: const Icon(Icons.attachment_outlined),
                               ),
-                              title: Text(L10n.of(context).takeAPhoto),
+                              title: Text(L10n.of(context).sendFile),
                               contentPadding: const EdgeInsets.all(0),
                             ),
                           ),
                         ],
-                        PopupMenuItem<String>(
-                          value: 'image',
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor:
-                                  theme.colorScheme.onPrimaryContainer,
-                              foregroundColor:
-                                  theme.colorScheme.primaryContainer,
-                              child: const Icon(Icons.photo_outlined),
-                            ),
-                            title: Text(L10n.of(context).sendImage),
-                            contentPadding: const EdgeInsets.all(0),
-                          ),
-                        ),
-                        if (PlatformInfos.isMobile)
-                          PopupMenuItem<String>(
-                            value: 'camera-video',
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor:
-                                    theme.colorScheme.onPrimaryContainer,
-                                foregroundColor:
-                                    theme.colorScheme.primaryContainer,
-                                child: const Icon(Icons.videocam_outlined),
-                              ),
-                              title: Text(L10n.of(context).recordAVideo),
-                              contentPadding: const EdgeInsets.all(0),
-                            ),
-                          ),
-                        PopupMenuItem<String>(
-                          value: 'video',
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor:
-                                  theme.colorScheme.onPrimaryContainer,
-                              foregroundColor:
-                                  theme.colorScheme.primaryContainer,
-                              child:
-                                  const Icon(Icons.video_camera_back_outlined),
-                            ),
-                            title: Text(L10n.of(context).sendVideo),
-                            contentPadding: const EdgeInsets.all(0),
-                          ),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'file',
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor:
-                                  theme.colorScheme.onPrimaryContainer,
-                              foregroundColor:
-                                  theme.colorScheme.primaryContainer,
-                              child: const Icon(Icons.attachment_outlined),
-                            ),
-                            title: Text(L10n.of(context).sendFile),
-                            contentPadding: const EdgeInsets.all(0),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: height,
-                    width: height - 10,
-                    alignment: Alignment.center,
-                    child: IconButton(
-                      tooltip: L10n.of(context).emojis,
-                      color: theme.colorScheme.onPrimaryContainer,
-                      icon: PageTransitionSwitcher(
-                        transitionBuilder: (
-                          Widget child,
-                          Animation<double> primaryAnimation,
-                          Animation<double> secondaryAnimation,
-                        ) {
-                          return SharedAxisTransition(
-                            animation: primaryAnimation,
-                            secondaryAnimation: secondaryAnimation,
-                            transitionType: SharedAxisTransitionType.scaled,
-                            fillColor: Colors.transparent,
-                            child: child,
-                          );
-                        },
-                        child: Icon(
-                          controller.showEmojiPicker
-                              ? Icons.keyboard
-                              : Icons.add_reaction_outlined,
-                          key: ValueKey(controller.showEmojiPicker),
-                        ),
                       ),
-                      onPressed: controller.emojiPickerAction,
                     ),
-                  ),
-                  if (!controller.showEmojiPicker)
                     Container(
                       height: height,
-                      width: height,
+                      width: height - 10,
                       alignment: Alignment.center,
                       child: IconButton(
-                        tooltip: L10n.of(context).stickers,
+                        tooltip: L10n.of(context).emojis,
                         color: theme.colorScheme.onPrimaryContainer,
                         icon: PageTransitionSwitcher(
                           transitionBuilder: (
@@ -284,94 +254,128 @@ class ChatInputRow extends StatelessWidget {
                             );
                           },
                           child: Icon(
-                            Icons.settings_system_daydream_outlined,
+                            controller.showEmojiPicker
+                                ? Icons.keyboard
+                                : Icons.add_reaction_outlined,
                             key: ValueKey(controller.showEmojiPicker),
                           ),
                         ),
-                        onPressed: controller.stickerPickerAction,
+                        onPressed: controller.emojiPickerAction,
                       ),
                     ),
-                  if (Matrix.of(context).isMultiAccount &&
-                      Matrix.of(context).hasComplexBundles &&
-                      Matrix.of(context).currentBundle!.length > 1)
+                    if (!controller.showEmojiPicker)
+                      Container(
+                        height: height,
+                        width: height,
+                        alignment: Alignment.center,
+                        child: IconButton(
+                          tooltip: L10n.of(context).stickers,
+                          color: theme.colorScheme.onPrimaryContainer,
+                          icon: PageTransitionSwitcher(
+                            transitionBuilder: (
+                              Widget child,
+                              Animation<double> primaryAnimation,
+                              Animation<double> secondaryAnimation,
+                            ) {
+                              return SharedAxisTransition(
+                                animation: primaryAnimation,
+                                secondaryAnimation: secondaryAnimation,
+                                transitionType: SharedAxisTransitionType.scaled,
+                                fillColor: Colors.transparent,
+                                child: child,
+                              );
+                            },
+                            child: Icon(
+                              Icons.settings_system_daydream_outlined,
+                              key: ValueKey(controller.showEmojiPicker),
+                            ),
+                          ),
+                          onPressed: controller.stickerPickerAction,
+                        ),
+                      ),
+                    if (Matrix.of(context).isMultiAccount &&
+                        Matrix.of(context).hasComplexBundles &&
+                        Matrix.of(context).currentBundle!.length > 1)
+                      Container(
+                        height: height,
+                        width: height,
+                        alignment: Alignment.center,
+                        child: _ChatAccountPicker(controller),
+                      ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 0.0),
+                        child: InputBar(
+                          room: controller.room,
+                          minLines: 1,
+                          maxLines: 8,
+                          autofocus: !PlatformInfos.isMobile,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: AppConfig.sendOnEnter == true &&
+                                  PlatformInfos.isMobile
+                              ? TextInputAction.send
+                              : null,
+                          onSubmitted: controller.onInputBarSubmitted,
+                          onSubmitImage: controller.sendImageFromClipBoard,
+                          focusNode: controller.inputFocus,
+                          controller: controller.sendController,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.only(
+                              left: 6.0,
+                              right: 6.0,
+                              bottom: 6.0,
+                              top: 3.0,
+                            ),
+                            counter: const SizedBox.shrink(),
+                            hintText: L10n.of(context).writeAMessage,
+                            hintMaxLines: 1,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            filled: false,
+                          ),
+                          onChanged: controller.onInputBarChanged,
+                        ),
+                      ),
+                    ),
                     Container(
                       height: height,
                       width: height,
                       alignment: Alignment.center,
-                      child: _ChatAccountPicker(controller),
-                    ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 0.0),
-                      child: InputBar(
-                        room: controller.room,
-                        minLines: 1,
-                        maxLines: 8,
-                        autofocus: !PlatformInfos.isMobile,
-                        keyboardType: TextInputType.multiline,
-                        textInputAction: AppConfig.sendOnEnter == true &&
-                                PlatformInfos.isMobile
-                            ? TextInputAction.send
-                            : null,
-                        onSubmitted: controller.onInputBarSubmitted,
-                        onSubmitImage: controller.sendImageFromClipBoard,
-                        focusNode: controller.inputFocus,
-                        controller: controller.sendController,
-                        decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.only(
-                            left: 6.0,
-                            right: 6.0,
-                            bottom: 6.0,
-                            top: 3.0,
-                          ),
-                          counter: const SizedBox.shrink(),
-                          hintText: L10n.of(context).writeAMessage,
-                          hintMaxLines: 1,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          filled: false,
-                        ),
-                        onChanged: controller.onInputBarChanged,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    height: height,
-                    width: height,
-                    alignment: Alignment.center,
-                    child: PlatformInfos.platformCanRecord &&
-                            controller.sendController.text.isEmpty
-                        ? IconButton(
-                            tooltip: L10n.of(context).voiceMessage,
-                            onPressed: () =>
-                                ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  L10n.of(context)
-                                      .longPressToRecordVoiceMessage,
+                      child: PlatformInfos.platformCanRecord &&
+                              controller.sendController.text.isEmpty
+                          ? IconButton(
+                              tooltip: L10n.of(context).voiceMessage,
+                              onPressed: () =>
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    L10n.of(context)
+                                        .longPressToRecordVoiceMessage,
+                                  ),
                                 ),
                               ),
+                              onLongPress: () => recordingViewModel
+                                  .startRecording(controller.room),
+                              style: IconButton.styleFrom(
+                                backgroundColor: theme.bubbleColor,
+                                foregroundColor: theme.onBubbleColor,
+                              ),
+                              icon: const Icon(Icons.mic_none_outlined),
+                            )
+                          : IconButton(
+                              tooltip: L10n.of(context).send,
+                              onPressed: controller.send,
+                              style: IconButton.styleFrom(
+                                backgroundColor: theme.bubbleColor,
+                                foregroundColor: theme.onBubbleColor,
+                              ),
+                              icon: const Icon(Icons.send_outlined),
                             ),
-                            onLongPress: () => recordingViewModel
-                                .startRecording(controller.room),
-                            style: IconButton.styleFrom(
-                              backgroundColor: theme.bubbleColor,
-                              foregroundColor: theme.onBubbleColor,
-                            ),
-                            icon: const Icon(Icons.mic_none_outlined),
-                          )
-                        : IconButton(
-                            tooltip: L10n.of(context).send,
-                            onPressed: controller.send,
-                            style: IconButton.styleFrom(
-                              backgroundColor: theme.bubbleColor,
-                              foregroundColor: theme.onBubbleColor,
-                            ),
-                            icon: const Icon(Icons.send_outlined),
-                          ),
-                  ),
-                ],
-        );
+                    ),
+                  ],
+          );
+        }
+        return BlockSwipeArea(child: content);
       },
     );
   }
