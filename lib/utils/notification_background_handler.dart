@@ -8,10 +8,10 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/push_helper.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:hermes/utils/platform_infos.dart';
+import 'package:hermes/utils/push_helper.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import 'package:hermes/utils/client_manager.dart';
@@ -96,7 +96,7 @@ Future<void> notificationTap(
     notificationResponse.notificationResponseType.name,
   );
   final payload =
-      FluffyChatPushPayload.fromString(notificationResponse.payload ?? '');
+      HermesPushPayload.fromString(notificationResponse.payload ?? '');
   switch (notificationResponse.notificationResponseType) {
     case NotificationResponseType.selectedNotification:
       final roomId = payload.roomId;
@@ -186,7 +186,7 @@ Future<void> notificationTap(
                   enableVibration: false,
                   actions: <AndroidNotificationAction>[
                     AndroidNotificationAction(
-                      FluffyChatNotificationActions.reply.name,
+                      HermesNotificationActions.reply.name,
                       l10n.reply,
                       inputs: [
                         AndroidNotificationActionInput(
@@ -198,14 +198,14 @@ Future<void> notificationTap(
                       semanticAction: SemanticAction.reply,
                     ),
                     AndroidNotificationAction(
-                      FluffyChatNotificationActions.markAsRead.name,
+                      HermesNotificationActions.markAsRead.name,
                       l10n.markAsRead,
                       semanticAction: SemanticAction.markAsRead,
                     ),
                   ],
                 ),
               ),
-              payload: FluffyChatPushPayload(
+              payload: HermesPushPayload(
                 client.clientName,
                 room.id,
                 eventId,
