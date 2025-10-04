@@ -83,7 +83,6 @@ abstract class AppConfig {
   static Duration get swipePopDuration =>
       Duration(milliseconds: swipePopDurationMs);
 
-
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {
       try {
