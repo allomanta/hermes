@@ -433,8 +433,7 @@ class Message extends StatelessWidget {
                                             onLongPress: longPressSelect
                                                 ? null
                                                 : () {
-                                                    HapticFeedback
-                                                        .heavyImpact();
+                                                    HapticFeedback.vibrate();
                                                     onSelect(event);
                                                   },
                                             child: AnimatedOpacity(
