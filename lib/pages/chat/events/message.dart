@@ -87,13 +87,30 @@ class Message extends StatelessWidget {
     super.key,
   });
 
-  Future<void> _showContextMenu(BuildContext context, Offset anchor) async {
+  Future<void> _showContextMenu(
+    BuildContext context,
+    Offset globalPosition,
+  ) async {
+    final overlay = Overlay.of(context, rootOverlay: true)
+        .context
+        .findRenderObject() as RenderBox?;
+    if (overlay == null) return;
+
+    final local = overlay.globalToLocal(globalPosition);
+    final size = overlay.size;
+    final client = Matrix.of(context).client;
+
     final result = await showMenu<_MessageAction>(
       context: context,
-      position:
-          RelativeRect.fromLTRB(anchor.dx, anchor.dy, anchor.dx, anchor.dy),
-      items: const [
-        PopupMenuItem(
+      useRootNavigator: true,
+      position: RelativeRect.fromLTRB(
+        local.dx,
+        local.dy,
+        size.width - local.dx,
+        size.height - local.dy,
+      ),
+      items: [
+        const PopupMenuItem(
           value: _MessageAction.reply,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -104,7 +121,7 @@ class Message extends StatelessWidget {
             ],
           ),
         ),
-        PopupMenuItem(
+        const PopupMenuItem(
           value: _MessageAction.copy,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -115,7 +132,7 @@ class Message extends StatelessWidget {
             ],
           ),
         ),
-        PopupMenuItem(
+        const PopupMenuItem(
           value: _MessageAction.forward,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -126,7 +143,7 @@ class Message extends StatelessWidget {
             ],
           ),
         ),
-        PopupMenuItem(
+        const PopupMenuItem(
           value: _MessageAction.pin,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -137,28 +154,30 @@ class Message extends StatelessWidget {
             ],
           ),
         ),
-        PopupMenuItem(
-          value: _MessageAction.edit,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.edit_outlined, size: 18),
-              SizedBox(width: 12),
-              Text('Edit'),
-            ],
+        if (client.userID == event.senderId)
+          const PopupMenuItem(
+            value: _MessageAction.edit,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.edit_outlined, size: 18),
+                SizedBox(width: 12),
+                Text('Edit'),
+              ],
+            ),
           ),
-        ),
-        PopupMenuItem(
-          value: _MessageAction.redact,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.delete_outlined, size: 18),
-              SizedBox(width: 12),
-              Text('Delete'),
-            ],
+        if (client.userID == event.senderId)
+          const PopupMenuItem(
+            value: _MessageAction.redact,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.delete_outlined, size: 18),
+                SizedBox(width: 12),
+                Text('Delete'),
+              ],
+            ),
           ),
-        ),
       ],
     );
     switch (result) {
@@ -555,12 +574,25 @@ class Message extends StatelessWidget {
                                           padding:
                                               const EdgeInsets.only(left: 8),
                                           child: GestureDetector(
+                                            behavior:
+                                                HitTestBehavior.deferToChild,
                                             onLongPress: longPressSelect
                                                 ? null
                                                 : () {
                                                     HapticFeedback.vibrate();
                                                     onSelect(event);
                                                   },
+                                            onTapUp: longPressSelect
+                                                ? (_) => onSelect(event)
+                                                : (details) => _showContextMenu(
+                                                      context,
+                                                      details.globalPosition,
+                                                    ),
+                                            onSecondaryTapUp: (details) =>
+                                                _showContextMenu(
+                                              context,
+                                              details.globalPosition,
+                                            ),
                                             child: AnimatedOpacity(
                                               opacity: animateIn
                                                   ? 0
