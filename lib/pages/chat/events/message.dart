@@ -282,9 +282,10 @@ class Message extends StatelessWidget {
                                       ? Colors.transparent
                                       : null,
                                   enableFeedback: !selected,
+                                  onLongPress: () => onSelect(event),
                                   onTap: longPressSelect
-                                      ? null
-                                      : () => onSelect(event),
+                                      ? () => onSelect(event)
+                                      : null,
                                   borderRadius: BorderRadius.circular(
                                     AppConfig.borderRadius / 2,
                                   ),
