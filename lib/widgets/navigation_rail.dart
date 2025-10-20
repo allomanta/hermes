@@ -37,8 +37,16 @@ class SpacesNavigationRail extends StatelessWidget {
               .where((s) => s.hasRoomUpdate)
               .rateLimit(const Duration(seconds: 1)),
           builder: (context, _) {
-            final allSpaces =
-                client.rooms.where((room) => room.isSpace).toList();
+            final allSpaces = client.rooms.where((room) => room.isSpace);
+            final rootSpaces = allSpaces
+                .where(
+                  (space) => !allSpaces.any(
+                    (parentSpace) => parentSpace.spaceChildren.any(
+                      (child) => child.roomId == space.id,
+                    ),
+                  ),
+                )
+                .toList();
 
             return SizedBox(
               width: PantheonThemes.navRailWidth,
@@ -50,7 +58,7 @@ class SpacesNavigationRail extends StatelessWidget {
                           .copyWith(scrollbars: false),
                       child: ListView.builder(
                         scrollDirection: Axis.vertical,
-                        itemCount: allSpaces.length + 2,
+                        itemCount: rootSpaces.length + 2,
                         itemBuilder: (context, i) {
                           if (i == 0) {
                             return NaviRailItem(
@@ -69,7 +77,7 @@ class SpacesNavigationRail extends StatelessWidget {
                             );
                           }
                           i--;
-                          if (i == allSpaces.length) {
+                          if (i == rootSpaces.length) {
                             return NaviRailItem(
                               isSelected: false,
                               onTap: () => context.go('/rooms/newspace'),
@@ -80,9 +88,9 @@ class SpacesNavigationRail extends StatelessWidget {
                               toolTip: L10n.of(context).createNewSpace,
                             );
                           }
-                          final space = allSpaces[i];
+                          final space = rootSpaces[i];
                           final displayname =
-                              allSpaces[i].getLocalizedDisplayname(
+                              rootSpaces[i].getLocalizedDisplayname(
                             MatrixLocals(L10n.of(context)),
                           );
                           final spaceChildrenIds =
@@ -90,11 +98,11 @@ class SpacesNavigationRail extends StatelessWidget {
                           return NaviRailItem(
                             toolTip: displayname,
                             isSelected: activeSpaceId == space.id,
-                            onTap: () => onGoToSpaceId(allSpaces[i].id),
+                            onTap: () => onGoToSpaceId(rootSpaces[i].id),
                             unreadBadgeFilter: (room) =>
                                 spaceChildrenIds.contains(room.id),
                             icon: Avatar(
-                              mxContent: allSpaces[i].avatar,
+                              mxContent: rootSpaces[i].avatar,
                               name: displayname,
                               border: BorderSide(
                                 width: 1,
