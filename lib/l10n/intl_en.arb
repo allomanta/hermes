@@ -2811,7 +2811,7 @@
       }
     }
   },
-  "searchChatsRooms": "Search for #chats, @users...",
+  "searchChatsRooms": "Search",
   "@searchChatsRooms": {},
   "nothingFound": "Nothing found...",
   "@nothingFound": {},
