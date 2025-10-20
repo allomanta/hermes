@@ -45,64 +45,68 @@ class SpacesNavigationRail extends StatelessWidget {
               child: Column(
                 children: [
                   Expanded(
-                    child: ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      itemCount: allSpaces.length + 2,
-                      itemBuilder: (context, i) {
-                        if (i == 0) {
-                          return NaviRailItem(
-                            isSelected: activeSpaceId == null && !isSettings,
-                            onTap: onGoToChats,
-                            icon: const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Icon(Icons.forum_outlined),
-                            ),
-                            selectedIcon: const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Icon(Icons.forum),
-                            ),
-                            toolTip: L10n.of(context).chats,
-                            unreadBadgeFilter: (room) => true,
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context)
+                          .copyWith(scrollbars: false),
+                      child: ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        itemCount: allSpaces.length + 2,
+                        itemBuilder: (context, i) {
+                          if (i == 0) {
+                            return NaviRailItem(
+                              isSelected: activeSpaceId == null && !isSettings,
+                              onTap: onGoToChats,
+                              icon: const Padding(
+                                padding: EdgeInsets.all(10.0),
+                                child: Icon(Icons.forum_outlined),
+                              ),
+                              selectedIcon: const Padding(
+                                padding: EdgeInsets.all(10.0),
+                                child: Icon(Icons.forum),
+                              ),
+                              toolTip: L10n.of(context).chats,
+                              unreadBadgeFilter: (room) => true,
+                            );
+                          }
+                          i--;
+                          if (i == allSpaces.length) {
+                            return NaviRailItem(
+                              isSelected: false,
+                              onTap: () => context.go('/rooms/newspace'),
+                              icon: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Icon(Icons.add),
+                              ),
+                              toolTip: L10n.of(context).createNewSpace,
+                            );
+                          }
+                          final space = allSpaces[i];
+                          final displayname =
+                              allSpaces[i].getLocalizedDisplayname(
+                            MatrixLocals(L10n.of(context)),
                           );
-                        }
-                        i--;
-                        if (i == allSpaces.length) {
+                          final spaceChildrenIds =
+                              space.spaceChildren.map((c) => c.roomId).toSet();
                           return NaviRailItem(
-                            isSelected: false,
-                            onTap: () => context.go('/rooms/newspace'),
-                            icon: const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Icon(Icons.add),
+                            toolTip: displayname,
+                            isSelected: activeSpaceId == space.id,
+                            onTap: () => onGoToSpaceId(allSpaces[i].id),
+                            unreadBadgeFilter: (room) =>
+                                spaceChildrenIds.contains(room.id),
+                            icon: Avatar(
+                              mxContent: allSpaces[i].avatar,
+                              name: displayname,
+                              border: BorderSide(
+                                width: 1,
+                                color: Theme.of(context).dividerColor,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppConfig.borderRadius / 2,
+                              ),
                             ),
-                            toolTip: L10n.of(context).createNewSpace,
                           );
-                        }
-                        final space = allSpaces[i];
-                        final displayname =
-                            allSpaces[i].getLocalizedDisplayname(
-                          MatrixLocals(L10n.of(context)),
-                        );
-                        final spaceChildrenIds =
-                            space.spaceChildren.map((c) => c.roomId).toSet();
-                        return NaviRailItem(
-                          toolTip: displayname,
-                          isSelected: activeSpaceId == space.id,
-                          onTap: () => onGoToSpaceId(allSpaces[i].id),
-                          unreadBadgeFilter: (room) =>
-                              spaceChildrenIds.contains(room.id),
-                          icon: Avatar(
-                            mxContent: allSpaces[i].avatar,
-                            name: displayname,
-                            border: BorderSide(
-                              width: 1,
-                              color: Theme.of(context).dividerColor,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              AppConfig.borderRadius / 2,
-                            ),
-                          ),
-                        );
-                      },
+                        },
+                      ),
                     ),
                   ),
                   NaviRailItem(
