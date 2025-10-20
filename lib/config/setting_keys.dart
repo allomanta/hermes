@@ -65,7 +65,7 @@ enum AppSettings<T> {
   ),
   renderHtml<bool>('chat.fluffy.renderHtml', true),
   fontSizeFactor<double>('chat.fluffy.font_size_factor', 1.0),
-  hideRedactedEvents<bool>('chat.fluffy.hideRedactedEvents', false),
+  hideRedactedEvents<bool>('chat.fluffy.hideRedactedEvents', true),
   hideUnknownEvents<bool>('chat.fluffy.hideUnknownEvents', true),
   separateChatTypes<bool>('chat.fluffy.separateChatTypes', false),
   autoplayImages<bool>('chat.fluffy.autoplay_images', true),
