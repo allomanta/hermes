@@ -29,7 +29,7 @@ class NaviRailItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final borderRadius = BorderRadius.circular(90);
+    final borderRadius = BorderRadius.circular(90.0);
     final icon = isSelected ? selectedIcon ?? this.icon : this.icon;
     final unreadBadgeFilter = this.unreadBadgeFilter;
     return HoverBuilder(
@@ -44,7 +44,7 @@ class NaviRailItem extends StatelessWidget {
                 bottom: 8,
                 left: 0,
                 child: AnimatedContainer(
-                  width: isSelected
+                  width: isSelected && selectedIcon == null
                       ? PantheonThemes.isColumnMode(context)
                           ? 8
                           : 4
