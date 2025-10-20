@@ -136,13 +136,6 @@ class ChatListItem extends StatelessWidget {
                           onTap: () => onLongPress?.call(context),
                         ),
                       ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: () => onLongPress?.call(context),
-                        ),
-                      ),
                     ],
                   ),
                 ),
