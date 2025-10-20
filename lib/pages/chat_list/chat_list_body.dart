@@ -145,45 +145,45 @@ class ChatListViewBody extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (client.rooms.isNotEmpty && !controller.isSearchMode)
-                      SizedBox(
-                        height: 64,
-                        child: ListView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 12.0,
-                          ),
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            if (AppSettings.separateChatTypes.value)
-                              ActiveFilter.messages
-                            else
-                              ActiveFilter.allChats,
-                            ActiveFilter.groups,
-                            ActiveFilter.unread,
-                            // if (spaceDelegateCandidates.isNotEmpty &&
-                            //     !AppConfig.displayNavigationRail &&
-                            // !PantheonThemes.isColumnMode(context))
-                            //   ActiveFilter.spaces,
-                          ]
-                              .map(
-                                (filter) => Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4.0,
-                                  ),
-                                  child: FilterChip(
-                                    selected: filter == controller.activeFilter,
-                                    onSelected: (_) =>
-                                        controller.setActiveFilter(filter),
-                                    label:
-                                        Text(filter.toLocalizedString(context)),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
+                    // if (client.rooms.isNotEmpty && !controller.isSearchMode)
+                    //   SizedBox(
+                    //     height: 64,
+                    //     child: ListView(
+                    //       padding: const EdgeInsets.symmetric(
+                    //         horizontal: 12.0,
+                    //         vertical: 12.0,
+                    //       ),
+                    //       shrinkWrap: true,
+                    //       scrollDirection: Axis.horizontal,
+                    //       children: [
+                    //         if (AppSettings.separateChatTypes.value)
+                    //           ActiveFilter.messages
+                    //         else
+                    //           ActiveFilter.allChats,
+                    //         ActiveFilter.groups,
+                    //         ActiveFilter.unread,
+                    //         // if (spaceDelegateCandidates.isNotEmpty &&
+                    //         //     !AppConfig.displayNavigationRail &&
+                    //         // !PantheonThemes.isColumnMode(context))
+                    //         //   ActiveFilter.spaces,
+                    //       ]
+                    //           .map(
+                    //             (filter) => Padding(
+                    //               padding: const EdgeInsets.symmetric(
+                    //                 horizontal: 4.0,
+                    //               ),
+                    //               child: FilterChip(
+                    //                 selected: filter == controller.activeFilter,
+                    //                 onSelected: (_) =>
+                    //                     controller.setActiveFilter(filter),
+                    //                 label:
+                    //                     Text(filter.toLocalizedString(context)),
+                    //               ),
+                    //             ),
+                    //           )
+                    //           .toList(),
+                    //     ),
+                    //   ),
                     if (controller.isSearchMode)
                       SearchTitle(
                         title: L10n.of(context).chats,
