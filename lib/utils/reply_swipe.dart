@@ -24,6 +24,7 @@ class ReplySwipe extends StatefulWidget {
   });
 
   final Widget child;
+
   final VoidCallback onReply;
   final bool leftToRight;
   final double thresholdPx;
@@ -35,15 +36,10 @@ class ReplySwipe extends StatefulWidget {
   State<ReplySwipe> createState() => _ReplySwipeState();
 }
 
-class _ReplySwipeState extends State<ReplySwipe>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 180),
-  );
-
+class _ReplySwipeState extends State<ReplySwipe> with TickerProviderStateMixin {
   double _dragX = 0.0; // >= 0
   bool _thresholdBuzzed = false;
+  AnimationController? _snapBackAnimation;
 
   void _setDragX(double v) {
     final clamped = v.clamp(0.0, widget.maxDragPx).toDouble();
@@ -51,17 +47,8 @@ class _ReplySwipeState extends State<ReplySwipe>
       setState(() => _dragX = clamped);
       final crossed = _dragX >= widget.thresholdPx;
       if (widget.hapticOnThreshold && crossed && !_thresholdBuzzed) {
-        final future = HapticFeedback.vibrate();
-        assert(() {
-          future.then(
-            (_) => debugPrint('ReplySwipe: selectionClick succeeded'),
-            onError: (Object error, StackTrace stack) {
-              debugPrint('ReplySwipe: selectionClick failed: $error');
-            },
-          );
-          return true;
-        }());
         _thresholdBuzzed = true;
+        HapticFeedback.vibrate();
       }
       if (!crossed) _thresholdBuzzed = false;
     }
@@ -70,24 +57,33 @@ class _ReplySwipeState extends State<ReplySwipe>
   Future<void> _snapBack() async {
     final start = _dragX;
     if (start == 0.0) return;
-    final anim = Tween<double>(begin: start, end: 0.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
+
+    final ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
     );
+    _snapBackAnimation = ctrl;
+
+    final anim = Tween<double>(begin: start, end: 0.0).animate(
+      CurvedAnimation(parent: ctrl, curve: Curves.easeOut),
+    );
+
     void listener() => setState(() => _dragX = anim.value);
-    _ctrl
-      ..value = 0.0
-      ..addListener(listener);
+    ctrl.addListener(listener);
+
     try {
-      await _ctrl.forward();
-    } finally {
-      _ctrl.removeListener(listener);
+      await ctrl.forward();
       setState(() => _dragX = 0.0);
+      ctrl.removeListener(listener);
+    } finally {
+      ctrl.dispose();
+      _snapBackAnimation = null;
     }
   }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    _snapBackAnimation?.dispose();
     super.dispose();
   }
 
@@ -109,6 +105,10 @@ class _ReplySwipeState extends State<ReplySwipe>
             rec.allowedSign = allowedSign;
 
             rec
+              ..onStart = (details) {
+                _snapBackAnimation?.dispose();
+                _snapBackAnimation = null;
+              }
               ..onUpdate = (details) {
                 final delta = details.delta.dx * sign;
                 if (delta >= 0) {
