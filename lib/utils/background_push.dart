@@ -386,12 +386,7 @@ class BackgroundPush {
         client.onLoginStateChanged.value != LoginState.loggedIn) {
       return;
     }
-    try {
-      Logs().v('[Push] macOS poll: running oneShotSync');
-      await client.oneShotSync(timeout: const Duration(seconds: 20));
-    } catch (e, s) {
-      Logs().w('[Push] macOS poll sync failed', e, s);
-    }
+    await client.oneShotSync(timeout: const Duration(seconds: 20));
   }
 
   Future<void> _noFcmWarning() async {
