@@ -93,8 +93,8 @@ class ChatListItem extends StatelessWidget {
                           child: Avatar(
                             border: BorderSide(
                               width: 2,
-                              color: backgroundColor ??
-                                  theme.colorScheme.surface,
+                              color:
+                                  backgroundColor ?? theme.colorScheme.surface,
                             ),
                             borderRadius: BorderRadius.circular(
                               AppConfig.borderRadius / 4,

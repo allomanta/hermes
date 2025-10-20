@@ -8,6 +8,9 @@ import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/settings_switch_list_tile.dart';
+import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:hermes/utils/backfill_service.dart';
 import 'settings_chat.dart';
 
 class SettingsChatView extends StatelessWidget {
@@ -121,6 +124,49 @@ class SettingsChatView extends StatelessWidget {
               SettingsSwitchListTile.adaptive(
                 title: L10n.of(context).swipeRightToLeftToReply,
                 setting: AppSettings.swipeRightToLeftToReply,
+              ),
+              // Backfill all chats action (text-only; media lazy-loads as usual)
+              const Divider(),
+              ListTile(
+                title: const Text('Backfill all chats (text only)'),
+                subtitle: const Text(
+                  'Fetch older messages for every joined room. Media is not downloaded.',
+                ),
+                leading: const Icon(Icons.download_outlined),
+                onTap: () async {
+                  final confirm = await showOkCancelAlertDialog(
+                    context: context,
+                    title: 'Backfill all chats?',
+                    message:
+                        'This may take a while and increase local storage usage. Continue?',
+                    okLabel: L10n.of(context).ok,
+                    cancelLabel: L10n.of(context).cancel,
+                  );
+                  if (confirm != OkCancelResult.ok) return;
+
+                  final client = Matrix.of(context).client;
+                  await showFutureLoadingDialog(
+                    context: context,
+                    futureWithProgress: (setProgress) =>
+                        BackfillService.backfillAllChats(
+                      client,
+                      setProgress: setProgress,
+                      perRequest: 200,
+                      maxPerRoom: 2000,
+                    ),
+                    title: 'Backfilling chats…',
+                  );
+
+                  if (!context.mounted) return;
+                  final theme = Theme.of(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Backfill complete'),
+                      backgroundColor: theme.colorScheme.secondaryContainer,
+                      showCloseIcon: true,
+                    ),
+                  );
+                },
               ),
               Divider(color: theme.dividerColor),
               ListTile(

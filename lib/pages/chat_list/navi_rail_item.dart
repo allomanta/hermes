@@ -74,13 +74,13 @@ class NaviRailItem extends StatelessWidget {
                       child: unreadBadgeFilter == null
                           ? icon
                           : UnreadRoomsBadge(
-                            filter: unreadBadgeFilter,
-                            badgePosition: BadgePosition.topEnd(
-                              top: -12,
-                              end: -8,
+                              filter: unreadBadgeFilter,
+                              badgePosition: BadgePosition.topEnd(
+                                top: -12,
+                                end: -8,
+                              ),
+                              child: icon,
                             ),
-                            child: icon,
-                          ),
                     ),
                   ),
                 ),

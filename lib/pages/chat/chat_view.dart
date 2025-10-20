@@ -256,7 +256,8 @@ class ChatView extends StatelessWidget {
                 floatingActionButton: controller.showScrollDownButton &&
                         controller.selectedEvents.isEmpty
                     ? Padding(
-                        padding: const EdgeInsets.only(bottom: 66.0, right: 10.0),
+                        padding:
+                            const EdgeInsets.only(bottom: 66.0, right: 10.0),
                         child: FloatingActionButton(
                           onPressed: controller.scrollDown,
                           heroTag: null,

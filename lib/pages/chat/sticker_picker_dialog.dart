@@ -145,8 +145,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
-          _CloseStickerPickerIntent:
-              CallbackAction<_CloseStickerPickerIntent>(
+          _CloseStickerPickerIntent: CallbackAction<_CloseStickerPickerIntent>(
             onInvoke: (intent) {
               widget.onEscape?.call();
               return null;
