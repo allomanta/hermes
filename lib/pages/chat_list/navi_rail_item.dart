@@ -29,7 +29,7 @@ class NaviRailItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final borderRadius = BorderRadius.circular(AppConfig.borderRadius);
+    final borderRadius = BorderRadius.circular(90);
     final icon = isSelected ? selectedIcon ?? this.icon : this.icon;
     final unreadBadgeFilter = this.unreadBadgeFilter;
     return HoverBuilder(
@@ -61,31 +61,26 @@ class NaviRailItem extends StatelessWidget {
                 ),
               ),
               Center(
-                child: AnimatedScale(
-                  scale: hovered ? 1.1 : 1.0,
-                  duration: PantheonThemes.animationDuration,
-                  curve: PantheonThemes.animationCurve,
-                  child: Material(
-                    borderRadius: borderRadius,
-                    color: isSelected
-                        ? theme.colorScheme.primaryContainer
-                        : theme.colorScheme.surfaceContainerHigh,
-                    child: Tooltip(
-                      message: toolTip,
-                      child: InkWell(
-                        borderRadius: borderRadius,
-                        onTap: onTap,
-                        child: unreadBadgeFilter == null
-                            ? icon
-                            : UnreadRoomsBadge(
-                                filter: unreadBadgeFilter,
-                                badgePosition: BadgePosition.topEnd(
-                                  top: -12,
-                                  end: -8,
-                                ),
-                                child: icon,
-                              ),
-                      ),
+                child: Material(
+                  borderRadius: borderRadius,
+                  color: isSelected
+                      ? theme.colorScheme.primaryContainer
+                      : theme.colorScheme.surfaceContainerHigh,
+                  child: Tooltip(
+                    message: toolTip,
+                    child: InkWell(
+                      borderRadius: borderRadius,
+                      onTap: onTap,
+                      child: unreadBadgeFilter == null
+                          ? icon
+                          : UnreadRoomsBadge(
+                            filter: unreadBadgeFilter,
+                            badgePosition: BadgePosition.topEnd(
+                              top: -12,
+                              end: -8,
+                            ),
+                            child: icon,
+                          ),
                     ),
                   ),
                 ),

@@ -81,89 +81,69 @@ class ChatListItem extends StatelessWidget {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                 horizontalTitleGap: 8,
                 onLongPress: () => onLongPress?.call(context),
-                leading: HoverBuilder(
-                  builder: (context, hovered) => AnimatedScale(
-                    duration: PantheonThemes.animationDuration,
-                    curve: PantheonThemes.animationCurve,
-                    scale: hovered ? 1.1 : 1.0,
-                    child: SizedBox(
-                      width: Avatar.defaultSize,
-                      height: Avatar.defaultSize,
-                      child: Stack(
-                        children: [
-                          if (space != null)
-                            Positioned(
-                              top: 0,
-                              left: 0,
-                              child: Avatar(
-                                border: BorderSide(
+                leading: SizedBox(
+                  width: Avatar.defaultSize,
+                  height: Avatar.defaultSize,
+                  child: Stack(
+                    children: [
+                      if (space != null)
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          child: Avatar(
+                            border: BorderSide(
+                              width: 2,
+                              color: backgroundColor ??
+                                  theme.colorScheme.surface,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                              AppConfig.borderRadius / 4,
+                            ),
+                            mxContent: space.avatar,
+                            size: Avatar.defaultSize * 0.75,
+                            name: space.getLocalizedDisplayname(),
+                            onTap: () => onLongPress?.call(context),
+                          ),
+                        ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Avatar(
+                          border: space == null
+                              ? room.isSpace
+                                  ? BorderSide(
+                                      width: 1,
+                                      color: theme.dividerColor,
+                                    )
+                                  : null
+                              : BorderSide(
                                   width: 2,
                                   color: backgroundColor ??
                                       theme.colorScheme.surface,
                                 ),
-                                borderRadius: BorderRadius.circular(
+                          borderRadius: room.isSpace
+                              ? BorderRadius.circular(
                                   AppConfig.borderRadius / 4,
-                                ),
-                                mxContent: space.avatar,
-                                size: Avatar.defaultSize * 0.75,
-                                name: space.getLocalizedDisplayname(),
-                                onTap: () => onLongPress?.call(context),
-                              ),
-                            ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Avatar(
-                              border: space == null
-                                  ? room.isSpace
-                                      ? BorderSide(
-                                          width: 1,
-                                          color: theme.dividerColor,
-                                        )
-                                      : null
-                                  : BorderSide(
-                                      width: 2,
-                                      color: backgroundColor ??
-                                          theme.colorScheme.surface,
-                                    ),
-                              borderRadius: room.isSpace
-                                  ? BorderRadius.circular(
-                                      AppConfig.borderRadius / 4,
-                                    )
-                                  : null,
-                              mxContent: room.avatar,
-                              size: space != null
-                                  ? Avatar.defaultSize * 0.75
-                                  : Avatar.defaultSize,
-                              name: displayname,
-                              presenceUserId: directChatMatrixId,
-                              presenceBackgroundColor: backgroundColor,
-                              onTap: () => onLongPress?.call(context),
-                            ),
-                          ),
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: GestureDetector(
-                              onTap: () => onLongPress?.call(context),
-                              child: AnimatedScale(
-                                duration: PantheonThemes.animationDuration,
-                                curve: PantheonThemes.animationCurve,
-                                scale: listTileHovered ? 1.0 : 0.0,
-                                child: Material(
-                                  color: backgroundColor,
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: const Icon(
-                                    Icons.arrow_drop_down_circle_outlined,
-                                    size: 18,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                                )
+                              : null,
+                          mxContent: room.avatar,
+                          size: space != null
+                              ? Avatar.defaultSize * 0.75
+                              : Avatar.defaultSize,
+                          name: displayname,
+                          presenceUserId: directChatMatrixId,
+                          presenceBackgroundColor: backgroundColor,
+                          onTap: () => onLongPress?.call(context),
+                        ),
                       ),
-                    ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () => onLongPress?.call(context),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 title: Row(
