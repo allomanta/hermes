@@ -47,10 +47,10 @@ class SettingsChatView extends StatelessWidget {
                 max: 600,
                 divisions: 24,
                 value: controller.swipeDurationMs.clamp(120, 600).toDouble(),
-                onChanged: controller.swipeEnableFullScreenDrag
+                onChanged: AppSettings.swipePopEnableFullScreenDrag.value
                     ? controller.updateSwipeDuration
                     : null,
-                onChangeEnd: controller.swipeEnableFullScreenDrag
+                onChangeEnd: AppSettings.swipePopEnableFullScreenDrag.value
                     ? controller.saveSwipeDuration
                     : null,
               ),
@@ -70,10 +70,10 @@ class SettingsChatView extends StatelessWidget {
                 value: controller.swipeMinimumDragFraction
                     .clamp(0.05, 1.0)
                     .toDouble(),
-                onChanged: controller.swipeEnableFullScreenDrag
+                onChanged: AppSettings.swipePopEnableFullScreenDrag.value
                     ? controller.updateSwipeMinimumDragFraction
                     : null,
-                onChangeEnd: controller.swipeEnableFullScreenDrag
+                onChangeEnd: AppSettings.swipePopEnableFullScreenDrag.value
                     ? controller.saveSwipeMinimumDragFraction
                     : null,
               ),
@@ -90,10 +90,10 @@ class SettingsChatView extends StatelessWidget {
                 value: controller.swipeVelocityThreshold
                     .clamp(50.0, 2000.0)
                     .toDouble(),
-                onChanged: controller.swipeEnableFullScreenDrag
+                onChanged: AppSettings.swipePopEnableFullScreenDrag.value
                     ? controller.updateSwipeVelocityThreshold
                     : null,
-                onChangeEnd: controller.swipeEnableFullScreenDrag
+                onChangeEnd: AppSettings.swipePopEnableFullScreenDrag.value
                     ? controller.saveSwipeVelocityThreshold
                     : null,
               ),

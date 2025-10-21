@@ -13,7 +13,6 @@ class SettingsChat extends StatefulWidget {
 
 class SettingsChatController extends State<SettingsChat> {
   late double swipeDurationMs;
-  late bool swipeEnableFullScreenDrag;
   late double swipeMinimumDragFraction;
   late double swipeVelocityThreshold;
 
