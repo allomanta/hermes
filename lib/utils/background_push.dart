@@ -36,6 +36,7 @@ import 'package:hermes/utils/notification_background_handler.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/push_helper.dart';
 import 'package:hermes/widgets/hermes_app.dart';
+import 'package:fluffychat/main.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import '../widgets/matrix.dart';
@@ -86,6 +87,20 @@ class BackgroundPush {
   void _init() async {
     //<GOOGLE_SERVICES>firebaseEnabled = true;
     try {
+      mainIsolateReceivePort?.listen(
+        (message) async {
+          try {
+            await notificationTap(
+              NotificationResponseJson.fromJsonString(message),
+              client: client,
+              router: FluffyChatApp.router,
+              l10n: l10n,
+            );
+          } catch (e, s) {
+            Logs().wtf('Main Notification Tap crashed', e, s);
+          }
+        },
+      );
       if (PlatformInfos.isAndroid) {
         final port = ReceivePort();
         IsolateNameServer.removePortNameMapping('background_tab_port');
@@ -517,6 +532,7 @@ class BackgroundPush {
   }
 
   Future<void> _onUpMessage(PushMessage pushMessage, String i) async {
+    Logs().wtf('Push Notification from UP received', pushMessage);
     final message = pushMessage.content;
     upAction = true;
     final data = Map<String, dynamic>.from(
@@ -530,6 +546,8 @@ class BackgroundPush {
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+      useNotificationActions:
+          false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
     );
   }
 }

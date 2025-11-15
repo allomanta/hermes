@@ -15,7 +15,8 @@ AGENTS.md
 prime
 
 # libolm package
-/assets/js/package
+web/Imaging.js
+web/Imaging.wasm
 
 # IntelliJ related
 *.iml

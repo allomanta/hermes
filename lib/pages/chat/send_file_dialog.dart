@@ -19,11 +19,14 @@ class SendFileDialog extends StatefulWidget {
   final Room room;
   final List<XFile> files;
   final BuildContext outerContext;
+  final String? threadLastEventId, threadRootEventId;
 
   const SendFileDialog({
     required this.room,
     required this.files,
     required this.outerContext,
+    required this.threadLastEventId,
+    required this.threadRootEventId,
     super.key,
   });
 
@@ -107,6 +110,8 @@ class SendFileDialogState extends State<SendFileDialog> {
             thumbnail: thumbnail,
             shrinkImageMaxDimension: compress ? 1600 : null,
             extraContent: label.isEmpty ? null : {'body': label},
+            threadRootEventId: widget.threadRootEventId,
+            threadLastEventId: widget.threadLastEventId,
           );
         } on MatrixException catch (e) {
           final retryAfterMs = e.retryAfterMs;

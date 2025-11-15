@@ -3399,7 +3399,7 @@
     "@longPressToRecordVoiceMessage": {},
     "pause": "Pause",
     "@pause": {},
-    "newSubSpace": "Neuer sub space",
+    "newSubSpace": "Neuer Sub-Space",
     "@newSubSpace": {},
     "moveToDifferentSpace": "In einen anderen space wechseln",
     "@moveToDifferentSpace": {},
@@ -3418,7 +3418,7 @@
             }
         }
     },
-    "spaceMemberOf": "Space-Mitglied von {spaces}",
+    "spaceMemberOf": "Space-Mitglieder von {spaces}",
     "@spaceMemberOf": {
         "type": "String",
         "placeholders": {
@@ -3427,7 +3427,7 @@
             }
         }
     },
-    "spaceMemberOfCanKnock": "Space-Mitglied von {spaces} kann klopfen",
+    "spaceMemberOfCanKnock": "Space-Mitglieder von {spaces} kann klopfen",
     "@spaceMemberOfCanKnock": {
         "type": "String",
         "placeholders": {
@@ -3437,5 +3437,62 @@
         }
     },
     "donate": "Spenden",
-    "@donate": {}
+    "@donate": {},
+    "resume": "Fortsetzen",
+    "@resume": {},
+    "startedAPoll": "{username} hat eine Umfrage gestartet.",
+    "@startedAPoll": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "poll": "Umfrage",
+    "@poll": {},
+    "startPoll": "Umfrage starten",
+    "@startPoll": {},
+    "endPoll": "Umfrage beenden",
+    "@endPoll": {},
+    "answersVisible": "Antworten sichtbar",
+    "@answersVisible": {},
+    "answersHidden": "Antworten sind verborgen",
+    "@answersHidden": {},
+    "pollQuestion": "Frage",
+    "@pollQuestion": {},
+    "answerOption": "Antwortmöglichkeit",
+    "@answerOption": {},
+    "addAnswerOption": "Antwortoption hinzufügen",
+    "@addAnswerOption": {},
+    "allowMultipleAnswers": "Mehrere Antworten zulassen",
+    "@allowMultipleAnswers": {},
+    "pollHasBeenEnded": "Umfrage ist beendet",
+    "@pollHasBeenEnded": {},
+    "countVotes": "{count, plural, =1{Eine Stimme} other{{count} Stimmen}}",
+    "@countVotes": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "answersWillBeVisibleWhenPollHasEnded": "Die Antworten werden nach Ende der Umfrage sichtbar sein",
+    "@answersWillBeVisibleWhenPollHasEnded": {},
+    "replyInThread": "Im Thread antworten",
+    "@replyInThread": {},
+    "countReplies": "{count, plural, =1{Eine Antwort} other{{count} Antworten}}",
+    "@countReplies": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "thread": "Thread",
+    "@thread": {},
+    "backToMainChat": "Zurück zum Hauptchat",
+    "@backToMainChat": {}
 }

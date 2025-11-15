@@ -3398,5 +3398,99 @@
     "pause": "Sos",
     "@pause": {},
     "resume": "Atosú",
-    "@resume": {}
+    "@resume": {},
+    "newSubSpace": "Fo-spás nua",
+    "@newSubSpace": {},
+    "moveToDifferentSpace": "Bog go spás difriúil",
+    "@moveToDifferentSpace": {},
+    "moveUp": "Bog suas",
+    "@moveUp": {},
+    "moveDown": "Bog síos",
+    "@moveDown": {},
+    "removeFromSpaceDescription": "Bainfear an comhrá as an spás ach beidh sé fós le feiceáil i do liosta comhrá.",
+    "@removeFromSpaceDescription": {},
+    "countChats": "comhráite {chats}",
+    "@countChats": {
+        "type": "String",
+        "placeholders": {
+            "chats": {
+                "type": "int"
+            }
+        }
+    },
+    "spaceMemberOf": "Ball spáis de {spaces}",
+    "@spaceMemberOf": {
+        "type": "String",
+        "placeholders": {
+            "spaces": {
+                "type": "String"
+            }
+        }
+    },
+    "spaceMemberOfCanKnock": "Is féidir le ball spáis de {spaces} cnagadh",
+    "@spaceMemberOfCanKnock": {
+        "type": "String",
+        "placeholders": {
+            "spaces": {
+                "type": "String"
+            }
+        }
+    },
+    "donate": "Tabhair Síntiús",
+    "@donate": {},
+    "startedAPoll": "Chuir {username} tús le pobalbhreith.",
+    "@startedAPoll": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "poll": "Polaitíocht",
+    "@poll": {},
+    "startPoll": "Tosaigh pobalbhreith",
+    "@startPoll": {},
+    "endPoll": "Deireadh leis an pobalbhreith",
+    "@endPoll": {},
+    "answersVisible": "Freagraí le feiceáil",
+    "@answersVisible": {},
+    "answersHidden": "Freagraí i bhfolach",
+    "@answersHidden": {},
+    "pollQuestion": "Ceist pobalbhreithe",
+    "@pollQuestion": {},
+    "answerOption": "Rogha freagartha",
+    "@answerOption": {},
+    "addAnswerOption": "Cuir rogha freagra leis",
+    "@addAnswerOption": {},
+    "allowMultipleAnswers": "Ceadaigh freagraí iolracha",
+    "@allowMultipleAnswers": {},
+    "pollHasBeenEnded": "Tá deireadh leis an pobalbhreith",
+    "@pollHasBeenEnded": {},
+    "countVotes": "{count, plural, =1{Vóta amháin} other{{count} vótaí}}",
+    "@countVotes": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "answersWillBeVisibleWhenPollHasEnded": "Beidh freagraí le feiceáil nuair a bheidh an pobalbhreith thart",
+    "@answersWillBeVisibleWhenPollHasEnded": {},
+    "replyInThread": "Freagra sa snáithe",
+    "@replyInThread": {},
+    "countReplies": "{count, plural, =1{Freagra amháin} other{{count} freagraí}}",
+    "@countReplies": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "thread": "Snáithe",
+    "@thread": {},
+    "backToMainChat": "Ar ais chuig an bpríomhchomhrá",
+    "@backToMainChat": {}
 }

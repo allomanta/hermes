@@ -3129,5 +3129,99 @@
     "@roomVersion": {
         "type": "String",
         "placeholders": {}
-    }
+    },
+    "newSpace": "Nytt område",
+    "@newSpace": {},
+    "allSpaces": "Alle områder",
+    "@allSpaces": {},
+    "numChats": "{number} chats",
+    "@numChats": {
+        "type": "number",
+        "placeholders": {
+            "number": {
+                "type": "String"
+            }
+        }
+    },
+    "wasDirectChatDisplayName": "Tom chat (var {oldDisplayName})",
+    "@wasDirectChatDisplayName": {
+        "type": "String",
+        "placeholders": {
+            "oldDisplayName": {
+                "type": "String"
+            }
+        }
+    },
+    "moveDown": "Flytt ned",
+    "@moveDown": {},
+    "removeFromSpaceDescription": "Chatten blir fjernet fra området, men vises fortsatt i chatlisten din.",
+    "@removeFromSpaceDescription": {},
+    "countChats": "{chats} chats",
+    "@countChats": {
+        "type": "String",
+        "placeholders": {
+            "chats": {
+                "type": "int"
+            }
+        }
+    },
+    "donate": "Doner",
+    "@donate": {},
+    "banUserDescription": "Brukeren vil bli utestengt fra chatten og vil ikke kunne delta i chatten igjen før utestengelsen er opphevet.",
+    "@banUserDescription": {},
+    "unbanUserDescription": "Brukeren vil kunne gå inn i chatten igjen hvis vedkommende prøver.",
+    "@unbanUserDescription": {},
+    "kickUserDescription": "Brukeren blir kastet ut av chatten, men ikke utestengt. I offentlige chatter kan brukeren bli med på nytt når som helst.",
+    "@kickUserDescription": {},
+    "sendTypingNotifications": "Send skrivevarsler",
+    "@sendTypingNotifications": {},
+    "swipeRightToLeftToReply": "Sveip fra høyre mot venstre for å svare",
+    "@swipeRightToLeftToReply": {},
+    "startFirstChat": "Start din første chat",
+    "@startFirstChat": {},
+    "unlockOldMessages": "Lås opp gamle meldinger",
+    "@unlockOldMessages": {},
+    "storeInAndroidKeystore": "Lagre i Android KeyStore",
+    "@storeInAndroidKeystore": {},
+    "storeInAppleKeyChain": "Lagre i Apple nøkkelring",
+    "@storeInAppleKeyChain": {},
+    "storeSecurlyOnThisDevice": "Lagre sikkert på denne enheten",
+    "@storeSecurlyOnThisDevice": {},
+    "acceptedKeyVerification": "{sender} godtok nøkkelverifisering",
+    "@acceptedKeyVerification": {
+        "type": "String",
+        "placeholders": {
+            "sender": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationRuleMessageDescription": "Varsler brukeren om generelle meldinger.",
+    "@notificationRuleMessageDescription": {},
+    "notificationRuleSuppressEditsDescription": "Demper varsler for redigerte meldinger.",
+    "@notificationRuleSuppressEditsDescription": {},
+    "notificationRuleEncryptedDescription": "Varsler brukeren om meldinger i krypterte rom.",
+    "@notificationRuleEncryptedDescription": {},
+    "notificationRuleRoomServerAcl": "Romserverens tilgangskontrolliste",
+    "@notificationRuleRoomServerAcl": {},
+    "notificationRuleRoomOneToOneDescription": "Varsler brukeren om meldinger i én-til-én-rom.",
+    "@notificationRuleRoomOneToOneDescription": {},
+    "notificationRuleJitsiDescription": "Varsler brukeren om hendelser i Jitsi-widgeten.",
+    "@notificationRuleJitsiDescription": {},
+    "customReaction": "Egendefinert reaksjon",
+    "@customReaction": {},
+    "pause": "Pause",
+    "@pause": {},
+    "moveToDifferentSpace": "Flytt til et annet område",
+    "@moveToDifferentSpace": {},
+    "moveUp": "Flytt opp",
+    "@moveUp": {},
+    "storeInSecureStorageDescription": "Oppbevar gjenopprettingsnøkkelen på en sikker lagringsplass på denne enheten.",
+    "@storeInSecureStorageDescription": {},
+    "foregroundServiceRunning": "Denne varslingen vises når forgrunnstjenesten kjører.",
+    "@foregroundServiceRunning": {},
+    "callingAccount": "Ringekonto",
+    "@callingAccount": {},
+    "appearOnTopDetails": "Lar appen vises øverst (ikke nødvendig hvis du allerede har Fluffychat konfigurert som en ringekonto)",
+    "@appearOnTopDetails": {}
 }

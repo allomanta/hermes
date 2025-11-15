@@ -78,7 +78,7 @@ class HomeserverPickerController extends State<HomeserverPicker> {
         homeserver = Uri.https(homeserverInput, '');
       }
       final client = await Matrix.of(context).getLoginClient();
-      final (_, _, loginFlows) = await client.checkHomeserver(homeserver);
+      final (_, _, loginFlows, _) = await client.checkHomeserver(homeserver);
       this.loginFlows = loginFlows;
       if (supportsSso && !legacyPasswordLogin) {
         if (!PlatformInfos.isMobile) {
@@ -144,7 +144,7 @@ class HomeserverPickerController extends State<HomeserverPicker> {
     final result = await FlutterWebAuth2.authenticate(
       url: url.toString(),
       callbackUrlScheme: urlScheme,
-      options: const FlutterWebAuth2Options(),
+      options: FlutterWebAuth2Options(useWebview: PlatformInfos.isMobile),
     );
     final token = Uri.parse(result).queryParameters['loginToken'];
     if (token?.isEmpty ?? false) return;

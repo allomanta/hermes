@@ -1361,7 +1361,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "pin": "Klammerda",
+    "pin": "Tõsta esile",
     "@pin": {
         "type": "String",
         "placeholders": {}
@@ -1874,7 +1874,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "unpin": "Eemalda klammerdus",
+    "unpin": "Eemalda esiletõstmine",
     "@unpin": {
         "type": "String",
         "placeholders": {}
@@ -2185,9 +2185,9 @@
     "@unsupportedAndroidVersion": {},
     "voiceCall": "Häälkõne",
     "@voiceCall": {},
-    "confirmEventUnpin": "Kas sa oled kindel, et tahad klammerdatud sündmuse eemaldada?",
+    "confirmEventUnpin": "Kas sa oled kindel, et tahad esiletõstetud sündmuse jäädavalt eemaldada?",
     "@confirmEventUnpin": {},
-    "pinMessage": "Klammerda sõnum jututuppa",
+    "pinMessage": "Tõsta sõnum jututoas esile",
     "@pinMessage": {},
     "videoCallsBetaWarning": "Palun arvesta, et videokõned on veel beetajärgus. Nad ei pruugi veel toimida kõikidel platvormidel korrektselt.",
     "@videoCallsBetaWarning": {},
@@ -3393,5 +3393,99 @@
     "pause": "Peata",
     "@pause": {},
     "resume": "Jätka",
-    "@resume": {}
+    "@resume": {},
+    "newSubSpace": "Uus alamkogukond",
+    "@newSubSpace": {},
+    "moveToDifferentSpace": "Tõsta teise kogukonda",
+    "@moveToDifferentSpace": {},
+    "moveUp": "Liiguta ülespoole",
+    "@moveUp": {},
+    "moveDown": "Liiguta allapoole",
+    "@moveDown": {},
+    "removeFromSpaceDescription": "See vestlus eemaldatakse nüüd kogukonnast, kuid on jätkuvalt nähtav sinu vestluste loendis.",
+    "@removeFromSpaceDescription": {},
+    "countChats": "{chats} vestlust",
+    "@countChats": {
+        "type": "String",
+        "placeholders": {
+            "chats": {
+                "type": "int"
+            }
+        }
+    },
+    "spaceMemberOf": "Kogukonna liige: {spaces}",
+    "@spaceMemberOf": {
+        "type": "String",
+        "placeholders": {
+            "spaces": {
+                "type": "String"
+            }
+        }
+    },
+    "spaceMemberOfCanKnock": "{spaces} kogukonna liige võib uksele koputada",
+    "@spaceMemberOfCanKnock": {
+        "type": "String",
+        "placeholders": {
+            "spaces": {
+                "type": "String"
+            }
+        }
+    },
+    "donate": "Toeta meid rahaliselt",
+    "@donate": {},
+    "startedAPoll": "{username} koostas küsitluse.",
+    "@startedAPoll": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "poll": "Küsitlus",
+    "@poll": {},
+    "startPoll": "Koosta küsitlus",
+    "@startPoll": {},
+    "endPoll": "Lõpeta küsitlus",
+    "@endPoll": {},
+    "answersVisible": "Vastused on näha",
+    "@answersVisible": {},
+    "answersHidden": "Vastused on peidetud",
+    "@answersHidden": {},
+    "pollQuestion": "Küsitluse küsimus",
+    "@pollQuestion": {},
+    "answerOption": "Valikvastus",
+    "@answerOption": {},
+    "addAnswerOption": "Lisa valikvastus",
+    "@addAnswerOption": {},
+    "allowMultipleAnswers": "Luba mitu vastusevalikut",
+    "@allowMultipleAnswers": {},
+    "pollHasBeenEnded": "Küsitlus on lõppenud",
+    "@pollHasBeenEnded": {},
+    "countVotes": "{count, plural, =1{Üks hääl} other{{count} häält}}",
+    "@countVotes": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "answersWillBeVisibleWhenPollHasEnded": "Vastused on näha küsitluse lõppedes",
+    "@answersWillBeVisibleWhenPollHasEnded": {},
+    "replyInThread": "Vasta jutulõngas",
+    "@replyInThread": {},
+    "countReplies": "{count, plural, =1{Üks vastus} other{{count} vastust}}",
+    "@countReplies": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "thread": "Jutulõng",
+    "@thread": {},
+    "backToMainChat": "Tagasi põhivestlusesse",
+    "@backToMainChat": {}
 }

@@ -56,4 +56,7 @@ abstract class AppConfig {
     host: 'github.com',
     path: '/allomanta/hermes/blob/main/PRIVACY.md',
   );
+
+  static const String mainIsolatePortName = 'main_isolate';
+  static const String pushIsolatePortName = 'push_isolate';
 }

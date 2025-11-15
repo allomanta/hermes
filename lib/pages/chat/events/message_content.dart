@@ -12,6 +12,7 @@ import 'package:hermes/utils/date_time_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:fluffychat/pages/chat/events/poll.dart';
 import '../../../config/app_config.dart';
 import '../../../utils/event_checkbox_extension.dart';
 import '../../../utils/platform_infos.dart';
@@ -234,27 +235,11 @@ class MessageContent extends StatelessWidget {
           textmessage:
           default:
             if (event.redacted) {
-              return FutureBuilder<User?>(
-                future: event.redactedBecause?.fetchSenderUser(),
-                builder: (context, snapshot) {
-                  final reason =
-                      event.redactedBecause?.content.tryGet<String>('reason');
-                  final redactedBy = snapshot.data?.calcDisplayname() ??
-                      event.redactedBecause?.senderId.localpart ??
-                      L10n.of(context).user;
-                  return _ButtonContent(
-                    label: reason == null
-                        ? L10n.of(context).redactedBy(redactedBy)
-                        : L10n.of(context).redactedByBecause(
-                            redactedBy,
-                            reason,
-                          ),
-                    icon: '🗑️',
-                    textColor: buttonTextColor.withAlpha(128),
-                    onPressed: () => onInfoTab!(event),
-                    fontSize: fontSize,
-                  );
-                },
+              return RedactionWidget(
+                event: event,
+                buttonTextColor: buttonTextColor,
+                onInfoTab: onInfoTab,
+                fontSize: fontSize,
               );
             }
             var html = AppSettings.renderHtml.value && event.isRichMessage
@@ -296,6 +281,21 @@ class MessageContent extends StatelessWidget {
               ),
             );
         }
+      case PollEventContent.startType:
+        if (event.redacted) {
+          return RedactionWidget(
+            event: event,
+            buttonTextColor: buttonTextColor,
+            onInfoTab: onInfoTab,
+            fontSize: fontSize,
+          );
+        }
+        return PollWidget(
+          event: event,
+          timeline: timeline,
+          textColor: textColor,
+          linkColor: linkColor,
+        );
       case EventTypes.CallInvite:
         return FutureBuilder<User?>(
           future: event.fetchSenderUser(),
@@ -330,6 +330,46 @@ class MessageContent extends StatelessWidget {
           },
         );
     }
+  }
+}
+
+class RedactionWidget extends StatelessWidget {
+  const RedactionWidget({
+    super.key,
+    required this.event,
+    required this.buttonTextColor,
+    required this.onInfoTab,
+    required this.fontSize,
+  });
+
+  final Event event;
+  final Color buttonTextColor;
+  final void Function(Event p1)? onInfoTab;
+  final double fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<User?>(
+      future: event.redactedBecause?.fetchSenderUser(),
+      builder: (context, snapshot) {
+        final reason = event.redactedBecause?.content.tryGet<String>('reason');
+        final redactedBy = snapshot.data?.calcDisplayname() ??
+            event.redactedBecause?.senderId.localpart ??
+            L10n.of(context).user;
+        return _ButtonContent(
+          label: reason == null
+              ? L10n.of(context).redactedBy(redactedBy)
+              : L10n.of(context).redactedByBecause(
+                  redactedBy,
+                  reason,
+                ),
+          icon: '🗑️',
+          textColor: buttonTextColor.withAlpha(128),
+          onPressed: () => onInfoTab!(event),
+          fontSize: fontSize,
+        );
+      },
+    );
   }
 }
 

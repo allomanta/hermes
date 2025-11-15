@@ -16,6 +16,7 @@ import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/member_actions_popup_menu_button.dart';
 import 'package:hermes/utils/reply_swipe.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import '../../../config/app_config.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
@@ -46,6 +47,7 @@ class Message extends StatelessWidget {
   final void Function() onRedact;
   final void Function() onMention;
   final void Function() onEdit;
+  final void Function(String eventId)? enterThread;
   final bool longPressSelect;
   final bool selected;
   final bool singleSelected;
@@ -85,6 +87,7 @@ class Message extends StatelessWidget {
     required this.scrollController,
     required this.colors,
     this.onExpand,
+    required this.enterThread,
     this.isCollapsed = false,
     super.key,
   });
@@ -216,6 +219,7 @@ class Message extends StatelessWidget {
       EventTypes.Sticker,
       EventTypes.Encrypted,
       EventTypes.CallInvite,
+      PollEventContent.startType,
     }.contains(event.type)) {
       if (event.type.startsWith('m.call.')) {
         return const SizedBox.shrink();
@@ -326,8 +330,13 @@ class Message extends StatelessWidget {
     final showReceiptsRow =
         event.hasAggregatedEvents(timeline, RelationshipTypes.reaction);
 
+    final threadChildren =
+        event.aggregatedEvents(timeline, RelationshipTypes.thread);
+
     final showReactionPicker =
         singleSelected && event.room.canSendDefaultMessages;
+
+    final enterThread = this.enterThread;
 
     return Center(
       child: ReplySwipe(
@@ -645,15 +654,12 @@ class Message extends StatelessWidget {
                                                           CrossAxisAlignment
                                                               .start,
                                                       children: <Widget>[
-                                                        if ({
-                                                          RelationshipTypes
-                                                              .reply,
-                                                          RelationshipTypes
-                                                              .thread,
-                                                        }.contains(
-                                                          event
-                                                              .relationshipType,
-                                                        ))
+                                                        if (event
+                                                                .inReplyToEventId(
+                                                              includingFallback:
+                                                                  false,
+                                                            ) !=
+                                                            null)
                                                           FutureBuilder<Event?>(
                                                             future: event
                                                                 .getReplyEvent(
@@ -671,7 +677,7 @@ class Message extends StatelessWidget {
                                                                           .data!
                                                                       : Event(
                                                                           eventId:
-                                                                              event.relationshipEventId!,
+                                                                              event.inReplyToEventId() ?? '\$fake_event_id',
                                                                           content: {
                                                                             'msgtype':
                                                                                 'm.text',
@@ -1022,6 +1028,47 @@ class Message extends StatelessWidget {
                         child: MessageReactions(event, timeline),
                       ),
               ),
+              if (enterThread != null)
+                AnimatedSize(
+                  duration: FluffyThemes.animationDuration,
+                  curve: FluffyThemes.animationCurve,
+                  alignment: Alignment.bottomCenter,
+                  child: threadChildren.isEmpty
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(
+                            top: 2.0,
+                            bottom: 8.0,
+                            left: Avatar.defaultSize + 8,
+                          ),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxWidth: FluffyThemes.columnWidth * 1.5,
+                            ),
+                            child: TextButton.icon(
+                              style: TextButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                foregroundColor:
+                                    theme.colorScheme.onSecondaryContainer,
+                                backgroundColor:
+                                    theme.colorScheme.secondaryContainer,
+                              ),
+                              onPressed: () => enterThread(event.eventId),
+                              icon: const Icon(Icons.message),
+                              label: Text(
+                                '${L10n.of(context).countReplies(threadChildren.length)} | ${threadChildren.first.calcLocalizedBodyFallback(
+                                  MatrixLocals(L10n.of(context)),
+                                  withSenderNamePrefix: true,
+                                )}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ),
+                ),
               if (displayReadMarker)
                 Row(
                   children: [
