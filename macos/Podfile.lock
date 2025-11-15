@@ -5,6 +5,8 @@ PODS:
     - FlutterMacOS
   - desktop_drop (0.0.1):
     - FlutterMacOS
+  - desktop_webview_window (0.0.1):
+    - FlutterMacOS
   - device_info_plus (0.0.1):
     - FlutterMacOS
   - dynamic_color (0.0.2):
@@ -100,6 +102,7 @@ DEPENDENCIES:
   - app_links (from `Flutter/ephemeral/.symlinks/plugins/app_links/macos`)
   - audio_session (from `Flutter/ephemeral/.symlinks/plugins/audio_session/macos`)
   - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
+  - desktop_webview_window (from `Flutter/ephemeral/.symlinks/plugins/desktop_webview_window/macos`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
   - dynamic_color (from `Flutter/ephemeral/.symlinks/plugins/dynamic_color/macos`)
   - emoji_picker_flutter (from `Flutter/ephemeral/.symlinks/plugins/emoji_picker_flutter/macos`)
@@ -147,6 +150,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/audio_session/macos
   desktop_drop:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos
+  desktop_webview_window:
+    :path: Flutter/ephemeral/.symlinks/plugins/desktop_webview_window/macos
   device_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
   dynamic_color:
@@ -210,11 +215,12 @@ SPEC CHECKSUMS:
   app_links: 05a6ec2341985eb05e9f97dc63f5837c39895c3f
   audio_session: eaca2512cf2b39212d724f35d11f46180ad3a33e
   desktop_drop: 10a3e6a7fa9dbe350541f2574092fecfa345a07b
+  desktop_webview_window: 7e37af677d6d19294cb433d9b1d878ef78dffa4d
   device_info_plus: 4fb280989f669696856f8b129e4a5e3cd6c48f76
   dynamic_color: cb7c2a300ee67ed3bd96c3e852df3af0300bf610
   emoji_picker_flutter: 51ca408e289d84d1e460016b2a28721ec754fcf7
   file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
-  file_selector_macos: 6280b52b459ae6c590af5d78fc35c7267a3c4b31
+  file_selector_macos: 9e9e068e90ebee155097d00e89ae91edb2374db7
   Firebase: 0312a2352584f782ea56f66d91606891d4607f06
   firebase_core: e324fc945c2abe77065357fd9c8dd6853d8a88a5
   FirebaseCore: 7ec4d0484817f12c3373955bc87762d96842d483
@@ -230,17 +236,17 @@ SPEC CHECKSUMS:
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
   package_info_plus: f0052d280d17aa382b932f399edf32507174e870
-  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   record_macos: 43194b6c06ca6f8fa132e2acea72b202b92a0f5b
   screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
   share_plus: 510bf0af1a42cd602274b4629920c9649c52f4cc
-  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
   sqlcipher_flutter_libs: 01ead34db27ae5e49987cae46c8a34199eb22cfe
-  url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673
+  url_launcher_macos: f87a979182d112f911de6820aefddaf56ee9fbfd
   video_compress: 752b161da855df2492dd1a8fa899743cc8fe9534
-  video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
+  video_player_avfoundation: dd410b52df6d2466a42d28550e33e4146928280a
   wakelock_plus: 917609be14d812ddd9e9528876538b2263aaa03b
   webcrypto: a5f5eb3e375cf0a99993e207e97cdcab5c94ce2e
   WebRTC-SDK: 40d4f5ba05cadff14e4db5614aec402a633f007e
