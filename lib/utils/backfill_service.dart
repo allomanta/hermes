@@ -26,7 +26,7 @@ class BackfillService {
         .where((r) => r.membership == Membership.join && !r.isSpace)
         .toList();
 
-    final total = rooms.length == 0 ? 1 : rooms.length;
+    final total = rooms.isEmpty ? 1 : rooms.length;
     var index = 0;
 
     for (final room in rooms) {
@@ -65,4 +65,3 @@ class BackfillService {
     setProgress?.call(1.0);
   }
 }
-

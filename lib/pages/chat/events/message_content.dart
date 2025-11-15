@@ -12,7 +12,7 @@ import 'package:hermes/utils/date_time_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
-import 'package:fluffychat/pages/chat/events/poll.dart';
+import 'package:hermes/pages/chat/events/poll.dart';
 import '../../../config/app_config.dart';
 import '../../../utils/event_checkbox_extension.dart';
 import '../../../utils/platform_infos.dart';

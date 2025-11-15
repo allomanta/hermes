@@ -16,7 +16,7 @@ import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/member_actions_popup_menu_button.dart';
 import 'package:hermes/utils/reply_swipe.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import '../../../config/app_config.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
@@ -1030,8 +1030,8 @@ class Message extends StatelessWidget {
               ),
               if (enterThread != null)
                 AnimatedSize(
-                  duration: FluffyThemes.animationDuration,
-                  curve: FluffyThemes.animationCurve,
+                  duration: PantheonThemes.animationDuration,
+                  curve: PantheonThemes.animationCurve,
                   alignment: Alignment.bottomCenter,
                   child: threadChildren.isEmpty
                       ? const SizedBox.shrink()
@@ -1043,7 +1043,7 @@ class Message extends StatelessWidget {
                           ),
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(
-                              maxWidth: FluffyThemes.columnWidth * 1.5,
+                              maxWidth: PantheonThemes.columnWidth * 1.5,
                             ),
                             child: TextButton.icon(
                               style: TextButton.styleFrom(

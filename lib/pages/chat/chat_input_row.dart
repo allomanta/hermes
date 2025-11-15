@@ -263,7 +263,7 @@ class ChatInputRow extends StatelessWidget {
                             ),
                           ),
                           PopupMenuItem(
-                            value: AddPopupMenuActions.camera,
+                            value: AddPopupMenuActions.photoCamera,
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
@@ -292,7 +292,7 @@ class ChatInputRow extends StatelessWidget {
                           ),
                         ),
                         PopupMenuItem(
-                          value: AddPopupMenuActions.camera-video,
+                          value: AddPopupMenuActions.videoCamera,
                           child: ListTile(
                             leading: CircleAvatar(
                               backgroundColor:
@@ -336,16 +336,18 @@ class ChatInputRow extends StatelessWidget {
                         ),
                         PopupMenuItem(
                           value: AddPopupMenuActions.poll,
-                          child: ListTile (
+                          child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: theme.colorScheme.onPrimaryContainer,
-                              foregroundColor: theme.colorScheme.primaryContainer,
+                              backgroundColor:
+                                  theme.colorScheme.onPrimaryContainer,
+                              foregroundColor:
+                                  theme.colorScheme.primaryContainer,
                               child: const Icon(Icons.poll_outlined),
                             ),
-                            title: Text(L10n).of(context).startPoll,
+                            title: Text(L10n.of(context).startPoll),
                             contentPadding: const EdgeInsets.all(0),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),

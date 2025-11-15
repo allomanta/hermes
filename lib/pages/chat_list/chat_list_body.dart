@@ -1,21 +1,16 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_list/chat_list.dart';
 import 'package:hermes/pages/chat_list/chat_list_item.dart';
 import 'package:hermes/pages/chat_list/dummy_chat_list_item.dart';
-import 'package:hermes/pages/chat_list/search_title.dart';
 import 'package:hermes/pages/chat_list/space_view.dart';
-import 'package:hermes/pages/chat_list/status_msg_list.dart';
 import 'package:hermes/utils/stream_extension.dart';
 import 'package:hermes/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:hermes/widgets/avatar.dart';
 import '../../config/themes.dart';
-import '../../widgets/adaptive_dialogs/user_dialog.dart';
 import '../../widgets/matrix.dart';
 import 'chat_list_header.dart';
 
@@ -26,8 +21,6 @@ class ChatListViewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     final client = Matrix.of(context).client;
     final activeSpace = controller.activeSpaceId;
     if (activeSpace != null) {

@@ -16,7 +16,7 @@ To improve the process please make sure that you read the following guidelines c
 9. Prefer simple and easy to maintain solutions over complexity and fancy ones.
 # Code Style
 
-FluffyChat tries to be as minimal as possible even in the code style. We try to keep the code clean, simple and easy to read. The source code of the app is under `/lib` with the main entry point `/lib/main.dart`.
+Hermes tries to be as minimal as possible even in the code style. We try to keep the code clean, simple and easy to read. The source code of the app is under `/lib` with the main entry point `/lib/main.dart`.
 
 <!-- editorconfig-checker-disable -->
 <!-- prettier-ignore-start -->

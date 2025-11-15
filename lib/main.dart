@@ -11,8 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/platform_infos.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/notification_background_handler.dart';
+import 'package:hermes/config/app_config.dart';
+import 'package:hermes/utils/notification_background_handler.dart';
 import 'config/setting_keys.dart';
 import 'utils/background_push.dart';
 import 'widgets/hermes_app.dart';

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:hermes/config/app_config.dart';
 import 'package:hermes/widgets/hover_builder.dart';
 import 'package:hermes/widgets/unread_rooms_badge.dart';
 import '../../config/themes.dart';

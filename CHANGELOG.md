@@ -1,6 +1,6 @@
 ## v2.3.0
 
-FluffyChat v2.3.0 fixes a possible database corruption bug on Android, also fixes a
+Hermes v2.3.0 fixes a possible database corruption bug on Android, also fixes a
 major performance leak and introduces polls and threads.
 
 - feat: Implement polls (Christian Kußowski)
@@ -38,7 +38,7 @@ major performance leak and introduces polls and threads.
 
 ## v2.2.0
 
-FluffyChat 2.2.0 introduces a new UX for spaces and adds support for restricted
+Hermes 2.2.0 introduces a new UX for spaces and adds support for restricted
 join rules.
 
 The app also now has a new design for recording voice messages including a new
@@ -53,7 +53,7 @@ has changed as the available configs are now generated automatically.
 Did you know that you can set a lot of additional configs in the new config viewer
 inside the app? This now supports much more options but please use with care!
 
-On Android FluffyChat now supports notification actions (reply and mark as read) and
+On Android Hermes now supports notification actions (reply and mark as read) and
 also now supports Android Auto integration. Please do not cause an accident when using
 the app while driving!
 

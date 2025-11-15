@@ -36,7 +36,7 @@ import 'package:hermes/utils/notification_background_handler.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/push_helper.dart';
 import 'package:hermes/widgets/hermes_app.dart';
-import 'package:fluffychat/main.dart';
+import 'package:hermes/main.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import '../widgets/matrix.dart';
@@ -61,8 +61,8 @@ class BackgroundPush {
   Timer? _macosPollingTimer;
 
   static const Set<String> _legacyPushGatewayUrls = {
-    'https://push.fluffychat.im/_matrix/push/v1/notify',
-    'https://push.fluffychat.im/_matrix/push/v1/legacy',
+    'https://push.hermes.im/_matrix/push/v1/notify',
+    'https://push.hermes.im/_matrix/push/v1/legacy',
   };
 
   FlutterLocalNotificationsPlugin get notificationsPlugin =>
@@ -93,7 +93,7 @@ class BackgroundPush {
             await notificationTap(
               NotificationResponseJson.fromJsonString(message),
               client: client,
-              router: FluffyChatApp.router,
+              router: HermesApp.router,
               l10n: l10n,
             );
           } catch (e, s) {

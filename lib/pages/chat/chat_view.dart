@@ -177,8 +177,9 @@ class ChatView extends StatelessWidget {
       autofocus: true,
       onKeyEvent: controller.onKeyEvent,
       child: PopScope(
-        canPop:
-            controller.selectedEvents.isEmpty && !controller.showEmojiPicker && controller.activeThreadId == null,
+        canPop: controller.selectedEvents.isEmpty &&
+            !controller.showEmojiPicker &&
+            controller.activeThreadId == null,
         onPopInvokedWithResult: (pop, _) async {
           if (pop) return;
           controller.handleExitEvent();
@@ -195,7 +196,8 @@ class ChatView extends StatelessWidget {
               if (activeThreadId != null) {
                 appbarBottomHeight += ChatAppBarListTile.fixedHeight;
               }
-              if (controller.room.pinnedEventIds.isNotEmpty && activeThreadId != null) {
+              if (controller.room.pinnedEventIds.isNotEmpty &&
+                  activeThreadId != null) {
                 appbarBottomHeight += ChatAppBarListTile.fixedHeight;
               }
               if (scrollUpBannerEventId != null && activeThreadId == null) {
@@ -205,8 +207,8 @@ class ChatView extends StatelessWidget {
                 appBar: AppBar(
                   actionsIconTheme: IconThemeData(
                     color: controller.selectedEvents.isEmpty
-                        ? controller.activeThreadId != null 
-                            ? theme.colorScheme.secondaryContainer 
+                        ? controller.activeThreadId != null
+                            ? theme.colorScheme.secondaryContainer
                             : null
                         : theme.colorScheme.onTertiaryContainer,
                   ),
@@ -225,27 +227,27 @@ class ChatView extends StatelessWidget {
                           ? IconButton(
                               icon: const Icon(Icons.close),
                               onPressed: controller.closeThread,
-                              tooltip: l10n.of(context).backToMainChat,
-                              color: theme.colorScheme
+                              tooltip: L10n.of(context).backToMainChat,
+                              color: theme.colorScheme.onSecondaryContainer,
                             )
-                          :
-                      PantheonThemes.isColumnMode(context)
-                          ? null
-                          : StreamBuilder<Object>(
-                              stream: Matrix.of(context)
-                                  .client
-                                  .onSync
-                                  .stream
-                                  .where(
-                                    (syncUpdate) => syncUpdate.hasRoomUpdate,
+                          : PantheonThemes.isColumnMode(context)
+                              ? null
+                              : StreamBuilder<Object>(
+                                  stream: Matrix.of(context)
+                                      .client
+                                      .onSync
+                                      .stream
+                                      .where(
+                                        (syncUpdate) =>
+                                            syncUpdate.hasRoomUpdate,
+                                      ),
+                                  builder: (context, _) => UnreadRoomsBadge(
+                                    filter: (r) => r.id != controller.roomId,
+                                    badgePosition:
+                                        BadgePosition.topEnd(end: 8, top: 4),
+                                    child: const Center(child: BackButton()),
                                   ),
-                              builder: (context, _) => UnreadRoomsBadge(
-                                filter: (r) => r.id != controller.roomId,
-                                badgePosition:
-                                    BadgePosition.topEnd(end: 8, top: 4),
-                                child: const Center(child: BackButton()),
-                              ),
-                            ),
+                                ),
                   titleSpacing: PantheonThemes.isColumnMode(context) ? 24 : 0,
                   title: ChatAppBarTitle(controller),
                   actions: _appBarActions(context),
@@ -256,25 +258,26 @@ class ChatView extends StatelessWidget {
                       children: [
                         PinnedEvents(controller),
                         if (activeThreadId != null)
-                        SizedBox(
-                          height: ChatAppBarListTile.fixedHeight,
-                          child: Center(
-                            child: TextButton.icon(
-                              onPressed: () =>
-                                  controller.scrollToEventId(activeThreadId),
-                              icon: const Icon(Icons.message),
-                              label: Text(L10n.of(context).replyInThread),
-                              style: TextButton.styleFrom(
-                                foregroundColor:
-                                    theme.colorScheme.onSecondaryContainer,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
+                          SizedBox(
+                            height: ChatAppBarListTile.fixedHeight,
+                            child: Center(
+                              child: TextButton.icon(
+                                onPressed: () =>
+                                    controller.scrollToEventId(activeThreadId),
+                                icon: const Icon(Icons.message),
+                                label: Text(L10n.of(context).replyInThread),
+                                style: TextButton.styleFrom(
+                                  foregroundColor:
+                                      theme.colorScheme.onSecondaryContainer,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        if (scrollUpBannerEventId != null && activeThreadId == null)
+                        if (scrollUpBannerEventId != null &&
+                            activeThreadId == null)
                           ChatAppBarListTile(
                             leading: IconButton(
                               color: theme.colorScheme.onSurfaceVariant,

@@ -34,8 +34,8 @@ import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/share_scaffold_dialog.dart';
-import 'package:fluffychat/pages/chat/start_poll_bottom_sheet.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
+import 'package:hermes/pages/chat/start_poll_bottom_sheet.dart';
+import 'package:hermes/utils/adaptive_bottom_sheet.dart';
 import '../../utils/account_bundles.dart';
 import '../../utils/localized_exception_extension.dart';
 import 'send_file_dialog.dart';
@@ -169,17 +169,21 @@ class ChatController extends State<ChatPageWithRoom>
   String pendingText = '';
 
   bool showEmojiPicker = false;
-  int emojiPickerIndex = 0; String? get threadLastEventId {
+  int emojiPickerIndex = 0;
+  String? get threadLastEventId {
     final threadId = activeThreadId;
     if (threadId == null) return null;
     return timeline?.events
         .filterByVisibleInGui(threadId: threadId)
         .firstOrNull
         ?.eventId;
-  } void enterThread(String eventId) => setState(() {
+  }
+
+  void enterThread(String eventId) => setState(() {
         activeThreadId = eventId;
         selectedEvents.clear();
-      }); void closeThread() => setState(() {
+      });
+  void closeThread() => setState(() {
         activeThreadId = null;
         selectedEvents.clear();
       });
@@ -1234,7 +1238,7 @@ class ChatController extends State<ChatPageWithRoom>
       clearSelectedEvents();
     } else if (showEmojiPicker) {
       emojiPickerAction();
-    } else if (controller.activeThreadId != null) {
+    } else if (activeThreadId != null) {
       closeThread();
     }
   }

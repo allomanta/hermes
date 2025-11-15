@@ -226,8 +226,9 @@ class ChatListItem extends StatelessWidget {
                                       AppConfig.borderRadius,
                                     ),
                                   ),
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8.0),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
                                   margin: const EdgeInsets.only(right: 4.0),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
