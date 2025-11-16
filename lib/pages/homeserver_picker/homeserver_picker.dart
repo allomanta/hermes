@@ -19,9 +19,6 @@ import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart
 import 'package:hermes/widgets/matrix.dart';
 import '../../utils/localized_exception_extension.dart';
 
-import 'package:hermes/utils/tor_stub.dart'
-    if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
-
 class HomeserverPicker extends StatefulWidget {
   final bool addMultiAccount;
   const HomeserverPicker({required this.addMultiAccount, super.key});
@@ -38,15 +35,6 @@ class HomeserverPickerController extends State<HomeserverPicker> {
   );
 
   String? error;
-
-  bool isTorBrowser = false;
-
-  Future<void> _checkTorBrowser() async {
-    if (!kIsWeb) return;
-
-    final isTor = await TorBrowserDetector.isTorBrowser;
-    isTorBrowser = isTor;
-  }
 
   /// Starts an analysis of the given homeserver. It uses the current domain and
   /// makes sure that it is prefixed with https. Then it searches for the
@@ -170,12 +158,6 @@ class HomeserverPickerController extends State<HomeserverPicker> {
         });
       }
     }
-  }
-
-  @override
-  void initState() {
-    _checkTorBrowser();
-    super.initState();
   }
 
   @override
