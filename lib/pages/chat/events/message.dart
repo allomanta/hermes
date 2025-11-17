@@ -114,6 +114,7 @@ class Message extends StatelessWidget {
         size.width - local.dx,
         size.height - local.dy,
       ),
+      requestFocus: false,
       items: [
         const PopupMenuItem(
           value: _MessageAction.reply,
@@ -208,6 +209,7 @@ class Message extends StatelessWidget {
         break;
       // handle others
     }
+
   }
 
   @override
