@@ -12,11 +12,13 @@ import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_list/chat_list_view.dart';
+import 'package:hermes/utils/android_share_shortcuts.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/utils/show_scaffold_dialog.dart';
 import 'package:hermes/utils/show_update_snackbar.dart';
+import 'package:hermes/utils/stream_extension.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -87,6 +89,9 @@ class ChatListController extends State<ChatList>
   StreamSubscription? _intentFileStreamSubscription;
 
   StreamSubscription? _intentUriStreamSubscription;
+
+  StreamSubscription<bool>? _directShareShortcutSubscription;
+  Client? _directShareShortcutClient;
 
   late ActiveFilter activeFilter;
 
@@ -328,29 +333,59 @@ class ChatListController extends State<ChatList>
   String? get activeChat => widget.activeChat;
 
   void _processIncomingSharedMedia(List<SharedMediaFile> files) {
-    if (files.isEmpty) return;
+    unawaited(_handleIncomingSharedMedia(files));
+  }
 
+  Future<void> _handleIncomingSharedMedia(List<SharedMediaFile> files) async {
+    if (files.isEmpty || !mounted) return;
+
+    final shareItems = _buildShareItems(files);
+    String? shortcutRoomId;
+    if (PlatformInfos.isAndroid) {
+      shortcutRoomId = await AndroidShareShortcuts.takePendingShortcutRoomId();
+    }
+
+    if (shortcutRoomId != null) {
+      final room = Matrix.of(context).client.getRoomById(shortcutRoomId);
+      if (room != null &&
+          room.membership == Membership.join &&
+          !room.isSpace &&
+          room.canSendDefaultMessages) {
+        _navigateToRoomWithShareItems(shortcutRoomId, shareItems);
+        return;
+      }
+    }
+
+    if (!mounted) return;
     showScaffoldDialog(
       context: context,
-      builder: (context) => ShareScaffoldDialog(
-        items: files.map(
-          (file) {
-            if ({
-              SharedMediaType.text,
-              SharedMediaType.url,
-            }.contains(file.type)) {
-              return TextShareItem(file.path);
-            }
-            return FileShareItem(
-              XFile(
-                file.path.replaceFirst('file://', ''),
-                mimeType: file.mimeType,
-              ),
-            );
-          },
-        ).toList(),
-      ),
+      builder: (context) => ShareScaffoldDialog(items: shareItems),
     );
+  }
+
+  List<ShareItem> _buildShareItems(List<SharedMediaFile> files) {
+    return files.map((file) {
+      if ({
+        SharedMediaType.text,
+        SharedMediaType.url,
+      }.contains(file.type)) {
+        return TextShareItem(file.path);
+      }
+      return FileShareItem(
+        XFile(
+          file.path.replaceFirst('file://', ''),
+          mimeType: file.mimeType,
+        ),
+      );
+    }).toList();
+  }
+
+  void _navigateToRoomWithShareItems(String roomId, List<ShareItem> items) {
+    if (!mounted) return;
+    while (context.canPop()) {
+      context.pop();
+    }
+    context.go('/rooms/$roomId', extra: items);
   }
 
   void _processIncomingUris(Uri? uri) async {
@@ -389,6 +424,26 @@ class ChatListController extends State<ChatList>
     }
   }
 
+  void _setupDirectShareShortcuts() {
+    if (!PlatformInfos.isAndroid || !mounted) return;
+    final client = Matrix.of(context).client;
+    if (_directShareShortcutClient == client) return;
+    _directShareShortcutSubscription?.cancel();
+    _directShareShortcutClient = client;
+    final locals = MatrixLocals(L10n.of(context));
+    unawaited(AndroidShareShortcuts.schedulePublish(client, locals));
+    _directShareShortcutSubscription =
+        client.onSync.stream.rateLimit(const Duration(seconds: 10)).listen((_) {
+      if (!mounted) return;
+      unawaited(
+        AndroidShareShortcuts.schedulePublish(
+          client,
+          MatrixLocals(L10n.of(context)),
+        ),
+      );
+    });
+  }
+
   @override
   void initState() {
     activeFilter = AppSettings.separateChatTypes.value
@@ -418,10 +473,17 @@ class ChatListController extends State<ChatList>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _setupDirectShareShortcuts();
+  }
+
+  @override
   void dispose() {
     _intentDataStreamSubscription?.cancel();
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();
+    _directShareShortcutSubscription?.cancel();
     scrollController.removeListener(_onScroll);
     super.dispose();
   }
@@ -812,6 +874,12 @@ class ChatListController extends State<ChatList>
       Matrix.of(context).setActiveClient(client);
     });
     _clientStream.add(client);
+    _directShareShortcutClient = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _setupDirectShareShortcuts();
+      }
+    });
   }
 
   void setActiveBundle(String bundle) {

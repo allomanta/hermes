@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <share-target android:targetClass="chat.pantheon.hermes.MainActivity">
+        <data android:mimeType="text/*" />
+        <data android:mimeType="image/*" />
+        <data android:mimeType="video/*" />
+        <data android:mimeType="audio/*" />
+        <data android:mimeType="application/*" />
+        <category android:name="androidx.sharetarget.category.TEXT_SHARE_TARGET" />
+        <category android:name="androidx.sharetarget.category.IMAGE_SHARE_TARGET" />
+        <category android:name="androidx.sharetarget.category.VIDEO_SHARE_TARGET" />
+        <category android:name="androidx.sharetarget.category.FILE_SHARE_TARGET" />
+    </share-target>
+</shortcuts>
