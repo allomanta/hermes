@@ -20,6 +20,8 @@ class AndroidShareShortcuts {
   static MatrixLocals? _latestLocals;
   static bool _isPublishing = false;
   static bool _publishQueued = false;
+  static String? _lastPublishedSignature;
+  static final Set<String> _lastPublishedShortcutIds = <String>{};
 
   static Future<void> schedulePublish(
     Client client,
@@ -68,6 +70,7 @@ class AndroidShareShortcuts {
       );
 
     final shortcuts = <Map<String, dynamic>>[];
+    final shortcutIds = <String>{};
     for (final room in rooms.take(_maxShortcuts)) {
       final label = room.getLocalizedDisplayname(locals);
       shortcuts.add({
@@ -80,12 +83,48 @@ class AndroidShareShortcuts {
         'isBot': false,
         'isConversation': true,
       });
+      shortcutIds.add(room.id);
+    }
+
+    final signature = jsonEncode(shortcuts);
+    final removedShortcutIds =
+        _lastPublishedShortcutIds.difference(shortcutIds).toList();
+    final hasChanges =
+        signature != _lastPublishedSignature || removedShortcutIds.isNotEmpty;
+    if (!hasChanges) {
+      return;
+    }
+
+    if (removedShortcutIds.isNotEmpty) {
+      await _removeShortcuts(removedShortcutIds);
+    }
+
+    if (shortcuts.isEmpty) {
+      _lastPublishedSignature = signature;
+      _lastPublishedShortcutIds
+        ..clear()
+        ..addAll(shortcutIds);
+      return;
     }
 
     try {
       await _channel.invokeMethod('publishShareShortcuts', shortcuts);
+      _lastPublishedSignature = signature;
+      _lastPublishedShortcutIds
+        ..clear()
+        ..addAll(shortcutIds);
     } on PlatformException catch (error, stackTrace) {
       debugPrint('Failed to publish Android share shortcuts: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  static Future<void> _removeShortcuts(List<String> shortcutIds) async {
+    if (!PlatformInfos.isAndroid || shortcutIds.isEmpty) return;
+    try {
+      await _channel.invokeMethod('removeShareShortcuts', shortcutIds);
+    } on PlatformException catch (error, stackTrace) {
+      debugPrint('Failed to remove Android share shortcuts: $error');
       debugPrintStack(stackTrace: stackTrace);
     }
   }
@@ -125,6 +164,8 @@ class AndroidShareShortcuts {
     try {
       await _channel.invokeMethod('clearShareShortcuts');
       _avatarCache.clear();
+      _lastPublishedSignature = null;
+      _lastPublishedShortcutIds.clear();
     } on PlatformException catch (error, stackTrace) {
       debugPrint('Failed to clear Android share shortcuts: $error');
       debugPrintStack(stackTrace: stackTrace);

@@ -53,12 +53,28 @@ object DirectShareShortcuts : MethodChannel.MethodCallHandler {
                 publishShortcuts(shortcuts)
                 result.success(null)
             }
+            "removeShareShortcuts" -> {
+                @Suppress("UNCHECKED_CAST")
+                val shortcutIds = (call.arguments as? List<*>)
+                    ?.mapNotNull { it as? String }
+                    ?: emptyList()
+                removeShareShortcuts(shortcutIds)
+                result.success(null)
+            }
             "clearShareShortcuts" -> {
                 ShortcutManagerCompat.removeAllDynamicShortcuts(appContext)
                 result.success(null)
             }
             else -> result.notImplemented()
         }
+    }
+
+    private fun removeShareShortcuts(shortcutIds: List<String>) {
+        if (!::appContext.isInitialized || shortcutIds.isEmpty()) return
+        ShortcutManagerCompat.removeDynamicShortcuts(appContext, shortcutIds)
+        ShortcutManagerCompat.removeLongLivedShortcuts(appContext, shortcutIds)
+        val disableMessage = appContext.getString(R.string.shortcut_disabled_message)
+        ShortcutManagerCompat.disableShortcuts(appContext, shortcutIds, disableMessage)
     }
 
     private fun publishShortcuts(shortcuts: List<Map<String, Any?>>) {
