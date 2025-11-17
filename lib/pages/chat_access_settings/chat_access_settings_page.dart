@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart' hide Visibility;
-
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_access_settings/chat_access_settings_controller.dart';
@@ -24,17 +25,19 @@ class ChatAccessSettingsPageView extends StatelessWidget {
       ),
       body: MaxWidthBody(
         child: StreamBuilder<Object>(
-          stream: room.client.onRoomState.stream
-              .where((update) => update.roomId == controller.room.id),
+          stream: room.client.onRoomState.stream.where(
+            (update) => update.roomId == controller.room.id,
+          ),
           builder: (context, snapshot) {
             final canonicalAlias = room.canonicalAlias;
-            final altAliases = room
+            final altAliases =
+                room
                     .getState(EventTypes.RoomCanonicalAlias)
                     ?.content
                     .tryGetList<String>('alt_aliases') ??
                 [];
             return Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: [
                 ListTile(
                   title: Text(
@@ -47,12 +50,13 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                 ),
                 RadioGroup<HistoryVisibility>(
                   groupValue: room.historyVisibility,
-                  onChanged: controller.historyVisibilityLoading ||
+                  onChanged:
+                      controller.historyVisibilityLoading ||
                           !room.canChangeHistoryVisibility
                       ? (_) {}
                       : controller.setHistoryVisibility,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize: .min,
                     children: [
                       for (final historyVisibility in HistoryVisibility.values)
                         RadioListTile<HistoryVisibility>.adaptive(
@@ -80,12 +84,13 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                   groupValue: room.joinRules,
                   onChanged: controller.setJoinRule,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize: .min,
                     children: [
                       for (final joinRule in controller.availableJoinRules)
                         if (joinRule != JoinRules.private)
                           RadioListTile<JoinRules>.adaptive(
-                            enabled: !controller.joinRulesLoading &&
+                            enabled:
+                                !controller.joinRulesLoading &&
                                 room.canChangeJoinRules,
                             title: Text(
                               joinRule.localizedString(
@@ -99,8 +104,10 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                   ),
                 ),
                 Divider(color: theme.dividerColor),
-                if ({JoinRules.public, JoinRules.knock}
-                    .contains(room.joinRules)) ...[
+                if ({
+                  JoinRules.public,
+                  JoinRules.knock,
+                }.contains(room.joinRules)) ...[
                   ListTile(
                     title: Text(
                       L10n.of(context).areGuestsAllowedToJoin,
@@ -114,11 +121,12 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                     groupValue: room.guestAccess,
                     onChanged: controller.setGuestAccess,
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: .min,
                       children: [
                         for (final guestAccess in GuestAccess.values)
                           RadioListTile<GuestAccess>.adaptive(
-                            enabled: !controller.guestAccessLoading &&
+                            enabled:
+                                !controller.guestAccessLoading &&
                                 room.canChangeGuestAccess,
                             title: Text(
                               guestAccess.getLocalizedString(
@@ -148,9 +156,10 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                   if (canonicalAlias.isNotEmpty)
                     _AliasListTile(
                       alias: canonicalAlias,
-                      onDelete: room.canChangeStateEvent(
-                        EventTypes.RoomCanonicalAlias,
-                      )
+                      onDelete:
+                          room.canChangeStateEvent(
+                            EventTypes.RoomCanonicalAlias,
+                          )
                           ? () => controller.deleteAlias(canonicalAlias)
                           : null,
                       isCanonicalAlias: true,
@@ -158,9 +167,10 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                   for (final alias in altAliases)
                     _AliasListTile(
                       alias: alias,
-                      onDelete: room.canChangeStateEvent(
-                        EventTypes.RoomCanonicalAlias,
-                      )
+                      onDelete:
+                          room.canChangeStateEvent(
+                            EventTypes.RoomCanonicalAlias,
+                          )
                           ? () => controller.deleteAlias(alias)
                           : null,
                     ),
@@ -172,10 +182,9 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                         return const SizedBox.shrink();
                       }
                       localAddresses.remove(room.canonicalAlias);
-                      localAddresses
-                          .removeWhere((alias) => altAliases.contains(alias));
+                      localAddresses.removeWhere(altAliases.contains);
                       return Column(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisSize: .min,
                         children: localAddresses
                             .map(
                               (alias) => _AliasListTile(
@@ -257,10 +266,7 @@ class _AliasListTile extends StatelessWidget {
           ? const Icon(Icons.star)
           : const Icon(Icons.link_outlined),
       title: InkWell(
-        onTap: () => PantheonShare.share(
-          'https://matrix.to/#/$alias',
-          context,
-        ),
+        onTap: () => PantheonShare.share('https://matrix.to/#/$alias', context),
         child: SelectableText(
           alias,
           style: TextStyle(

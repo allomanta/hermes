@@ -1,6 +1,9 @@
-import 'dart:math';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter/material.dart';
+import 'dart:math';
 
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/themes.dart';
@@ -21,10 +24,7 @@ Future<T?> showAdaptiveBottomSheet<T>({
       builder: (context) => Center(
         child: Container(
           margin: const EdgeInsets.all(16),
-          constraints: const BoxConstraints(
-            maxWidth: 480,
-            maxHeight: 720,
-          ),
+          constraints: const BoxConstraints(maxWidth: 480, maxHeight: 720),
           child: Material(
             elevation: Theme.of(context).dialogTheme.elevation ?? 4,
             shadowColor: Theme.of(context).dialogTheme.shadowColor,
@@ -40,17 +40,15 @@ Future<T?> showAdaptiveBottomSheet<T>({
 
   return showModalBottomSheet<T>(
     context: context,
-    useSafeArea: true,
-    builder: (context) => Padding(
-      padding: EdgeInsets.zero,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(AppConfig.borderRadius / 2),
-          topRight: Radius.circular(AppConfig.borderRadius / 2),
-        ),
-        child: builder(context),
+    builder: (context) => ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight:
+            MediaQuery.viewInsetsOf(context).bottom +
+            min(MediaQuery.sizeOf(context).height - 32, 600),
       ),
+      child: builder(context),
     ),
+    useSafeArea: true,
     useRootNavigator: useRootNavigator,
     isDismissible: isDismissible,
     isScrollControlled: isScrollControlled,

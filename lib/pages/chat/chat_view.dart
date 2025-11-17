@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
-
-import 'package:badges/badges.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:matrix/matrix.dart';
 
@@ -50,8 +52,9 @@ class ChatView extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.message_outlined),
             tooltip: L10n.of(context).replyInThread,
-            onPressed: () => controller
-                .enterThread(controller.selectedEvents.single.eventId),
+            onPressed: () => controller.enterThread(
+              controller.selectedEvents.single.eventId,
+            ),
           ),
         if (controller.canPinSelectedEvents)
           IconButton(
@@ -122,10 +125,7 @@ class ChatView extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.shield_outlined,
-                        color: Colors.red,
-                      ),
+                      const Icon(Icons.shield_outlined, color: Colors.red),
                       const SizedBox(width: 12),
                       Text(L10n.of(context).reportMessage),
                     ],
@@ -154,6 +154,7 @@ class ChatView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final hasActiveGroupCall = controller.room.hasActiveMatrixRtcCall;
     if (controller.room.membership == Membership.invite) {
       showFutureLoadingDialog(
         context: context,
@@ -161,8 +162,9 @@ class ChatView extends StatelessWidget {
         exceptionContext: ExceptionContext.joinRoom,
       );
     }
-    final bottomSheetPadding =
-        PantheonThemes.isColumnMode(context) ? 16.0 : 8.0;
+    final bottomSheetPadding = PantheonThemes.isColumnMode(context)
+        ? 16.0
+        : 8.0;
     final scrollUpBannerEventId = controller.scrollUpBannerEventId;
 
     final accountConfig = Matrix.of(context).client.applicationAccountConfig;
@@ -177,7 +179,8 @@ class ChatView extends StatelessWidget {
       autofocus: true,
       onKeyEvent: controller.onKeyEvent,
       child: PopScope(
-        canPop: controller.selectedEvents.isEmpty &&
+        canPop:
+            controller.selectedEvents.isEmpty &&
             !controller.showEmojiPicker &&
             controller.activeThreadId == null,
         onPopInvokedWithResult: (pop, _) async {
@@ -208,8 +211,8 @@ class ChatView extends StatelessWidget {
                   actionsIconTheme: IconThemeData(
                     color: controller.selectedEvents.isEmpty
                         ? controller.activeThreadId != null
-                            ? theme.colorScheme.secondaryContainer
-                            : null
+                              ? theme.colorScheme.secondaryContainer
+                              : null
                         : theme.colorScheme.onTertiaryContainer,
                   ),
                   backgroundColor: controller.selectedEvents.isEmpty
@@ -224,30 +227,24 @@ class ChatView extends StatelessWidget {
                           color: theme.colorScheme.onTertiaryContainer,
                         )
                       : activeThreadId != null
-                          ? IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: controller.closeThread,
-                              tooltip: L10n.of(context).backToMainChat,
-                              color: theme.colorScheme.onSecondaryContainer,
-                            )
-                          : PantheonThemes.isColumnMode(context)
-                              ? null
-                              : StreamBuilder<Object>(
-                                  stream: Matrix.of(context)
-                                      .client
-                                      .onSync
-                                      .stream
-                                      .where(
-                                        (syncUpdate) =>
-                                            syncUpdate.hasRoomUpdate,
-                                      ),
-                                  builder: (context, _) => UnreadRoomsBadge(
-                                    filter: (r) => r.id != controller.roomId,
-                                    badgePosition:
-                                        BadgePosition.topEnd(end: 8, top: 4),
-                                    child: const Center(child: BackButton()),
-                                  ),
-                                ),
+                      ? IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: controller.closeThread,
+                          tooltip: L10n.of(context).backToMainChat,
+                          color: theme.colorScheme.onSecondaryContainer,
+                        )
+                      : PantheonThemes.isColumnMode(context)
+                      ? null
+                      : StreamBuilder<Object>(
+                          stream: Matrix.of(context).client.onSync.stream.where(
+                            (syncUpdate) => syncUpdate.hasRoomUpdate,
+                          ),
+                          builder: (context, _) => UnreadRoomsBadge(
+                            filter: (r) => r.id != controller.roomId,
+                            badgePosition: BadgePosition.topEnd(end: 8, top: 4),
+                            child: const Center(child: BackButton()),
+                          ),
+                        ),
                   titleSpacing: PantheonThemes.isColumnMode(context) ? 24 : 0,
                   title: ChatAppBarTitle(controller),
                   actions: _appBarActions(context),
@@ -305,11 +302,14 @@ class ChatView extends StatelessWidget {
                 ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.miniEndFloat,
-                floatingActionButton: controller.showScrollDownButton &&
+                floatingActionButton:
+                    controller.showScrollDownButton &&
                         controller.selectedEvents.isEmpty
                     ? Padding(
-                        padding:
-                            const EdgeInsets.only(bottom: 66.0, right: 10.0),
+                        padding: const EdgeInsets.only(
+                          bottom: 66.0,
+                          right: 10.0,
+                        ),
                         child: FloatingActionButton(
                           onPressed: controller.scrollDown,
                           heroTag: null,
@@ -356,10 +356,7 @@ class ChatView extends StatelessWidget {
                               ),
                             ),
                             if (controller.showScrollDownButton)
-                              Divider(
-                                height: 1,
-                                color: theme.dividerColor,
-                              ),
+                              Divider(height: 1, color: theme.dividerColor),
                             if (controller.room.isExtinct)
                               Container(
                                 margin: EdgeInsets.all(bottomSheetPadding),
@@ -386,8 +383,8 @@ class ChatView extends StatelessWidget {
                                   borderRadius: const BorderRadius.all(
                                     Radius.circular(24),
                                   ),
-                                  child: controller.room.isAbandonedDMRoom ==
-                                          true
+                                  child:
+                                      controller.room.isAbandonedDMRoom == true
                                       ? Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceEvenly,
@@ -442,10 +439,7 @@ class ChatView extends StatelessWidget {
                         Container(
                           color: theme.scaffoldBackgroundColor.withAlpha(230),
                           alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.upload_outlined,
-                            size: 100,
-                          ),
+                          child: const Icon(Icons.upload_outlined, size: 100),
                         ),
                     ],
                   ),

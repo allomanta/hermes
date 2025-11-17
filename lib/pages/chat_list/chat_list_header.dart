@@ -21,30 +21,36 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final client = Matrix.of(context).client;
+    final isColumnMode = PantheonThemes.isColumnMode(context);
 
     return SliverAppBar(
       floating: true,
       toolbarHeight: 72,
       pinned: PantheonThemes.isColumnMode(context),
       scrolledUnderElevation: 0,
-      backgroundColor: Colors.transparent,
+      shape: isColumnMode
+          ? Border(bottom: BorderSide(color: theme.dividerColor, width: 1))
+          : null,
+      backgroundColor: isColumnMode
+          ? theme.colorScheme.surface.withAlpha(240)
+          : Colors.transparent,
       automaticallyImplyLeading: false,
       title: StreamBuilder(
         stream: client.onSyncStatus.stream,
         builder: (context, snapshot) {
-          final status = client.onSyncStatus.value ??
+          final status =
+              client.onSyncStatus.value ??
               const SyncStatusUpdate(SyncStatus.waitingForResponse);
-          final hide = client.onSync.value != null &&
+          final hide =
+              client.onSync.value != null &&
               status.status != SyncStatus.error &&
               client.prevBatch != null;
           return TextField(
             controller: controller.searchController,
             focusNode: controller.searchFocusNode,
             textInputAction: TextInputAction.search,
-            onChanged: (text) => controller.onSearchEnter(
-              text,
-              globalSearch: globalSearch,
-            ),
+            onChanged: (text) =>
+                controller.onSearchEnter(text, globalSearch: globalSearch),
             decoration: InputDecoration(
               filled: true,
               fillColor: theme.colorScheme.secondaryContainer,
@@ -52,28 +58,26 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                 borderSide: BorderSide.none,
                 borderRadius: BorderRadius.circular(99),
               ),
-              contentPadding: EdgeInsets.zero,
               hintText: hide
                   ? L10n.of(context).searchChatsRooms
                   : status.calcLocalizedString(context),
               hintStyle: TextStyle(
-                color: status.error != null
-                    ? Colors.orange
-                    : theme.colorScheme.onPrimaryContainer,
+                color: theme.colorScheme.onPrimaryContainer,
                 fontWeight: FontWeight.normal,
               ),
+
               prefixIcon: hide
                   ? controller.isSearchMode
-                      ? IconButton(
-                          tooltip: L10n.of(context).cancel,
-                          icon: const Icon(Icons.close_outlined),
-                          onPressed: controller.cancelSearch,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        )
-                      : Icon(
-                          Icons.search_outlined,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        )
+                        ? IconButton(
+                            tooltip: L10n.of(context).cancel,
+                            icon: const Icon(Icons.close_outlined),
+                            onPressed: controller.cancelSearch,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          )
+                        : Icon(
+                            Icons.search_outlined,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          )
                   : Container(
                       margin: const EdgeInsets.all(12),
                       width: 8,
@@ -82,11 +86,6 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                         child: CircularProgressIndicator.adaptive(
                           strokeWidth: 2,
                           value: status.progress,
-                          valueColor: status.error != null
-                              ? const AlwaysStoppedAnimation<Color>(
-                                  Colors.orange,
-                                )
-                              : null,
                         ),
                       ),
                     ),

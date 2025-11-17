@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-
-import 'package:go_router/go_router.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/settings_password/settings_password_view.dart';
@@ -25,7 +26,9 @@ class SettingsPasswordController extends State<SettingsPassword> {
 
   bool loading = false;
 
-  void changePassword() async {
+  Future<void> changePassword() async {
+    final l10n = L10n.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     setState(() {
       oldPasswordError = newPassword1Error = newPassword2Error = null;
     });
@@ -53,15 +56,13 @@ class SettingsPasswordController extends State<SettingsPassword> {
       loading = true;
     });
     try {
-      final scaffoldMessenger = ScaffoldMessenger.of(context);
       await Matrix.of(context).client.changePassword(
-            newPassword1Controller.text,
-            oldPassword: oldPasswordController.text,
-          );
+        newPassword1Controller.text,
+        oldPassword: oldPasswordController.text,
+      );
+      if (!mounted) return;
       scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text(L10n.of(context).passwordHasBeenChanged),
-        ),
+        SnackBar(content: Text(l10n.passwordHasBeenChanged)),
       );
       if (mounted) context.pop();
     } catch (e) {
@@ -76,6 +77,14 @@ class SettingsPasswordController extends State<SettingsPassword> {
         loading = false;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    oldPasswordController.dispose();
+    newPassword1Controller.dispose();
+    newPassword2Controller.dispose();
+    super.dispose();
   }
 
   @override

@@ -33,7 +33,7 @@ class ChatListViewBody extends StatelessWidget {
         key: ValueKey(activeSpace),
         spaceId: activeSpace,
         onBack: controller.clearActiveSpace,
-        onChatTab: (room) => controller.onChatTap(room),
+        onChatTab: controller.onChatTap,
         activeChat: controller.activeChat,
       );
     }
@@ -57,14 +57,18 @@ class ChatListViewBody extends StatelessWidget {
     const dummyChatCount = 4;
     final filter = controller.searchController.text.toLowerCase();
     return StreamBuilder(
-      key: ValueKey(
-        client.userID.toString(),
-      ),
+      key: ValueKey(client.userID.toString()),
       stream: client.onSync.stream
           .where((s) => s.hasRoomUpdate)
           .rateLimit(const Duration(seconds: 1)),
       builder: (context, _) {
-        final rooms = controller.filteredRooms;
+        final rooms = controller.filteredRooms
+            .where(
+              (room) =>
+                  !AppSettings.hideRoomsInSpaces.value ||
+                  spaceDelegateCandidates[room.id] == null,
+            )
+            .toList();
 
         return SafeArea(
           child: CustomScrollView(
@@ -375,10 +379,7 @@ class ChatListViewBody extends StatelessWidget {
 }
 
 class PublicRoomsHorizontalList extends StatelessWidget {
-  const PublicRoomsHorizontalList({
-    super.key,
-    required this.publicRooms,
-  });
+  const PublicRoomsHorizontalList({super.key, required this.publicRooms});
 
   final List<PublishedRoomsChunk>? publicRooms;
 
@@ -397,12 +398,14 @@ class PublicRoomsHorizontalList extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               itemCount: publicRooms.length,
               itemBuilder: (context, i) => _SearchItem(
-                title: publicRooms[i].name ??
+                title:
+                    publicRooms[i].name ??
                     publicRooms[i].canonicalAlias?.localpart ??
                     L10n.of(context).group,
                 avatar: publicRooms[i].avatarUrl,
                 onPressed: () => showAdaptiveDialog(
                   context: context,
+                  barrierDismissible: true,
                   builder: (c) => PublicRoomDialog(
                     roomAlias:
                         publicRooms[i].canonicalAlias ?? publicRooms[i].roomId,
@@ -428,31 +431,26 @@ class _SearchItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-        onTap: onPressed,
-        child: SizedBox(
-          width: 84,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Avatar(
-                mxContent: avatar,
-                name: title,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  title,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
+    onTap: onPressed,
+    child: SizedBox(
+      width: 84,
+      child: Column(
+        mainAxisSize: .min,
+        children: [
+          const SizedBox(height: 8),
+          Avatar(mxContent: avatar, name: title),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              title,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12),
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }

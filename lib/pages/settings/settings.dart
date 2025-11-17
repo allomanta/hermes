@@ -1,6 +1,9 @@
-import 'dart:async';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter/material.dart';
+import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,7 +17,6 @@ import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart
 import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import '../../widgets/matrix.dart';
-import '../bootstrap/bootstrap_dialog.dart';
 import 'settings_view.dart';
 
 class Settings extends StatefulWidget {
@@ -29,23 +31,25 @@ class SettingsController extends State<Settings> {
   bool profileUpdated = false;
 
   void updateProfile() => setState(() {
-        profileUpdated = true;
-        profileFuture = null;
-      });
+    profileUpdated = true;
+    profileFuture = null;
+  });
 
-  void setDisplaynameAction() async {
+  Future<void> setDisplaynameAction() async {
+    final l10n = L10n.of(context);
+    final matrix = Matrix.of(context);
     final profile = await profileFuture;
+    if (!mounted) return;
     final input = await showTextInputDialog(
       useRootNavigator: false,
       context: context,
-      title: L10n.of(context).editDisplayname,
-      okLabel: L10n.of(context).ok,
-      cancelLabel: L10n.of(context).cancel,
-      initialText:
-          profile?.displayName ?? Matrix.of(context).client.userID!.localpart,
+      title: l10n.editDisplayname,
+      okLabel: l10n.ok,
+      cancelLabel: l10n.cancel,
+      initialText: profile?.displayName ?? matrix.client.userID!.localpart,
     );
     if (input == null) return;
-    final matrix = Matrix.of(context);
+    if (!mounted) return;
     final success = await showFutureLoadingDialog(
       context: context,
       future: () => matrix.client.setProfileField(
@@ -59,46 +63,50 @@ class SettingsController extends State<Settings> {
     }
   }
 
-  void logoutAction() async {
-    final noBackup = showChatBackupBanner == true;
-    if (await showOkCancelAlertDialog(
-          useRootNavigator: false,
-          context: context,
-          title: L10n.of(context).areYouSureYouWantToLogout,
-          message: L10n.of(context).noBackupWarning,
-          isDestructive: noBackup,
-          okLabel: L10n.of(context).logout,
-          cancelLabel: L10n.of(context).cancel,
-        ) ==
-        OkCancelResult.cancel) {
-      return;
-    }
+  Future<void> logoutAction() async {
+    final l10n = L10n.of(context);
     final matrix = Matrix.of(context);
+    final consent = await showOkCancelAlertDialog(
+      useRootNavigator: false,
+      context: context,
+      title: l10n.areYouSureYouWantToLogout,
+      message: l10n.noBackupWarning,
+      isDestructive: cryptoIdentityConnected == false,
+      okLabel: l10n.logout,
+      cancelLabel: l10n.cancel,
+    );
+    if (consent != OkCancelResult.ok) return;
+    if (!mounted) return;
     await showFutureLoadingDialog(
       context: context,
       future: () => matrix.client.logout(),
     );
+    if (!mounted) return;
+    context.go('/');
   }
 
-  void setAvatarAction() async {
+  Future<void> setAvatarAction() async {
+    final l10n = L10n.of(context);
+    final matrix = Matrix.of(context);
     final profile = await profileFuture;
+    if (!mounted) return;
     final actions = [
       if (PlatformInfos.isMobile)
         AdaptiveModalAction(
           value: AvatarAction.camera,
-          label: L10n.of(context).openCamera,
+          label: l10n.openCamera,
           isDefaultAction: true,
           icon: const Icon(Icons.camera_alt_outlined),
         ),
       AdaptiveModalAction(
         value: AvatarAction.file,
-        label: L10n.of(context).openGallery,
+        label: l10n.openGallery,
         icon: const Icon(Icons.photo_outlined),
       ),
       if (profile?.avatarUrl != null)
         AdaptiveModalAction(
           value: AvatarAction.remove,
-          label: L10n.of(context).removeYourAvatar,
+          label: l10n.removeYourAvatar,
           isDestructive: true,
           icon: const Icon(Icons.delete_outlined),
         ),
@@ -107,12 +115,12 @@ class SettingsController extends State<Settings> {
         ? actions.single.value
         : await showModalActionPopup<AvatarAction>(
             context: context,
-            title: L10n.of(context).changeYourAvatar,
-            cancelLabel: L10n.of(context).cancel,
+            title: l10n.changeYourAvatar,
+            cancelLabel: l10n.cancel,
             actions: actions,
           );
     if (action == null) return;
-    final matrix = Matrix.of(context);
+    if (!mounted) return;
     if (action == AvatarAction.remove) {
       final success = await showFutureLoadingDialog(
         context: context,
@@ -132,15 +140,10 @@ class SettingsController extends State<Settings> {
         imageQuality: 50,
       );
       if (result == null) return;
-      file = MatrixFile(
-        bytes: await result.readAsBytes(),
-        name: result.path,
-      );
+      file = MatrixFile(bytes: await result.readAsBytes(), name: result.path);
     } else {
-      final result = await selectFiles(
-        context,
-        type: FileSelectorType.images,
-      );
+      if (!mounted) return;
+      final result = await selectFiles(context, type: FileType.image);
       final pickedFile = result.firstOrNull;
       if (pickedFile == null) return;
       file = MatrixFile(
@@ -148,6 +151,7 @@ class SettingsController extends State<Settings> {
         name: pickedFile.name,
       );
     }
+    if (!mounted) return;
     final success = await showFutureLoadingDialog(
       context: context,
       future: () => matrix.client.setAvatar(file),
@@ -164,51 +168,48 @@ class SettingsController extends State<Settings> {
     super.initState();
   }
 
-  void checkBootstrap() async {
+  Future<void> checkBootstrap() async {
     final client = Matrix.of(context).client;
     if (!client.encryptionEnabled) return;
+    if (!client.isLogged()) return;
     await client.accountDataLoading;
     await client.userDeviceKeysLoading;
     if (client.prevBatch == null) {
       await client.onSync.stream.first;
     }
-    final crossSigning =
-        await client.encryption?.crossSigning.isCached() ?? false;
-    final needsBootstrap =
-        await client.encryption?.keyManager.isCached() == false ||
-            client.encryption?.crossSigning.enabled == false ||
-            crossSigning == false;
-    final isUnknownSession = client.isUnknownSession;
+
+    final state = await client.getCryptoIdentityState();
+    if (!mounted) return;
     setState(() {
-      showChatBackupBanner = needsBootstrap || isUnknownSession;
+      cryptoIdentityConnected = state.initialized && state.connected;
     });
   }
 
-  bool? crossSigningCached;
-  bool? showChatBackupBanner;
+  bool? cryptoIdentityConnected;
 
-  void firstRunBootstrapAction([_]) async {
-    if (showChatBackupBanner != true) {
-      showOkAlertDialog(
+  Future<void> firstRunBootstrapAction([_]) async {
+    if (cryptoIdentityConnected == true) {
+      final action = await showOkCancelAlertDialog(
         context: context,
         title: L10n.of(context).chatBackup,
         message: L10n.of(context).onlineKeyBackupEnabled,
-        okLabel: L10n.of(context).close,
+        okLabel: L10n.of(context).resetRecoveryKey,
+        cancelLabel: L10n.of(context).close,
+        isDestructive: true,
       );
+      if (action != OkCancelResult.ok) return;
+      if (!mounted) return;
+      await context.push('/backup?reset=true');
       return;
     }
-    await BootstrapDialog(
-      client: Matrix.of(context).client,
-    ).show(context);
+    await context.push('/backup');
     checkBootstrap();
   }
 
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
-    profileFuture ??= client.getProfileFromUserId(
-      client.userID!,
-    );
+    profileFuture ??= client.getProfileFromUserId(client.userID!);
     return SettingsView(this);
   }
 }

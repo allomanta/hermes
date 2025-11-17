@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -34,8 +39,10 @@ class EventVideoPlayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final supportsVideoPlayer = PlatformInfos.supportsVideoPlayer;
 
-    final blurHash = (event.infoMap as Map<String, dynamic>)
-            .tryGet<String>('xyz.amorgan.blurhash') ??
+    final blurHash =
+        (event.infoMap as Map<String, dynamic>).tryGet<String>(
+          'xyz.amorgan.blurhash',
+        ) ??
         fallbackBlurHash;
     final fileDescription = event.fileDescription;
     const maxDimension = 300.0;
@@ -48,11 +55,12 @@ class EventVideoPlayer extends StatelessWidget {
     final height = videoHeight / modifier;
 
     final durationInt = infoMap?.tryGet<int>('duration');
-    final duration =
-        durationInt == null ? null : Duration(milliseconds: durationInt);
+    final duration = durationInt == null
+        ? null
+        : Duration(milliseconds: durationInt);
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       spacing: 8,
       children: [
         Material(
@@ -77,9 +85,12 @@ class EventVideoPlayer extends StatelessWidget {
                 tag: event.eventId,
                 child: Stack(
                   children: [
-                    if (event.hasThumbnail)
+                    if (event.hasThumbnail &&
+                        AppSettings.showThumbnailsInTimeline.value)
                       MxcImage(
                         event: event,
+                        cacheKey: event.transactionId ?? event.eventId,
+                        cacheName: event.room.id,
                         isThumbnail: true,
                         width: width,
                         height: height,
@@ -127,23 +138,18 @@ class EventVideoPlayer extends StatelessWidget {
           SizedBox(
             width: width,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Linkify(
                 text: fileDescription,
                 textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
                 style: TextStyle(
                   color: textColor,
-                  fontSize: AppSettings.fontSizeFactor.value *
-                      AppConfig.messageFontSize,
+                  fontSize: AppConfig.messageFontSize,
                 ),
                 options: const LinkifyOptions(humanize: false),
                 linkStyle: TextStyle(
                   color: linkColor,
-                  fontSize: AppSettings.fontSizeFactor.value *
-                      AppConfig.messageFontSize,
+                  fontSize: AppConfig.messageFontSize,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),

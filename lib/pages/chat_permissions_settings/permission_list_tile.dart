@@ -63,6 +63,8 @@ class PermissionsListTile extends StatelessWidget {
           return L10n.of(context).enableEncryption;
         case 'm.room.server_acl':
           return L10n.of(context).editBlockedServers;
+        case MatrixRtcCallMember.eventType:
+          return 'Create or join a group call';
       }
     }
     return permissionKey;
@@ -75,8 +77,8 @@ class PermissionsListTile extends StatelessWidget {
     final color = permission >= 100
         ? Colors.orangeAccent
         : permission >= 50
-            ? Colors.blueAccent
-            : Colors.greenAccent;
+        ? Colors.blueAccent
+        : Colors.greenAccent;
     return ListTile(
       title: Text(
         getLocalizedPowerLevelString(context),
@@ -109,14 +111,12 @@ class PermissionsListTile extends StatelessWidget {
             DropdownMenuItem(
               value: permission >= 100 ? permission : 100,
               child: Text(
-                L10n.of(context)
-                    .adminLevel(permission >= 100 ? permission : 100),
+                L10n.of(
+                  context,
+                ).adminLevel(permission >= 100 ? permission : 100),
               ),
             ),
-            DropdownMenuItem(
-              value: null,
-              child: Text(L10n.of(context).custom),
-            ),
+            DropdownMenuItem(value: null, child: Text(L10n.of(context).custom)),
           ],
         ),
       ),

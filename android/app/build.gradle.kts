@@ -3,7 +3,6 @@ import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -21,7 +20,7 @@ dependencies {
 // Workaround for https://pub.dev/packages/unifiedpush#the-build-fails-because-of-duplicate-classes
 configurations.all {
     // Use the latest version published: https://central.sonatype.com/artifact/com.google.crypto.tink/tink-android
-    val tink = "com.google.crypto.tink:tink-android:1.17.0"
+    val tink = "com.google.crypto.tink:tink-android:1.23.0"
     // You can also use the library declaration catalog
     // val tink = libs.google.tink
     resolutionStrategy {
@@ -69,6 +68,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        ndk { // Workaround for https://github.com/flutter/flutter/issues/162153#issuecomment-2612443642
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64", "x86")
+        }
     }
 
     buildTypes {
@@ -82,6 +84,13 @@ android {
         }
     }
 }
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+    }
+}
+
 
 flutter {
     source = "../.."

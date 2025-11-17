@@ -1,7 +1,9 @@
-import 'dart:async';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'dart:async';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:matrix/matrix.dart';
@@ -17,7 +19,8 @@ import 'package:hermes/widgets/matrix.dart';
 import '../../widgets/adaptive_dialogs/user_dialog.dart';
 
 class NewPrivateChat extends StatefulWidget {
-  const NewPrivateChat({super.key});
+  final String? deeplink;
+  const NewPrivateChat({super.key, required this.deeplink});
 
   @override
   NewPrivateChatController createState() => NewPrivateChatController();
@@ -33,7 +36,19 @@ class NewPrivateChatController extends State<NewPrivateChat> {
 
   static const Duration _coolDown = Duration(milliseconds: 500);
 
-  void searchUsers([String? input]) async {
+  @override
+  void initState() {
+    super.initState();
+
+    final deeplink = widget.deeplink;
+    if (deeplink != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        UrlLauncher(context, deeplink).openMatrixToUrl();
+      });
+    }
+  }
+
+  Future<void> searchUsers([String? input]) async {
     final searchTerm = input ?? controller.text;
     if (searchTerm.isEmpty) {
       _searchCoolDown?.cancel();
@@ -52,11 +67,12 @@ class NewPrivateChatController extends State<NewPrivateChat> {
   }
 
   Future<List<Profile>> _searchUser(String searchTerm) async {
-    final result =
-        await Matrix.of(context).client.searchUserDirectory(searchTerm);
+    final result = await Matrix.of(
+      context,
+    ).client.searchUserDirectory(searchTerm);
     final profiles = result.results;
 
-    if (searchTerm.isValidMatrixId &&
+    if (searchTerm.isValidMatrixIdStrict() &&
         searchTerm.sigil == '@' &&
         !profiles.any((profile) => profile.userId == searchTerm)) {
       profiles.add(Profile(userId: searchTerm));
@@ -67,20 +83,20 @@ class NewPrivateChatController extends State<NewPrivateChat> {
 
   void inviteAction() => PantheonShare.shareInviteLink(context);
 
-  void openScannerAction() async {
+  Future<void> openScannerAction() async {
+    final l10n = L10n.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     if (PlatformInfos.isAndroid) {
       final info = await DeviceInfoPlugin().androidInfo;
+      if (!mounted) return;
       if (info.version.sdkInt < 21) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              L10n.of(context).unsupportedAndroidVersionLong,
-            ),
-          ),
+        scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text(l10n.unsupportedAndroidVersionLong)),
         );
         return;
       }
     }
+    if (!mounted) return;
     await showAdaptiveBottomSheet(
       context: context,
       builder: (_) => QrScannerModal(
@@ -89,19 +105,27 @@ class NewPrivateChatController extends State<NewPrivateChat> {
     );
   }
 
-  void copyUserId() async {
+  Future<void> copyUserId() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final l10n = L10n.of(context);
     await Clipboard.setData(
       ClipboardData(text: Matrix.of(context).client.userID!),
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(L10n.of(context).copiedToClipboard)),
+    if (!mounted) return;
+    scaffoldMessenger.showSnackBar(
+      SnackBar(content: Text(l10n.copiedToClipboard)),
     );
   }
 
-  void openUserModal(Profile profile) => UserDialog.show(
-        context: context,
-        profile: profile,
-      );
+  void openUserModal(Profile profile) =>
+      UserDialog.show(context: context, profile: profile);
+
+  @override
+  void dispose() {
+    controller.dispose();
+    textFieldFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => NewPrivateChatView(this);

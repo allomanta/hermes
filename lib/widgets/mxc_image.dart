@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -25,8 +31,12 @@ class MxcImage extends StatefulWidget {
   final ThumbnailMethod thumbnailMethod;
   final Widget Function(BuildContext context)? placeholder;
   final String? cacheKey;
+  final String? cacheName;
   final Client? client;
   final BorderRadius borderRadius;
+
+  static void clearCache(String cacheName) =>
+      _MxcImageState._imageDataCaches.remove(cacheName);
 
   const MxcImage({
     this.uri,
@@ -44,6 +54,7 @@ class MxcImage extends StatefulWidget {
     this.cacheKey,
     this.client,
     this.borderRadius = BorderRadius.zero,
+    this.cacheName,
     super.key,
   });
 
@@ -52,7 +63,10 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage> {
-  static final Map<String, Uint8List> _imageDataCache = {};
+  static final Map<String?, Map<String, Uint8List>> _imageDataCaches = {};
+  Map<String, Uint8List> get _imageDataCache =>
+      _imageDataCaches[widget.cacheName ?? ''] ??= {};
+
   Uint8List? _imageDataNoCache;
 
   Uint8List? get _imageData => widget.cacheKey == null
@@ -96,10 +110,18 @@ class _MxcImageState extends State<MxcImage> {
     }
 
     if (event != null) {
+      final useThumbnail = widget.isThumbnail && event.hasThumbnail;
+      if (!useThumbnail &&
+          !{
+            MessageTypes.Image,
+            MessageTypes.Sticker,
+          }.contains(event.messageType)) {
+        Logs().e('Event of type ${event.messageType} has no thumbnail!');
+      }
       final data = await event.downloadAndDecryptAttachment(
-        getThumbnail: widget.isThumbnail,
+        getThumbnail: useThumbnail,
       );
-      if (data.detectFileType is MatrixImageFile || widget.isThumbnail) {
+      if (data.detectFileType is MatrixImageFile) {
         if (!mounted) return;
         setState(() {
           _imageData = data.bytes;
@@ -109,7 +131,7 @@ class _MxcImageState extends State<MxcImage> {
     }
   }
 
-  void _tryLoad() async {
+  Future<void> _tryLoad() async {
     if (_imageData != null) {
       return;
     }
@@ -119,6 +141,8 @@ class _MxcImageState extends State<MxcImage> {
       if (!mounted) return;
       await Future.delayed(widget.retryDuration);
       _tryLoad();
+    } on MatrixException catch (e) {
+      Logs().d('Unable to load image', e);
     }
   }
 
@@ -128,19 +152,11 @@ class _MxcImageState extends State<MxcImage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad());
   }
 
-  Widget placeholder(BuildContext context) =>
-      widget.placeholder?.call(context) ??
-      Container(
-        width: widget.width,
-        height: widget.height,
-        alignment: Alignment.center,
-        child: const CircularProgressIndicator.adaptive(strokeWidth: 2),
-      );
-
   @override
   Widget build(BuildContext context) {
     final data = _imageData;
     final hasData = data != null && data.isNotEmpty;
+    final ungzippedLottieData = data == null ? null : _ungzipLottie(data);
 
     return AnimatedSwitcher(
       duration: PantheonThemes.animationDuration,
@@ -175,4 +191,48 @@ class _MxcImageState extends State<MxcImage> {
           : placeholder(context),
     );
   }
+}
+
+class _MxcImagePlaceholder extends StatelessWidget {
+  final double? width;
+  final double? height;
+  final Widget Function(BuildContext context)? placeholder;
+
+  const _MxcImagePlaceholder({
+    required this.width,
+    required this.height,
+    required this.placeholder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return placeholder?.call(context) ??
+        Container(
+          width: width,
+          height: height,
+          alignment: Alignment.center,
+          child: const CircularProgressIndicator.adaptive(strokeWidth: 2),
+        );
+  }
+}
+
+Uint8List? _ungzipLottie(Uint8List data) {
+  // early return if the data is not gzipped
+  if (data.length < 2 || data.first != 0x1f || data[1] != 0x8b) {
+    return null;
+  }
+
+  // try decoding json
+  try {
+    final decompressed = GZipDecoder().decodeBytes(data);
+    final jsonStr = utf8.decode(decompressed);
+    final json = jsonDecode(jsonStr);
+    if (json is Map && json.containsKey('v')) {
+      return Uint8List.fromList(utf8.encode(jsonStr));
+    }
+  } catch (_) {
+    return null;
+  }
+
+  return null;
 }

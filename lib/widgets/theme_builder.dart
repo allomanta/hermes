@@ -1,7 +1,12 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:hermes/utils/color_value.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,7 +17,8 @@ class ThemeBuilder extends StatefulWidget {
     BuildContext context,
     ThemeMode themeMode,
     Color? primaryColor,
-  ) builder;
+  )
+  builder;
 
   final String themeModeSettingsKey;
   final String primaryColorSettingsKey;
@@ -38,28 +44,26 @@ class ThemeController extends State<ThemeBuilder> {
   Color? get primaryColor => _primaryColor;
 
   static ThemeController of(BuildContext context) =>
-      Provider.of<ThemeController>(
-        context,
-        listen: false,
-      );
+      Provider.of<ThemeController>(context, listen: false);
 
-  void _loadData(_) async {
-    final preferences =
-        _sharedPreferences ??= await SharedPreferences.getInstance();
+  Future<void> _loadData(_) async {
+    final preferences = _sharedPreferences ??=
+        await SharedPreferences.getInstance();
 
     final rawThemeMode = preferences.getString(widget.themeModeSettingsKey);
     final rawColor = preferences.getInt(widget.primaryColorSettingsKey);
 
     setState(() {
-      _themeMode = ThemeMode.values
-          .singleWhereOrNull((value) => value.name == rawThemeMode);
+      _themeMode = ThemeMode.values.singleWhereOrNull(
+        (value) => value.name == rawThemeMode,
+      );
       _primaryColor = rawColor == null ? null : Color(rawColor);
     });
   }
 
   Future<void> setThemeMode(ThemeMode newThemeMode) async {
-    final preferences =
-        _sharedPreferences ??= await SharedPreferences.getInstance();
+    final preferences = _sharedPreferences ??=
+        await SharedPreferences.getInstance();
     await preferences.setString(widget.themeModeSettingsKey, newThemeMode.name);
     setState(() {
       _themeMode = newThemeMode;
@@ -67,8 +71,8 @@ class ThemeController extends State<ThemeBuilder> {
   }
 
   Future<void> setPrimaryColor(Color? newPrimaryColor) async {
-    final preferences =
-        _sharedPreferences ??= await SharedPreferences.getInstance();
+    final preferences = _sharedPreferences ??=
+        await SharedPreferences.getInstance();
     if (newPrimaryColor == null) {
       await preferences.remove(widget.primaryColorSettingsKey);
     } else {
@@ -93,11 +97,8 @@ class ThemeController extends State<ThemeBuilder> {
     return Provider(
       create: (_) => this,
       child: DynamicColorBuilder(
-        builder: (light, _) => widget.builder(
-          context,
-          themeMode,
-          primaryColor ?? light?.primary,
-        ),
+        builder: (light, _) =>
+            widget.builder(context, themeMode, primaryColor ?? light?.primary),
       ),
     );
   }

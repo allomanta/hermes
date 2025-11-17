@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -17,6 +22,7 @@ class PinnedEvents extends StatelessWidget {
   const PinnedEvents(this.controller, {super.key});
 
   Future<void> _displayPinnedEventsDialog(BuildContext context) async {
+    final l10n = L10n.of(context);
     final eventsResult = await showFutureLoadingDialog(
       context: context,
       future: () => Future.wait(
@@ -27,23 +33,28 @@ class PinnedEvents extends StatelessWidget {
     );
     final events = eventsResult.result;
     if (events == null) return;
+    if (!context.mounted) return;
 
     final eventId = events.length == 1
         ? events.single?.eventId
         : await showModalActionPopup<String>(
             context: context,
-            title: L10n.of(context).pin,
-            cancelLabel: L10n.of(context).cancel,
+            title: l10n.pin,
+            cancelLabel: l10n.cancel,
             actions: events
                 .map(
                   (event) => AdaptiveModalAction(
                     value: event?.eventId ?? '',
                     icon: const Icon(Icons.push_pin_outlined),
-                    label: event?.calcLocalizedBodyFallback(
-                          MatrixLocals(L10n.of(context)),
-                          withSenderNamePrefix: true,
-                          hideReply: true,
-                        ) ??
+                    label:
+                        event
+                            ?.calcLocalizedBodyFallback(
+                              MatrixLocals(l10n),
+                              withSenderNamePrefix: true,
+                              hideReply: true,
+                            )
+                            .trim()
+                            .replaceAll('\n', ' ') ??
                         'UNKNOWN',
                   ),
                 )
@@ -68,11 +79,14 @@ class PinnedEvents extends StatelessWidget {
       builder: (context, snapshot) {
         final event = snapshot.data;
         return ChatAppBarListTile(
-          title: event?.calcLocalizedBodyFallback(
-                MatrixLocals(L10n.of(context)),
-                withSenderNamePrefix: true,
-                hideReply: true,
-              ) ??
+          title:
+              event
+                  ?.calcLocalizedBodyFallback(
+                    MatrixLocals(L10n.of(context)),
+                    withSenderNamePrefix: true,
+                    hideReply: true,
+                  )
+                  .replaceAll('\n', ' ') ??
               L10n.of(context).loadingPleaseWait,
           leading: IconButton(
             splashRadius: 18,

@@ -11,8 +11,9 @@ import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/platform_infos.dart';
 
 class AndroidShareShortcuts {
-  static const _channel =
-      MethodChannel('im.hermes.hermes/direct_share_shortcuts');
+  static const _channel = MethodChannel(
+    'im.hermes.hermes/direct_share_shortcuts',
+  );
   static const _maxShortcuts = 10;
 
   static final Map<String, String?> _avatarCache = <String, String?>{};
@@ -51,21 +52,20 @@ class AndroidShareShortcuts {
     if (client == null || locals == null) return;
 
     await client.roomsLoading;
-    final rooms = client.rooms
-        .where(
-          (room) =>
-              room.membership == Membership.join &&
-              !room.isSpace &&
-              room.canSendDefaultMessages,
-        )
-        .toList()
-      ..sort(
-        (a, b) {
-          final bTs = _roomTimestamp(b);
-          final aTs = _roomTimestamp(a);
-          return bTs.compareTo(aTs);
-        },
-      );
+    final rooms =
+        client.rooms
+            .where(
+              (room) =>
+                  room.membership == Membership.join &&
+                  !room.isSpace &&
+                  room.canSendDefaultMessages,
+            )
+            .toList()
+          ..sort((a, b) {
+            final bTs = _roomTimestamp(b);
+            final aTs = _roomTimestamp(a);
+            return bTs.compareTo(aTs);
+          });
 
     final shortcuts = <Map<String, dynamic>>[];
     for (final room in rooms.take(_maxShortcuts)) {
@@ -134,8 +134,9 @@ class AndroidShareShortcuts {
   static Future<String?> takePendingShortcutRoomId() async {
     if (!PlatformInfos.isAndroid) return null;
     try {
-      final roomId =
-          await _channel.invokeMethod<String>('takePendingShortcutRoomId');
+      final roomId = await _channel.invokeMethod<String>(
+        'takePendingShortcutRoomId',
+      );
       if (roomId == null || roomId.isEmpty) {
         return null;
       }

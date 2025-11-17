@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -41,6 +44,7 @@ class ChatEmojiPicker extends StatelessWidget {
                           onEmojiSelected: controller.onEmojiSelected,
                           onBackspacePressed: controller.emojiPickerBackspace,
                           config: Config(
+                            locale: Localizations.localeOf(context),
                             emojiViewConfig: EmojiViewConfig(
                               noRecents: const NoRecent(),
                               backgroundColor:
@@ -51,8 +55,9 @@ class ChatEmojiPicker extends StatelessWidget {
                             ),
                             categoryViewConfig: CategoryViewConfig(
                               backspaceColor: theme.colorScheme.primary,
-                              iconColor:
-                                  theme.colorScheme.primary.withAlpha(128),
+                              iconColor: theme.colorScheme.primary.withAlpha(
+                                128,
+                              ),
                               iconColorSelected: theme.colorScheme.primary,
                               indicatorColor: theme.colorScheme.primary,
                               backgroundColor: theme.colorScheme.surface,
@@ -69,7 +74,12 @@ class ChatEmojiPicker extends StatelessWidget {
                         ),
                         StickerPickerDialog(
                           room: controller.room,
-                          onSelected: (sticker) {
+                          onSelected: (sticker) async {
+                            final proceed = await showTrustUserInRoomDialog(
+                              context,
+                              controller.room,
+                            );
+                            if (!proceed) return;
                             controller.room.sendEvent(
                               {
                                 'body': sticker.body,

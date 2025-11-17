@@ -32,7 +32,7 @@ class NewGroupView extends StatelessWidget {
       ),
       body: MaxWidthBody(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -103,8 +103,9 @@ class NewGroupView extends StatelessWidget {
               curve: PantheonThemes.animationCurve,
               child: controller.publicGroup
                   ? SwitchListTile.adaptive(
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 32),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                      ),
                       secondary: const Icon(Icons.search_outlined),
                       title: Text(L10n.of(context).groupCanBeFoundViaSearch),
                       value: controller.groupCanBeFound,
@@ -120,17 +121,16 @@ class NewGroupView extends StatelessWidget {
               child: controller.createGroupType == CreateGroupType.space
                   ? const SizedBox.shrink()
                   : SwitchListTile.adaptive(
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 32),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                      ),
                       secondary: Icon(
                         Icons.lock_outlined,
                         color: theme.colorScheme.onSurface,
                       ),
                       title: Text(
                         L10n.of(context).enableEncryption,
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurface,
-                        ),
+                        style: TextStyle(color: theme.colorScheme.onSurface),
                       ),
                       value: !controller.publicGroup,
                       onChanged: null,
@@ -141,8 +141,9 @@ class NewGroupView extends StatelessWidget {
               curve: PantheonThemes.animationCurve,
               child: controller.createGroupType == CreateGroupType.space
                   ? ListTile(
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 32),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                      ),
                       trailing: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.0),
                         child: Icon(Icons.info_outlined),
@@ -156,8 +157,9 @@ class NewGroupView extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed:
-                      controller.loading ? null : controller.submitAction,
+                  onPressed: controller.loading
+                      ? null
+                      : controller.submitAction,
                   child: controller.loading
                       ? const LinearProgressIndicator()
                       : Text(
@@ -180,9 +182,7 @@ class NewGroupView extends StatelessWidget {
                       ),
                       title: Text(
                         error.toLocalizedString(context),
-                        style: TextStyle(
-                          color: theme.colorScheme.error,
-                        ),
+                        style: TextStyle(color: theme.colorScheme.error),
                       ),
                     ),
             ),

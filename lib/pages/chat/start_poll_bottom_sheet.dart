@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
@@ -28,7 +29,9 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
 
   String? _txid;
 
-  void _createPoll() async {
+  Future<void> _createPoll() async {
+    final proceed = await showTrustUserInRoomDialog(context, widget.room);
+    if (!proceed || !mounted) return;
     try {
       var id = 0;
       _txid ??= widget.room.client.generateUniqueTransactionId();
@@ -46,18 +49,20 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
         maxSelections: _allowMultipleAnswers ? _answers.length : 1,
         txid: _txid,
       );
+      if (!mounted) return;
       Navigator.of(context).pop();
     } catch (e, s) {
       Logs().w('Unable to create poll', e, s);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toLocalizedString(context))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
     }
   }
 
   void _updateCanCreate([_]) {
-    final newCanCreate = _bodyController.text.trim().isNotEmpty &&
+    final newCanCreate =
+        _bodyController.text.trim().isNotEmpty &&
         !_answers.any((controller) => controller.text.trim().isEmpty);
     if (_canCreate != newCanCreate) {
       setState(() {
@@ -67,45 +72,30 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
   }
 
   @override
+  void dispose() {
+    _bodyController.dispose();
+    for (final answerController in _answers) {
+      answerController.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     const maxAnswers = 10;
     return Scaffold(
       appBar: AppBar(
-        leading: CloseButton(
-          onPressed: Navigator.of(context).pop,
-        ),
+        leading: CloseButton(onPressed: Navigator.of(context).pop),
         title: Text(L10n.of(context).startPoll),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         children: [
-          SegmentedButton<PollKind>(
-            selected: {_pollKind},
-            multiSelectionEnabled: false,
-            onSelectionChanged: (pollKind) => setState(() {
-              _pollKind = pollKind.first;
-            }),
-            segments: [
-              ButtonSegment(
-                value: PollKind.disclosed,
-                label: Text(
-                  L10n.of(context).answersVisible,
-                ),
-              ),
-              ButtonSegment(
-                value: PollKind.undisclosed,
-                label: Text(
-                  L10n.of(context).answersHidden,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
           TextField(
             controller: _bodyController,
-            minLines: 1,
+            minLines: 2,
             maxLines: 4,
-            maxLength: 512,
+            maxLength: 1024,
             onChanged: _updateCanCreate,
             decoration: InputDecoration(
               hintText: L10n.of(context).pollQuestion,
@@ -141,11 +131,22 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
               icon: const Icon(Icons.add_outlined),
               onPressed: _answers.length < maxAnswers
                   ? () => setState(() {
-                        _answers.add(TextEditingController());
-                      })
+                      _answers.add(TextEditingController());
+                    })
                   : null,
               label: Text(L10n.of(context).addAnswerOption),
             ),
+          ),
+          const Divider(height: 32),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Switch.adaptive(
+              value: _pollKind == PollKind.disclosed,
+              onChanged: (allow) => setState(() {
+                _pollKind = allow ? PollKind.disclosed : PollKind.undisclosed;
+              }),
+            ),
+            title: Text(L10n.of(context).answersVisible),
           ),
           ListTile(
             contentPadding: EdgeInsets.zero,
@@ -157,7 +158,6 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
             ),
             title: Text(L10n.of(context).allowMultipleAnswers),
           ),
-          const SizedBox(height: 8),
           ElevatedButton(
             onPressed: !isLoading && _canCreate ? _createPoll : null,
             child: isLoading

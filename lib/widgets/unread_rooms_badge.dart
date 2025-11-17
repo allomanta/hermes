@@ -1,6 +1,10 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:badges/badges.dart' as b;
+import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
 import 'matrix.dart';
@@ -21,9 +25,7 @@ class UnreadRoomsBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final unreadCount = Matrix.of(context)
-        .client
-        .rooms
+    final unreadCount = Matrix.of(context).client.rooms
         .where(filter)
         .where((r) => (r.isUnread || r.membership == Membership.invite))
         .length;
@@ -31,17 +33,11 @@ class UnreadRoomsBadge extends StatelessWidget {
       badgeStyle: b.BadgeStyle(
         badgeColor: theme.colorScheme.primary,
         elevation: 4,
-        borderSide: BorderSide(
-          color: theme.colorScheme.surface,
-          width: 2,
-        ),
+        borderSide: BorderSide(color: theme.colorScheme.surface, width: 2),
       ),
       badgeContent: Text(
         unreadCount.toString(),
-        style: TextStyle(
-          color: theme.colorScheme.onPrimary,
-          fontSize: 12,
-        ),
+        style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 12),
       ),
       showBadge: unreadCount != 0,
       badgeAnimation: const b.BadgeAnimation.scale(),

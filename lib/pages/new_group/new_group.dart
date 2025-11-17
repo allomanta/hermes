@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -13,8 +18,10 @@ import 'package:hermes/widgets/matrix.dart';
 
 class NewGroup extends StatefulWidget {
   final CreateGroupType createGroupType;
+  final String? spaceId;
   const NewGroup({
     this.createGroupType = CreateGroupType.group,
+    this.spaceId,
     super.key,
   });
 
@@ -49,10 +56,10 @@ class NewGroupController extends State<NewGroup> {
 
   void setGroupCanBeFound(bool b) => setState(() => groupCanBeFound = b);
 
-  void selectPhoto() async {
+  Future<void> selectPhoto() async {
     final photo = await selectFiles(
       context,
-      type: FileSelectorType.images,
+      type: FileType.image,
       allowMultiple: false,
     );
     final bytes = await photo.singleOrNull?.readAsBytes();
@@ -65,13 +72,21 @@ class NewGroupController extends State<NewGroup> {
 
   Future<void> _createGroup() async {
     if (!mounted) return;
-    final roomId = await Matrix.of(context).client.createGroupChat(
-      visibility:
-          groupCanBeFound ? sdk.Visibility.public : sdk.Visibility.private,
+    final client = Matrix.of(context).client;
+
+    final roomId = await client.createGroupChat(
+      visibility: groupCanBeFound
+          ? sdk.Visibility.public
+          : sdk.Visibility.private,
       preset: publicGroup
           ? sdk.CreateRoomPreset.publicChat
           : sdk.CreateRoomPreset.privateChat,
       groupName: nameController.text.isNotEmpty ? nameController.text : null,
+      powerLevelContentOverride: publicGroup
+          ? null
+          : {
+              'events': {MatrixRtcCallMember.eventType: 0},
+            },
       initialState: [
         if (avatar != null)
           sdk.StateEvent(
@@ -80,36 +95,51 @@ class NewGroupController extends State<NewGroup> {
           ),
       ],
     );
+    await _addToSpace(roomId);
     if (!mounted) return;
+
     context.go('/rooms/$roomId/invite');
   }
 
   Future<void> _createSpace() async {
     if (!mounted) return;
     final spaceId = await Matrix.of(context).client.createRoom(
-          preset: publicGroup
-              ? sdk.CreateRoomPreset.publicChat
-              : sdk.CreateRoomPreset.privateChat,
-          creationContent: {'type': RoomCreationTypes.mSpace},
-          visibility: publicGroup ? sdk.Visibility.public : null,
-          roomAliasName: publicGroup
-              ? nameController.text.trim().toLowerCase().replaceAll(' ', '_')
-              : null,
-          name: nameController.text.trim(),
-          powerLevelContentOverride: {'events_default': 100},
-          initialState: [
-            if (avatar != null)
-              sdk.StateEvent(
-                type: sdk.EventTypes.RoomAvatar,
-                content: {'url': avatarUrl.toString()},
-              ),
-          ],
-        );
+      preset: publicGroup
+          ? sdk.CreateRoomPreset.publicChat
+          : sdk.CreateRoomPreset.privateChat,
+      creationContent: {'type': RoomCreationTypes.mSpace},
+      visibility: publicGroup ? sdk.Visibility.public : null,
+      roomAliasName: publicGroup
+          ? nameController.text.trim().toLowerCase().replaceAll(' ', '_')
+          : null,
+      name: nameController.text.trim(),
+      powerLevelContentOverride: {'events_default': 100},
+      initialState: [
+        if (avatar != null)
+          sdk.StateEvent(
+            type: sdk.EventTypes.RoomAvatar,
+            content: {'url': avatarUrl.toString()},
+          ),
+      ],
+    );
+    await _addToSpace(spaceId);
     if (!mounted) return;
     context.pop<String>(spaceId);
   }
 
-  void submitAction([_]) async {
+  Future<void> _addToSpace(String roomId) async {
+    final spaceId = widget.spaceId;
+    if (spaceId != null) {
+      final activeSpace = Matrix.of(context).client.getRoomById(spaceId);
+      if (activeSpace == null) {
+        throw Exception('Can not add group to space: Space not found $spaceId');
+      }
+      await activeSpace.postLoad();
+      await activeSpace.setSpaceChild(roomId);
+    }
+  }
+
+  Future<void> submitAction([_]) async {
     final client = Matrix.of(context).client;
 
     try {
@@ -142,6 +172,22 @@ class NewGroupController extends State<NewGroup> {
         loading = false;
       });
     }
+  }
+
+  @override
+  void initState() {
+    final spaceId = widget.spaceId;
+    if (spaceId != null) {
+      final space = Matrix.of(context).client.getRoomById(spaceId);
+      publicGroup = space?.joinRules == JoinRules.public;
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
   }
 
   @override

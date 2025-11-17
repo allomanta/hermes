@@ -1,5 +1,7 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/app_config.dart';
 
@@ -49,7 +51,8 @@ class AdaptiveDialogAction extends StatelessWidget {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                    borderRadius: borderRadius ??
+                    borderRadius:
+                        borderRadius ??
                         BorderRadius.circular(AppConfig.borderRadius),
                   ),
                   backgroundColor: autofocus
@@ -79,5 +82,81 @@ class AdaptiveDialogAction extends StatelessWidget {
           child: child,
         );
     }
+  }
+}
+
+class AdaptiveDialogInkWell extends StatelessWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final EdgeInsets padding;
+
+  const AdaptiveDialogInkWell({
+    super.key,
+    required this.onTap,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if ({TargetPlatform.iOS, TargetPlatform.macOS}.contains(theme.platform)) {
+      return CupertinoButton(
+        onPressed: onTap,
+        borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+        color: theme.colorScheme.surfaceBright,
+        padding: padding,
+        child: child,
+      );
+    }
+    return Material(
+      color: onTap == null
+          ? theme.colorScheme.surfaceContainer
+          : theme.colorScheme.surfaceBright,
+      borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+        onTap: onTap,
+        child: Padding(
+          padding: padding,
+          child: Center(child: child),
+        ),
+      ),
+    );
+  }
+}
+
+class AdaptiveIconTextButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback? onTap;
+  const AdaptiveIconTextButton({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.secondary;
+    return Expanded(
+      child: AdaptiveDialogInkWell(
+        padding: EdgeInsets.all(8.0),
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: .min,
+          children: [
+            Icon(icon, color: color),
+            Text(
+              label,
+              style: TextStyle(fontSize: 12, color: color),
+              maxLines: 1,
+              overflow: .ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

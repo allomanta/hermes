@@ -118,18 +118,6 @@
             }
         }
     },
-    "badServerVersionsException": "Домаћи сервер подржава верзије:\n{serverVersions}\nали ова апликација подржава само {supportedVersions}",
-    "@badServerVersionsException": {
-        "type": "String",
-        "placeholders": {
-            "serverVersions": {
-                "type": "String"
-            },
-            "supportedVersions": {
-                "type": "String"
-            }
-        }
-    },
     "banFromChat": "Забрани у ћаскању",
     "@banFromChat": {
         "type": "String",
@@ -162,11 +150,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "botMessages": "Поруке Бота",
-    "@botMessages": {
-        "type": "String",
-        "placeholders": {}
-    },
     "cancel": "Откажи",
     "@cancel": {
         "type": "String",
@@ -182,30 +165,6 @@
         "type": "String",
         "placeholders": {
             "username": {
-                "type": "String"
-            }
-        }
-    },
-    "changedTheChatDescriptionTo": "{username} промени опис ћаскања у: „{description}“",
-    "@changedTheChatDescriptionTo": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            },
-            "description": {
-                "type": "String"
-            }
-        }
-    },
-    "changedTheChatNameTo": "{username} промени назив ћаскања у: „{chatname}“",
-    "@changedTheChatNameTo": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            },
-            "chatname": {
                 "type": "String"
             }
         }
@@ -361,11 +320,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "chatBackupDescription": "Ваша резервна копија ћаскања је обезбеђена кључем. Немојте да га изгубите.",
-    "@chatBackupDescription": {
-        "type": "String",
-        "placeholders": {}
-    },
     "chatDetails": "Детаљи ћаскања",
     "@chatDetails": {
         "type": "String",
@@ -382,7 +336,6 @@
         "placeholders": {}
     },
     "clearArchive": "Очисти архиву",
-    "@clearArchive": {},
     "close": "Затвори",
     "@close": {
         "type": "String",
@@ -468,28 +421,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "confirm": "Потврди",
-    "@confirm": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "connect": "Повежи се",
-    "@connect": {
-        "type": "String",
-        "placeholders": {}
-    },
     "contactHasBeenInvitedToTheGroup": "Особа је позвана у групу",
     "@contactHasBeenInvitedToTheGroup": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "containsDisplayName": "Садржи приказно име",
-    "@containsDisplayName": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "containsUserName": "Садржи корисничко име",
-    "@containsUserName": {
         "type": "String",
         "placeholders": {}
     },
@@ -567,33 +500,6 @@
             }
         }
     },
-    "dateWithoutYear": "{day} {month}",
-    "@dateWithoutYear": {
-        "type": "String",
-        "placeholders": {
-            "month": {
-                "type": "String"
-            },
-            "day": {
-                "type": "String"
-            }
-        }
-    },
-    "dateWithYear": "{day} {month} {year}",
-    "@dateWithYear": {
-        "type": "String",
-        "placeholders": {
-            "year": {
-                "type": "String"
-            },
-            "month": {
-                "type": "String"
-            },
-            "day": {
-                "type": "String"
-            }
-        }
-    },
     "deactivateAccountWarning": "Ово ће деактивирати ваш кориснички налог. Не може се повратити! Сигурни сте?",
     "@deactivateAccountWarning": {
         "type": "String",
@@ -616,16 +522,6 @@
     },
     "deleteMessage": "Брисање поруке",
     "@deleteMessage": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "device": "Уређај",
-    "@device": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "deviceId": "ИД уређаја",
-    "@deviceId": {
         "type": "String",
         "placeholders": {}
     },
@@ -684,23 +580,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "emotePacks": "Пакети емотија за собу",
-    "@emotePacks": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "emoteSettings": "Поставке емотија",
-    "@emoteSettings": {
-        "type": "String",
-        "placeholders": {}
-    },
     "emoteShortcode": "скраћеница",
     "@emoteShortcode": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "emoteWarnNeedToPick": "Морате да изаберете скраћеницу и слику за емоти!",
-    "@emoteWarnNeedToPick": {
         "type": "String",
         "placeholders": {}
     },
@@ -753,31 +634,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "enterYourHomeserver": "Унесите свој домаћи сервер",
-    "@enterYourHomeserver": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "everythingReady": "Све је спремно!",
-    "@everythingReady": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "extremeOffensive": "Екстремно увредљив",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "fileName": "Назив фајла",
-    "@fileName": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "hermes": "Hermes",
-    "@hermes": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fontSize": "Величина фонта",
     "@fontSize": {
         "type": "String",
@@ -795,11 +651,6 @@
     },
     "fromTheInvitation": "од позивања",
     "@fromTheInvitation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "goToTheNewRoom": "Иди у нову собу",
-    "@goToTheNewRoom": {
         "type": "String",
         "placeholders": {}
     },
@@ -854,28 +705,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "hideRedactedEvents": "Сакриј редиговане догађаје",
-    "@hideRedactedEvents": {
-        "type": "String",
-        "placeholders": {}
-    },
     "hideUnknownEvents": "Сакриј непознате догађаје",
     "@hideUnknownEvents": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "howOffensiveIsThisContent": "Колико је увредљив овај садржај?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "id": "ИД",
-    "@id": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "identity": "Идентитет",
-    "@identity": {
         "type": "String",
         "placeholders": {}
     },
@@ -896,11 +727,6 @@
     },
     "incorrectPassphraseOrKey": "Неисправна фраза или кључ опоравка",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Није увредљив",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -937,11 +763,6 @@
     },
     "invitedUsersOnly": "само позвани корисници",
     "@invitedUsersOnly": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inviteForMe": "Позивнице за мене",
-    "@inviteForMe": {
         "type": "String",
         "placeholders": {}
     },
@@ -1024,11 +845,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "license": "Лиценца",
-    "@license": {
-        "type": "String",
-        "placeholders": {}
-    },
     "lightTheme": "светли",
     "@lightTheme": {
         "type": "String",
@@ -1072,11 +888,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "memberChanges": "Измене чланова",
-    "@memberChanges": {
-        "type": "String",
-        "placeholders": {}
-    },
     "mention": "Спомени",
     "@mention": {
         "type": "String",
@@ -1094,11 +905,6 @@
     },
     "muteChat": "Ућуткај ћаскање",
     "@muteChat": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "needPantalaimonWarning": "За сада, потребан је Пантелејмон (Pantalaimon) да бисте користили шифровање с краја на крај.",
-    "@needPantalaimonWarning": {
         "type": "String",
         "placeholders": {}
     },
@@ -1147,11 +953,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "none": "Ништа",
-    "@none": {
-        "type": "String",
-        "placeholders": {}
-    },
     "noPasswordRecoveryDescription": "Још нисте одредили начин за опоравак лозинке.",
     "@noPasswordRecoveryDescription": {
         "type": "String",
@@ -1172,11 +973,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "notificationsEnabledForThisAccount": "Обавештења укључена за овај налог",
-    "@notificationsEnabledForThisAccount": {
-        "type": "String",
-        "placeholders": {}
-    },
     "numUsersTyping": "{count} корисника куца…",
     "@numUsersTyping": {
         "type": "String",
@@ -1186,23 +982,8 @@
             }
         }
     },
-    "offensive": "Увредљив",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offline": "Ван везе",
-    "@offline": {
-        "type": "String",
-        "placeholders": {}
-    },
     "ok": "у реду",
     "@ok": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "online": "На вези",
-    "@online": {
         "type": "String",
         "placeholders": {}
     },
@@ -1266,32 +1047,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "people": "Људи",
-    "@people": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "pickImage": "Избор слике",
-    "@pickImage": {
-        "type": "String",
-        "placeholders": {}
-    },
     "pin": "Закачи",
     "@pin": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "play": "Пусти {fileName}",
-    "@play": {
-        "type": "String",
-        "placeholders": {
-            "fileName": {
-                "type": "String"
-            }
-        }
-    },
-    "pleaseChoose": "Изаберите",
-    "@pleaseChoose": {
         "type": "String",
         "placeholders": {}
     },
@@ -1302,11 +1059,6 @@
     },
     "pleaseClickOnLink": "Кликните на везу у примљеној е-пошти па наставите.",
     "@pleaseClickOnLink": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "pleaseEnter4Digits": "Унесите 4 цифре или оставите празно да не закључавате апликацију.",
-    "@pleaseEnter4Digits": {
         "type": "String",
         "placeholders": {}
     },
@@ -1340,18 +1092,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "pushRules": "Правила протурања",
-    "@pushRules": {
-        "type": "String",
-        "placeholders": {}
-    },
     "reason": "Разлог",
     "@reason": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "recording": "Снимам",
-    "@recording": {
         "type": "String",
         "placeholders": {}
     },
@@ -1369,11 +1111,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "register": "Регистрација",
-    "@register": {
-        "type": "String",
-        "placeholders": {}
-    },
     "reject": "Одбиј",
     "@reject": {
         "type": "String",
@@ -1388,11 +1125,6 @@
             }
         }
     },
-    "rejoin": "Поново се придружи",
-    "@rejoin": {
-        "type": "String",
-        "placeholders": {}
-    },
     "remove": "Уклони",
     "@remove": {
         "type": "String",
@@ -1400,20 +1132,6 @@
     },
     "removeAllOtherDevices": "Уклони све остале уређаје",
     "@removeAllOtherDevices": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "removedBy": "Уклонио корисник {username}",
-    "@removedBy": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            }
-        }
-    },
-    "removeDevice": "Уклони уређај",
-    "@removeDevice": {
         "type": "String",
         "placeholders": {}
     },
@@ -1442,11 +1160,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "requestPermission": "Затражи дозволу",
-    "@requestPermission": {
-        "type": "String",
-        "placeholders": {}
-    },
     "roomHasBeenUpgraded": "Соба је надограђена",
     "@roomHasBeenUpgraded": {
         "type": "String",
@@ -1466,15 +1179,6 @@
     "@security": {
         "type": "String",
         "placeholders": {}
-    },
-    "seenByUser": "{username} прегледа",
-    "@seenByUser": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            }
-        }
     },
     "send": "Пошаљи",
     "@send": {
@@ -1503,11 +1207,6 @@
     },
     "sendMessages": "Слање порука",
     "@sendMessages": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "sendOriginal": "Пошаљи оригинал",
-    "@sendOriginal": {
         "type": "String",
         "placeholders": {}
     },
@@ -1575,21 +1274,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "setCustomEmotes": "постави посебне емотије",
-    "@setCustomEmotes": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "setInvitationLink": "Поставља везу позивнице",
-    "@setInvitationLink": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "setPermissionsLevel": "Одреди ниво дозволе",
-    "@setPermissionsLevel": {
-        "type": "String",
-        "placeholders": {}
-    },
     "setStatus": "Постави статус",
     "@setStatus": {
         "type": "String",
@@ -1613,16 +1297,6 @@
                 "type": "String"
             }
         }
-    },
-    "showPassword": "Прикажи лозинку",
-    "@showPassword": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "singlesignon": "Јединствена пријава",
-    "@singlesignon": {
-        "type": "String",
-        "placeholders": {}
     },
     "skip": "Прескочи",
     "@skip": {
@@ -1673,44 +1347,13 @@
         "type": "String",
         "placeholders": {}
     },
-    "title": "Hermes",
-    "@title": {
-        "description": "Title for the application",
-        "type": "String",
-        "placeholders": {}
-    },
-    "toggleFavorite": "Мењај омиљеност",
-    "@toggleFavorite": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "toggleMuted": "Мењај ућутканост",
-    "@toggleMuted": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "toggleUnread": "Означи не/прочитано",
-    "@toggleUnread": {
-        "type": "String",
-        "placeholders": {}
-    },
     "tooManyRequestsWarning": "Превише упита. Покушајте касније!",
     "@tooManyRequestsWarning": {
         "type": "String",
         "placeholders": {}
     },
-    "transferFromAnotherDevice": "Пренос са другог уређаја",
-    "@transferFromAnotherDevice": {
-        "type": "String",
-        "placeholders": {}
-    },
     "tryToSendAgain": "Покушај слање поново",
     "@tryToSendAgain": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "unavailable": "Недоступно",
-    "@unavailable": {
         "type": "String",
         "placeholders": {}
     },
@@ -1760,15 +1403,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "unreadChats": "{unreadCount, plural, other{непрочитаних ћаскања: {unreadCount}}}",
-    "@unreadChats": {
-        "type": "String",
-        "placeholders": {
-            "unreadCount": {
-                "type": "int"
-            }
-        }
-    },
     "userAndOthersAreTyping": "{username} и {count} корисника куцају…",
     "@userAndOthersAreTyping": {
         "type": "String",
@@ -1811,11 +1445,6 @@
             }
         }
     },
-    "username": "Корисничко име",
-    "@username": {
-        "type": "String",
-        "placeholders": {}
-    },
     "userSentUnknownEvent": "{username} посла {type} догађај",
     "@userSentUnknownEvent": {
         "type": "String",
@@ -1833,11 +1462,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "verify": "Верификуј",
-    "@verify": {
-        "type": "String",
-        "placeholders": {}
-    },
     "verifyStart": "Покрени верификацију",
     "@verifyStart": {
         "type": "String",
@@ -1850,11 +1474,6 @@
     },
     "verifyTitle": "Верификујем други налог",
     "@verifyTitle": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "videoCall": "Видео позив",
-    "@videoCall": {
         "type": "String",
         "placeholders": {}
     },
@@ -1893,11 +1512,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "wallpaper": "Тапета",
-    "@wallpaper": {
-        "type": "String",
-        "placeholders": {}
-    },
     "warning": "Упозорење!",
     "@warning": {
         "type": "String",
@@ -1920,11 +1534,6 @@
     },
     "whyDoYouWantToReportThis": "Зашто желите ово да пријавите?",
     "@whyDoYouWantToReportThis": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "wipeChatBackup": "Да обришем резервну копију како би направио нови сигурносни кључ?",
-    "@wipeChatBackup": {
         "type": "String",
         "placeholders": {}
     },
@@ -1962,5 +1571,537 @@
     "@yourPublicKey": {
         "type": "String",
         "placeholders": {}
+    },
+    "repeatPassword": "Ponovite lozinku",
+    "commandHint_cuddle": "Pošalji zagrljaj",
+    "@hugContent": {
+        "type": "String",
+        "placeholders": {
+            "senderName": {
+                "type": "String"
+            }
+        }
+    },
+    "@obtainingLocation": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@completedKeyVerification": {
+        "type": "String",
+        "placeholders": {
+            "sender": {
+                "type": "String"
+            }
+        }
+    },
+    "@synchronizingPleaseWaitCounter": {
+        "type": "String",
+        "placeholders": {
+            "percentage": {
+                "type": "String"
+            }
+        }
+    },
+    "@commandHint_create": {
+        "type": "String",
+        "description": "Usage hint for the command /create"
+    },
+    "@supposedMxid": {
+        "type": "String",
+        "placeholders": {
+            "mxid": {
+                "type": "String"
+            }
+        }
+    },
+    "@goToSpace": {
+        "type": "String",
+        "space": {}
+    },
+    "@noMatrixServer": {
+        "type": "String",
+        "placeholders": {
+            "server1": {
+                "type": "String"
+            },
+            "server2": {
+                "type": "String"
+            }
+        }
+    },
+    "@youInvitedBy": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "@youKickedAndBanned": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "@isReadyForKeyVerification": {
+        "type": "String",
+        "placeholders": {
+            "sender": {
+                "type": "String"
+            }
+        }
+    },
+    "@saveFile": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@countReplies": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "@versionWithNumber": {
+        "type": "String",
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "@countChats": {
+        "type": "String",
+        "placeholders": {
+            "chats": {
+                "type": "int"
+            }
+        }
+    },
+    "@spaceIsPublic": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@userLevel": {
+        "type": "String",
+        "placeholders": {
+            "level": {
+                "type": "int"
+            }
+        }
+    },
+    "@countFiles": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "@shareLocation": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@errorObtainingLocation": {
+        "type": "String",
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "@cantOpenUri": {
+        "type": "String",
+        "placeholders": {
+            "uri": {
+                "type": "String"
+            }
+        }
+    },
+    "@updateInstalled": {
+        "type": "String",
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "@synchronizingPleaseWait": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@commandHint_clearcache": {
+        "type": "String",
+        "description": "Usage hint for the command /clearcache"
+    },
+    "@noUsersFoundWithQuery": {
+        "type": "String",
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
+    },
+    "@spaceName": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@sentVoiceMessage": {
+        "type": "String",
+        "placeholders": {
+            "sender": {
+                "type": "String"
+            },
+            "duration": {
+                "type": "String"
+            }
+        }
+    },
+    "@redactedBy": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "@autoplayImages": {
+        "type": "String",
+        "placeholder": {}
+    },
+    "@startedKeyVerification": {
+        "type": "String",
+        "placeholders": {
+            "sender": {
+                "type": "String"
+            }
+        }
+    },
+    "@fileIsTooBigForServer": {
+        "type": "String",
+        "placeholders": {
+            "max": {
+                "type": "String"
+            }
+        }
+    },
+    "@adminLevel": {
+        "type": "String",
+        "placeholders": {
+            "level": {
+                "type": "int"
+            }
+        }
+    },
+    "@aboutHomeserver": {
+        "type": "String",
+        "placeholders": {
+            "homeserver": {
+                "type": "String"
+            }
+        }
+    },
+    "@locationPermissionDeniedNotice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@mute": {
+        "description": "This should be a very short string because there is not much space in the button!"
+    },
+    "@sendAsText": {
+        "type": "String"
+    },
+    "@commandInvalid": {
+        "type": "String"
+    },
+    "@locationDisabledNotice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@openInMaps": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@redactedByBecause": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            },
+            "reason": {
+                "type": "String"
+            }
+        }
+    },
+    "@youHaveWithdrawnTheInvitationFor": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "@youInvitedUser": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "@fileHasBeenSavedAt": {
+        "type": "String",
+        "placeholders": {
+            "path": {
+                "type": "String"
+            }
+        }
+    },
+    "@spaceMemberOfCanKnock": {
+        "type": "String",
+        "placeholders": {
+            "spaces": {
+                "type": "String"
+            }
+        }
+    },
+    "@commandMissing": {
+        "type": "String",
+        "placeholders": {
+            "command": {
+                "type": "String"
+            }
+        },
+        "description": "State that {command} is not a valid /command."
+    },
+    "@commandHint_discardsession": {
+        "type": "String",
+        "description": "Usage hint for the command /discardsession"
+    },
+    "@googlyEyesContent": {
+        "type": "String",
+        "placeholders": {
+            "senderName": {
+                "type": "String"
+            }
+        }
+    },
+    "@youBannedUser": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "@chatSearchedUntil": {
+        "type": "String",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "@sessionLostBody": {
+        "type": "String",
+        "placeholders": {
+            "url": {
+                "type": "String"
+            },
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "@thereAreCountUsersBlocked": {
+        "type": "String",
+        "count": {}
+    },
+    "@commandHint_myroomavatar": {
+        "type": "String",
+        "description": "Usage hint for the command /myroomavatar"
+    },
+    "@hasKnocked": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "@wrongPinEntered": {
+        "type": "String",
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "@createNewSpace": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@wasDirectChatDisplayName": {
+        "type": "String",
+        "placeholders": {
+            "oldDisplayName": {
+                "type": "String"
+            }
+        }
+    },
+    "@unknownPushRule": {
+        "type": "String",
+        "placeholders": {
+            "rule": {
+                "type": "String"
+            }
+        }
+    },
+    "@youKicked": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "@reactedWith": {
+        "type": "String",
+        "placeholders": {
+            "sender": {
+                "type": "String"
+            },
+            "reaction": {
+                "type": "String"
+            }
+        }
+    },
+    "@cuddleContent": {
+        "type": "String",
+        "placeholders": {
+            "senderName": {
+                "type": "String"
+            }
+        }
+    },
+    "@emoteKeyboardNoRecents": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "@acceptedKeyVerification": {
+        "type": "String",
+        "placeholders": {
+            "sender": {
+                "type": "String"
+            }
+        }
+    },
+    "@chatCanBeDiscoveredViaSearchOnServer": {
+        "type": "String",
+        "placeholders": {
+            "server": {
+                "type": "String"
+            }
+        }
+    },
+    "@canceledKeyVerification": {
+        "type": "String",
+        "placeholders": {
+            "sender": {
+                "type": "String"
+            }
+        }
+    },
+    "@commandHint_dm": {
+        "type": "String",
+        "description": "Usage hint for the command /dm"
+    },
+    "@restoreSessionBody": {
+        "type": "String",
+        "placeholders": {
+            "url": {
+                "type": "String"
+            },
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "@youUnbannedUser": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "@appWantsToUseForLogin": {
+        "type": "String",
+        "placeholders": {
+            "server": {
+                "type": "String"
+            }
+        }
+    },
+    "@unreadChatsInApp": {
+        "type": "String",
+        "placeholders": {
+            "appname": {
+                "type": "String"
+            },
+            "unread": {
+                "type": "String"
+            }
+        }
+    },
+    "@countVotes": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "@moderatorLevel": {
+        "type": "String",
+        "placeholders": {
+            "level": {
+                "type": "int"
+            }
+        }
+    },
+    "@sendImages": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "@countInvited": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "@spaceMemberOf": {
+        "type": "String",
+        "placeholders": {
+            "spaces": {
+                "type": "String"
+            }
+        }
+    },
+    "@requestedKeyVerification": {
+        "type": "String",
+        "placeholders": {
+            "sender": {
+                "type": "String"
+            }
+        }
+    },
+    "@searchIn": {
+        "type": "String",
+        "placeholders": {
+            "chat": {
+                "type": "String"
+            }
+        }
     }
 }

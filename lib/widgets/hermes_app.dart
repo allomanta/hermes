@@ -14,7 +14,7 @@ import 'matrix.dart';
 class HermesApp extends StatelessWidget {
   final Widget? testWidget;
   final List<Client> clients;
-  final String? pincode;
+  final ({String? pincode, bool useBiometrics}) appLockSettings;
   final SharedPreferences store;
 
   const HermesApp({
@@ -22,7 +22,7 @@ class HermesApp extends StatelessWidget {
     this.testWidget,
     required this.clients,
     required this.store,
-    this.pincode,
+    required this.appLockSettings,
   });
 
   /// getInitialLink may rereturn the value multiple times if this view is
@@ -35,6 +35,19 @@ class HermesApp extends StatelessWidget {
   static final GoRouter router = GoRouter(
     routes: AppRoutes.routes,
     debugLogDiagnostics: true,
+    redirect: (context, state) {
+      // Workaround for content sharings passed to go router:
+      if ({'content', 'sharemedia-im.hermes.app'}.contains(state.uri.scheme)) {
+        Logs().d('Ignore content sharing handling in go router', state.uri);
+        return '/';
+      }
+
+      // Pass deep links to app:
+      if (state.uri.toString().startsWith(AppConfig.deepLinkPrefix)) {
+        return '/rooms/newprivatechat#${state.uri}';
+      }
+      return null;
+    },
   );
 
   @override
@@ -43,23 +56,36 @@ class HermesApp extends StatelessWidget {
       builder: (context, themeMode, primaryColor) => MaterialApp.router(
         title: AppSettings.applicationName.value,
         themeMode: themeMode,
-        theme:
-            PantheonThemes.buildTheme(context, Brightness.light, primaryColor),
-        darkTheme:
-            PantheonThemes.buildTheme(context, Brightness.dark, primaryColor),
+        theme: PantheonThemes.buildTheme(
+          context,
+          Brightness.light,
+          primaryColor,
+        ),
+        darkTheme: PantheonThemes.buildTheme(
+          context,
+          Brightness.dark,
+          primaryColor,
+        ),
         scrollBehavior: CustomScrollBehavior(),
-        localizationsDelegates: L10n.localizationsDelegates,
+        localizationsDelegates: [
+          ...L10n.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+          ...GlobalCupertinoLocalizations.delegates,
+        ],
         supportedLocales: L10n.supportedLocales,
         routerConfig: router,
         builder: (context, child) => AppLockWidget(
-          pincode: pincode,
-          clients: clients,
+          pincode: appLockSettings.pincode,
+          useBiometrics: appLockSettings.useBiometrics,
+          isLoggedIn: clients.any((client) => client.isLogged()),
           // Need a navigator above the Matrix widget for
           // displaying dialogs
           child: Matrix(
             clients: clients,
             store: store,
-            child: testWidget ?? child,
+            child: CallOverlay(
+              child: testWidget ?? child ?? const SizedBox.shrink(),
+            ),
           ),
         ),
       ),

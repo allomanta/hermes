@@ -19,100 +19,139 @@ class SettingsSecurity extends StatefulWidget {
 }
 
 class SettingsSecurityController extends State<SettingsSecurity> {
-  void setAppLockAction() async {
+  Future<void> toggleBiometrics() async {
+    AppLock.of(context).showLockScreen();
+
+    final oldState = AppLock.of(context).useBiometrics;
+    final actionStr = oldState
+        ? L10n.of(context).disableBiometrics
+        : L10n.of(context).enableBiometrics;
+    final consent = await showOkCancelAlertDialog(
+      context: context,
+      title: actionStr,
+      message: L10n.of(context).biometricsDescription,
+      okLabel: actionStr,
+      cancelLabel: L10n.of(context).cancel,
+      isDestructive: true,
+    );
+    if (consent != OkCancelResult.ok) return;
+    if (!mounted) return;
+
+    if (!oldState) {
+      final localAuth = LocalAuthentication();
+      final unlocked = await localAuth.authenticate(
+        localizedReason: actionStr,
+        biometricOnly: true,
+      );
+      if (!unlocked) return;
+      if (!mounted) return;
+    }
+    await AppLock.of(context).changeUseBiometrics(!oldState);
+    setState(() {});
+  }
+
+  Future<void> disableAppLockAction() async {
+    AppLock.of(context).showLockScreen();
+    final consent = await showOkCancelAlertDialog(
+      context: context,
+      title: L10n.of(context).disableAppLock,
+      message: L10n.of(context).disableAppLockAreYouSure,
+      okLabel: L10n.of(context).disableAppLock,
+      cancelLabel: L10n.of(context).cancel,
+      isDestructive: true,
+    );
+    if (consent != OkCancelResult.ok) return;
+    if (!mounted) return;
+    await AppLock.of(context).changePincode(null);
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  Future<void> setAppLockAction() async {
+    await AppLock.of(context).changeUseBiometrics(false);
+    if (!mounted) return;
+    final l10n = L10n.of(context);
     if (AppLock.of(context).isActive) {
       AppLock.of(context).showLockScreen();
     }
     final newLock = await showTextInputDialog(
       useRootNavigator: false,
       context: context,
-      title: L10n.of(context).pleaseChooseAPasscode,
-      message: L10n.of(context).pleaseEnter4Digits,
-      cancelLabel: L10n.of(context).cancel,
+      title: l10n.pleaseChooseAPasscode,
+      message: l10n.pleaseEnter6Digits,
+      cancelLabel: l10n.cancel,
       validator: (text) {
-        if (text.isEmpty || (text.length == 4 && int.tryParse(text)! >= 0)) {
+        if (text.length == 6 && int.tryParse(text)! >= 0) {
           return null;
         }
-        return L10n.of(context).pleaseEnter4Digits;
+        return l10n.pleaseEnter6Digits;
       },
       keyboardType: TextInputType.number,
       obscureText: true,
       maxLines: 1,
       minLines: 1,
-      maxLength: 4,
+      maxLength: 6,
     );
     if (newLock != null) {
+      if (!mounted) return;
       await AppLock.of(context).changePincode(newLock);
+      setState(() {});
     }
   }
 
-  void deleteAccountAction() async {
+  Future<void> deleteAccountAction() async {
+    final l10n = L10n.of(context);
+    final matrix = Matrix.of(context);
     if (await showOkCancelAlertDialog(
           useRootNavigator: false,
           context: context,
-          title: L10n.of(context).warning,
-          message: L10n.of(context).deactivateAccountWarning,
-          okLabel: L10n.of(context).ok,
-          cancelLabel: L10n.of(context).cancel,
+          title: l10n.warning,
+          message: l10n.deactivateAccountWarning,
+          okLabel: l10n.ok,
+          cancelLabel: l10n.cancel,
           isDestructive: true,
         ) ==
         OkCancelResult.cancel) {
       return;
     }
-    final supposedMxid = Matrix.of(context).client.userID!;
+    if (!mounted) return;
+    final supposedMxid = matrix.client.userID!;
     final mxid = await showTextInputDialog(
       useRootNavigator: false,
       context: context,
-      title: L10n.of(context).confirmMatrixId,
-      validator: (text) => text == supposedMxid
-          ? null
-          : L10n.of(context).supposedMxid(supposedMxid),
+      title: l10n.confirmMatrixId,
+      validator: (text) =>
+          text == supposedMxid ? null : l10n.supposedMxid(supposedMxid),
       isDestructive: true,
-      okLabel: L10n.of(context).delete,
-      cancelLabel: L10n.of(context).cancel,
+      okLabel: l10n.delete,
+      cancelLabel: l10n.cancel,
     );
     if (mxid == null || mxid.isEmpty || mxid != supposedMxid) {
       return;
     }
-    final input = await showTextInputDialog(
-      useRootNavigator: false,
+    if (!mounted) return;
+    final resp = await showFutureLoadingDialog(
       context: context,
-      title: L10n.of(context).pleaseEnterYourPassword,
-      okLabel: L10n.of(context).ok,
-      cancelLabel: L10n.of(context).cancel,
-      isDestructive: true,
-      obscureText: true,
-      hintText: '******',
-      minLines: 1,
-      maxLines: 1,
+      delay: false,
+      future: () => matrix.client.uiaRequestBackground<IdServerUnbindResult?>(
+        (auth) => matrix.client.deactivateAccount(auth: auth, erase: true),
+      ),
     );
-    if (input == null) return;
-    await showFutureLoadingDialog(
-      context: context,
-      future: () => Matrix.of(context).client.deactivateAccount(
-            auth: AuthenticationPassword(
-              password: input,
-              identifier: AuthenticationUserIdentifier(
-                user: Matrix.of(context).client.userID!,
-              ),
-            ),
-          ),
-    );
-  }
 
-  void showBootstrapDialog(BuildContext context) async {
-    await BootstrapDialog(
-      client: Matrix.of(context).client,
-    ).show(context);
+    if (!resp.isError) {
+      if (!mounted) return;
+      await showFutureLoadingDialog(
+        context: context,
+        future: () => matrix.client.logout(),
+      );
+    }
   }
 
   Future<void> dehydrateAction() => Matrix.of(context).dehydrateAction(context);
 
-  void changeShareKeysWith(ShareKeysWith? shareKeysWith) async {
+  Future<void> changeShareKeysWith(ShareKeysWith? shareKeysWith) async {
     if (shareKeysWith == null) return;
-    AppSettings.shareKeysWith.setItem(
-      shareKeysWith.name,
-    );
+    AppSettings.shareKeysWith.setItem(shareKeysWith.name);
     Matrix.of(context).client.shareKeysWith = shareKeysWith;
     setState(() {});
   }

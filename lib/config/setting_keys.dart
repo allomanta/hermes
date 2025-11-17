@@ -1,9 +1,15 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-
 import 'package:async/async.dart';
+import 'package:hermes/utils/platform_infos.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:managed_configurations/managed_configurations.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hermes/utils/platform_infos.dart';
@@ -47,6 +53,9 @@ import 'package:hermes/utils/platform_infos.dart';
 
 enum AppSettings<T> {
   textMessageMaxLength<int>('textMessageMaxLength', 16384),
+
+  /// Max lines for unselected HTML/text bubbles; 0 = unlimited (no fade).
+  messagePreviewMaxLines<int>('chat.fluffy.message_preview_max_lines', 50),
   audioRecordingNumChannels<int>('audioRecordingNumChannels', 1),
   audioRecordingAutoGain<bool>('audioRecordingAutoGain', true),
   audioRecordingEchoCancel<bool>('audioRecordingEchoCancel', false),
@@ -80,10 +89,7 @@ enum AppSettings<T> {
     'chat.pantheon.swipePopEnableFullScreenDrag',
     true,
   ),
-  swipePopDuration<int>(
-    'chat.pantheon.swipePopDuration',
-    280,
-  ),
+  swipePopDuration<int>('chat.pantheon.swipePopDuration', 280),
   swipePopMinimumDragFraction<double>(
     'chat.pantheon.swipePopMinimumDragFraction',
     0.3,
@@ -102,38 +108,44 @@ enum AppSettings<T> {
     'chat.pantheon.no_encryption_warning_shown',
     false,
   ),
-  displayChatDetailsColumn(
-    'chat.pantheon.display_chat_details_column',
-    false,
-  ),
+  displayChatDetailsColumn('chat.pantheon.display_chat_details_column', false),
   // AppConfig-mirrored settings
   applicationName<String>('chat.pantheon.application_name', 'Hermes'),
   defaultHomeserver<String>('chat.pantheon.default_homeserver', 'matrix.org'),
   // colorSchemeSeed stored as ARGB int
-  colorSchemeSeedInt<int>(
-    'chat.pantheon.color_scheme_seed',
-    0xFF5625BA,
-  ),
+  colorSchemeSeedInt<int>('chat.pantheon.color_scheme_seed', 0xFF5625BA),
   enableSoftLogout<bool>('chat.pantheon.enable_soft_logout', false);
 
   final String key;
-  final T defaultValue;
+  final T _defaultValue;
 
-  const AppSettings(this.key, this.defaultValue);
+  const AppSettings(this.key, this._defaultValue);
 
   static SharedPreferences get store => _store!;
   static SharedPreferences? _store;
 
-  static Future<SharedPreferences> init({loadWebConfigFile = true}) async {
+  static Map<String, Object?>? _platformConfiguration;
+
+  T get defaultValue {
+    final platformConfig = _platformConfiguration?[name];
+    if (platformConfig is T) return platformConfig;
+    return _defaultValue;
+  }
+
+  static Future<void> reset({bool loadWebConfigFile = true}) async {
+    await AppSettings._store!.clear();
+    await init(loadWebConfigFile: loadWebConfigFile);
+  }
+
+  static Future<SharedPreferences> init({bool loadWebConfigFile = true}) async {
     if (AppSettings._store != null) return AppSettings.store;
 
     final store = AppSettings._store = await SharedPreferences.getInstance();
 
     // Migrate wrong datatype for fontSizeFactor
-    final fontSizeFactorString =
-        Result(() => store.getString(AppSettings.fontSizeFactor.key))
-            .asValue
-            ?.value;
+    final fontSizeFactorString = Result(
+      () => store.getString(AppSettings.fontSizeFactor.key),
+    ).asValue?.value;
     if (fontSizeFactorString != null) {
       Logs().i('Migrate wrong datatype for fontSizeFactor!');
       await store.remove(AppSettings.fontSizeFactor.key);
@@ -146,29 +158,24 @@ enum AppSettings<T> {
     if (store.getBool(AppSettings.sendOnEnter.key) == null) {
       await store.setBool(AppSettings.sendOnEnter.key, !PlatformInfos.isMobile);
     }
-    if (kIsWeb && loadWebConfigFile) {
+    if (store.getBool(AppSettings.doubleTapToReact.key) == null) {
+      await store.setBool(
+        AppSettings.doubleTapToReact.key,
+        PlatformInfos.isMobile,
+      );
+    }
+
+    // Load configuration from config.json file or MDM:
+    if (PlatformInfos.isMobile) {
+      _platformConfiguration =
+          await ManagedConfigurations().getManagedConfigurations;
+    } else if (kIsWeb && loadWebConfigFile) {
       try {
-        final configJsonString =
-            utf8.decode((await http.get(Uri.parse('config.json'))).bodyBytes);
-        final configJson =
+        final configJsonString = utf8.decode(
+          (await http.get(Uri.parse('config.json'))).bodyBytes,
+        );
+        _platformConfiguration =
             json.decode(configJsonString) as Map<String, Object?>;
-        for (final setting in AppSettings.values) {
-          if (store.get(setting.key) != null) continue;
-          final configValue = configJson[setting.name];
-          if (configValue == null) continue;
-          if (configValue is bool) {
-            await store.setBool(setting.key, configValue);
-          }
-          if (configValue is String) {
-            await store.setString(setting.key, configValue);
-          }
-          if (configValue is int) {
-            await store.setInt(setting.key, configValue);
-          }
-          if (configValue is double) {
-            await store.setDouble(setting.key, configValue);
-          }
-        }
       } on FormatException catch (_) {
         Logs().v('[ConfigLoader] config.json not found');
       } catch (e) {
@@ -178,6 +185,23 @@ enum AppSettings<T> {
 
     return store;
   }
+}
+
+extension AppSettingsBoolNExtension on AppSettings<bool?> {
+  bool? get value {
+    final value = Result(() => AppSettings.store.getBool(key));
+    final error = value.asError;
+    if (error != null) {
+      Logs().e(
+        'Unable to fetch $key from storage. Removing entry...',
+        error.error,
+        error.stackTrace,
+      );
+    }
+    return value.asValue?.value;
+  }
+
+  Future<void> setItem(bool value) => AppSettings.store.setBool(key, value);
 }
 
 extension AppSettingsBoolExtension on AppSettings<bool> {
@@ -246,4 +270,22 @@ extension AppSettingsDoubleExtension on AppSettings<double> {
   }
 
   Future<void> setItem(double value) => AppSettings.store.setDouble(key, value);
+}
+
+extension AppSettingsStringListExtension on AppSettings<List<String>> {
+  List<String> get value {
+    final value = Result(() => AppSettings.store.getStringList(key));
+    final error = value.asError;
+    if (error != null) {
+      Logs().e(
+        'Unable to fetch $key from storage. Removing entry...',
+        error.error,
+        error.stackTrace,
+      );
+    }
+    return value.asValue?.value ?? defaultValue;
+  }
+
+  Future<void> setItem(List<String> value) =>
+      AppSettings.store.setStringList(key, value);
 }

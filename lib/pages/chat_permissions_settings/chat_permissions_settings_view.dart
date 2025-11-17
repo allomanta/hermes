@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_permissions_settings/chat_permissions_settings.dart';
@@ -41,13 +42,13 @@ class ChatPermissionsSettingsView extends StatelessWidget {
             final eventsPowerLevels = Map<String, int?>.from(
               powerLevelsContent.tryGetMap<String, int?>('events') ?? {},
             )..removeWhere((k, v) => v is! int);
+            eventsPowerLevels[MatrixRtcCallMember.eventType] ??=
+                powerLevelsContent['state_default'] as int? ?? 50;
             return Column(
               children: [
                 ListTile(
                   leading: const Icon(Icons.info_outlined),
-                  subtitle: Text(
-                    L10n.of(context).chatPermissionsDescription,
-                  ),
+                  subtitle: Text(L10n.of(context).chatPermissionsDescription),
                 ),
                 Divider(color: theme.dividerColor),
                 ListTile(
@@ -60,7 +61,7 @@ class ChatPermissionsSettingsView extends StatelessWidget {
                   ),
                 ),
                 Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: .min,
                   children: [
                     for (final entry in powerLevels.entries)
                       PermissionsListTile(
@@ -87,12 +88,14 @@ class ChatPermissionsSettingsView extends StatelessWidget {
                     Builder(
                       builder: (context) {
                         const key = 'rooms';
-                        final value = powerLevelsContent
-                                .containsKey('notifications')
+                        final value =
+                            powerLevelsContent.containsKey('notifications')
                             ? powerLevelsContent
-                                    .tryGetMap<String, Object?>('notifications')
-                                    ?.tryGet<int>('rooms') ??
-                                0
+                                      .tryGetMap<String, Object?>(
+                                        'notifications',
+                                      )
+                                      ?.tryGet<int>('rooms') ??
+                                  0
                             : 0;
                         return PermissionsListTile(
                           permissionKey: key,

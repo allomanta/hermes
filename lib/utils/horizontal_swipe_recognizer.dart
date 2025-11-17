@@ -61,8 +61,10 @@ class HorizontalSwipeRecognizer extends HorizontalDragGestureRecognizer {
       if (deltaX != 0.0) {
         final logicalDelta = deltaX * allowedSign;
         _accumulatedDelta += logicalDelta;
-        final slop =
-            computeHitSlop(_pointerKind ?? event.kind, gestureSettings);
+        final slop = computeHitSlop(
+          _pointerKind ?? event.kind,
+          gestureSettings,
+        );
         if (_accumulatedDelta.abs() > slop) {
           _resolvedDirection = true;
           if (_accumulatedDelta < 0) {

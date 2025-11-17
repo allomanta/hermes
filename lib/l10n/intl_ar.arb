@@ -128,30 +128,6 @@
             }
         }
     },
-    "changedTheChatDescriptionTo": "غيَّر {username} وصف المحادثة الى: '{description}'",
-    "@changedTheChatDescriptionTo": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            },
-            "description": {
-                "type": "String"
-            }
-        }
-    },
-    "changedTheChatNameTo": "غيَّر {username} اسم المحادثة الى: '{chatname}'",
-    "@changedTheChatNameTo": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            },
-            "chatname": {
-                "type": "String"
-            }
-        }
-    },
     "changedTheChatPermissions": "غيَّر {username} أذون المحادثة",
     "@changedTheChatPermissions": {
         "type": "String",
@@ -313,16 +289,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "confirm": "أكّد",
-    "@confirm": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "connect": "اتصل",
-    "@connect": {
-        "type": "String",
-        "placeholders": {}
-    },
     "contactHasBeenInvitedToTheGroup": "دعيَ المراسل للمجموعة",
     "@contactHasBeenInvitedToTheGroup": {
         "type": "String",
@@ -344,15 +310,6 @@
         "placeholders": {
             "error": {
                 "type": "String"
-            }
-        }
-    },
-    "countParticipants": "{count} منتسبا",
-    "@countParticipants": {
-        "type": "String",
-        "placeholders": {
-            "count": {
-                "type": "int"
             }
         }
     },
@@ -392,33 +349,6 @@
             }
         }
     },
-    "dateWithoutYear": "{month}-{day}",
-    "@dateWithoutYear": {
-        "type": "String",
-        "placeholders": {
-            "month": {
-                "type": "String"
-            },
-            "day": {
-                "type": "String"
-            }
-        }
-    },
-    "dateWithYear": "{day}/{month}/{year}",
-    "@dateWithYear": {
-        "type": "String",
-        "placeholders": {
-            "year": {
-                "type": "String"
-            },
-            "month": {
-                "type": "String"
-            },
-            "day": {
-                "type": "String"
-            }
-        }
-    },
     "deactivateAccountWarning": "لا مجال للعودة، أتأكد تعطيل حسابك؟",
     "@deactivateAccountWarning": {
         "type": "String",
@@ -436,11 +366,6 @@
     },
     "deleteMessage": "حذف الرسالة",
     "@deleteMessage": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "device": "جهاز",
-    "@device": {
         "type": "String",
         "placeholders": {}
     },
@@ -474,18 +399,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "emoteSettings": "اعدادات الانفعالات",
-    "@emoteSettings": {
-        "type": "String",
-        "placeholders": {}
-    },
     "emoteShortcode": "رمز الانفعالة",
     "@emoteShortcode": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "emoteWarnNeedToPick": "اختر صورة ورمزا للانفعالة!",
-    "@emoteWarnNeedToPick": {
         "type": "String",
         "placeholders": {}
     },
@@ -517,21 +432,6 @@
                 "type": "String"
             }
         }
-    },
-    "enterYourHomeserver": "أدخل الخادم",
-    "@enterYourHomeserver": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "fileName": "اسم الملف",
-    "@fileName": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "hermes": "فلافي-شات",
-    "@hermes": {
-        "type": "String",
-        "placeholders": {}
     },
     "forward": "أعد التوجيه",
     "@forward": {
@@ -594,16 +494,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "id": "المعرّف",
-    "@id": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "identity": "المُعرّف",
-    "@identity": {
-        "type": "String",
-        "placeholders": {}
-    },
     "ignoredUsers": "المستخدمون المتجاهلون",
     "@ignoredUsers": {
         "type": "String",
@@ -650,7 +540,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "inviteText": "دعاك {username} إلى hermes.\n1. قم بزيارة موقع hermes.im وقم بتثبيت التطبيق\n2. قم بإنشاءحساب أو تسجيل الدخول\n3. افتح رابط الدعوة:\n {link}",
+    "inviteText": "دعاك {username} إلى Hermes.\n1. قم بزيارة موقع hermes.im وقم بتثبيت التطبيق\n2. قم بإنشاءحساب أو تسجيل الدخول\n3. افتح رابط الدعوة:\n {link}",
     "@inviteText": {
         "type": "String",
         "placeholders": {
@@ -729,11 +619,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "license": "الرخصة",
-    "@license": {
-        "type": "String",
-        "placeholders": {}
-    },
     "lightTheme": "فاتح",
     "@lightTheme": {
         "type": "String",
@@ -787,13 +672,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "needPantalaimonWarning": "اعلم أننا نستخدم بانتاليمون للتشفير طرفا لطرف.",
-    "@needPantalaimonWarning": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "newMessageInhermes": "💬 رسالة جديدة في hermes",
-    "@newMessageInhermes": {
+    "newMessageInHermes": "💬 رسالة جديدة في Hermes",
+    "@newMessageInHermes": {
         "type": "String",
         "placeholders": {}
     },
@@ -814,11 +694,6 @@
     },
     "noGoogleServicesWarning": "يبدو أن خدمة Firebase Cloud Messaging غير متاحة على جهازك. لمواصلة تلقي الإشعارات، نوصي بتثبيت ntfy. باستخدام ntfy أو أي مزود خدمة Unified Push آخر، يمكنك تلقي إشعارات الدفع بطريقة آمنة للبيانات. يمكنك تنزيل ntfy من PlayStore أو من F-Droid.",
     "@noGoogleServicesWarning": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "none": "بدون",
-    "@none": {
         "type": "String",
         "placeholders": {}
     },
@@ -872,24 +747,10 @@
         "type": "String",
         "placeholders": {}
     },
-    "pickImage": "اختر صورة",
-    "@pickImage": {
-        "type": "String",
-        "placeholders": {}
-    },
     "pin": "ثبِّت",
     "@pin": {
         "type": "String",
         "placeholders": {}
-    },
-    "play": "شغّل {fileName}",
-    "@play": {
-        "type": "String",
-        "placeholders": {
-            "fileName": {
-                "type": "String"
-            }
-        }
     },
     "pleaseEnterYourPassword": "أدخل كلمة السر",
     "@pleaseEnterYourPassword": {
@@ -908,11 +769,6 @@
     },
     "publicRooms": "الغرف العامة",
     "@publicRooms": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "recording": "يسجل",
-    "@recording": {
         "type": "String",
         "placeholders": {}
     },
@@ -939,11 +795,6 @@
             }
         }
     },
-    "rejoin": "أعد الانضمام",
-    "@rejoin": {
-        "type": "String",
-        "placeholders": {}
-    },
     "remove": "أزِل",
     "@remove": {
         "type": "String",
@@ -951,20 +802,6 @@
     },
     "removeAllOtherDevices": "أزِل كل الأجهزة الأخرى",
     "@removeAllOtherDevices": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "removedBy": "أزاله {username}",
-    "@removedBy": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            }
-        }
-    },
-    "removeDevice": "أزل جهازا",
-    "@removeDevice": {
         "type": "String",
         "placeholders": {}
     },
@@ -978,24 +815,10 @@
         "type": "String",
         "placeholders": {}
     },
-    "requestPermission": "أطلب إذنا",
-    "@requestPermission": {
-        "type": "String",
-        "placeholders": {}
-    },
     "roomHasBeenUpgraded": "رُقيّت الغرفة",
     "@roomHasBeenUpgraded": {
         "type": "String",
         "placeholders": {}
-    },
-    "seenByUser": "رآه {username}",
-    "@seenByUser": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            }
-        }
     },
     "send": "أرسل",
     "@send": {
@@ -1019,11 +842,6 @@
     },
     "sendImage": "أرسل صورة",
     "@sendImage": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "sendOriginal": "أرسل الملف الأصلي",
-    "@sendOriginal": {
         "type": "String",
         "placeholders": {}
     },
@@ -1085,11 +903,6 @@
                 "type": "String"
             }
         }
-    },
-    "setInvitationLink": "عيّن رابط الدعوة",
-    "@setInvitationLink": {
-        "type": "String",
-        "placeholders": {}
     },
     "setStatus": "عيّن الحالة",
     "@setStatus": {
@@ -1159,12 +972,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "title": "فلافي-شات",
-    "@title": {
-        "description": "Title for the application",
-        "type": "String",
-        "placeholders": {}
-    },
     "tryToSendAgain": "حاول إعادة الارسال",
     "@tryToSendAgain": {
         "type": "String",
@@ -1216,15 +1023,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "unreadChats": "{unreadCount, plural, =1{1 محادثة غير مقروءة} other{{unreadCount} محادثات غير مقروءة}}",
-    "@unreadChats": {
-        "type": "String",
-        "placeholders": {
-            "unreadCount": {
-                "type": "int"
-            }
-        }
-    },
     "userAndOthersAreTyping": "{username} و {count} أخرون يكتبون…",
     "@userAndOthersAreTyping": {
         "type": "String",
@@ -1267,11 +1065,6 @@
             }
         }
     },
-    "username": "اسم المستخدم",
-    "@username": {
-        "type": "String",
-        "placeholders": {}
-    },
     "userSentUnknownEvent": "أرسل {username} حدث {type}",
     "@userSentUnknownEvent": {
         "type": "String",
@@ -1283,11 +1076,6 @@
                 "type": "String"
             }
         }
-    },
-    "verify": "تحقق",
-    "@verify": {
-        "type": "String",
-        "placeholders": {}
     },
     "verifyStart": "ابدأ التحقق",
     "@verifyStart": {
@@ -1301,11 +1089,6 @@
     },
     "verifyTitle": "يتحقق من الحساب الآخر",
     "@verifyTitle": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "videoCall": "مكالمة فيديو",
-    "@videoCall": {
         "type": "String",
         "placeholders": {}
     },
@@ -1344,11 +1127,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "wallpaper": "الخلفية:",
-    "@wallpaper": {
-        "type": "String",
-        "placeholders": {}
-    },
     "warning": "تحذير!",
     "@warning": {
         "type": "String",
@@ -1384,13 +1162,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "people": "أشخاص",
-    "@people": {
-        "type": "String",
-        "placeholders": {}
-    },
     "scanQrCode": "امسح رمز الاستجابة السريعة",
-    "@scanQrCode": {},
     "noMatrixServer": "{server1} ليس خادم ماتريكس، بدلًا منه أتريد استخدام {server2}؟",
     "@noMatrixServer": {
         "type": "String",
@@ -1428,16 +1200,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "memberChanges": "تغييرات تخص الأعضاء",
-    "@memberChanges": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "غير مسيء",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "iHaveClickedOnLink": "نقرت على الرابط",
     "@iHaveClickedOnLink": {
         "type": "String",
@@ -1445,11 +1207,6 @@
     },
     "ignore": "تجاهل",
     "@ignore": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "howOffensiveIsThisContent": "ما مدى سوء هذا المحتوى؟",
-    "@howOffensiveIsThisContent": {
         "type": "String",
         "placeholders": {}
     },
@@ -1463,28 +1220,11 @@
         "type": "String",
         "placeholders": {}
     },
-    "goToTheNewRoom": "انتقل للغرفة الجديدة",
-    "@goToTheNewRoom": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fontSize": "حجم الخط",
     "@fontSize": {
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "مسيئة للغاية",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "everythingReady": "كل شيء جاهز!",
-    "@everythingReady": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "homeserver": "الخادم",
-    "@homeserver": {},
     "enterAnEmailAddress": "أدخل عنوان بريد إلكتروني",
     "@enterAnEmailAddress": {
         "type": "String",
@@ -1497,11 +1237,6 @@
     },
     "enableEncryption": "فعّل التشفير",
     "@enableEncryption": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "emotePacks": "حزمة الوجوه التعبيرية للغرفة",
-    "@emotePacks": {
         "type": "String",
         "placeholders": {}
     },
@@ -1525,11 +1260,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "deviceId": "معرّف الجهاز",
-    "@deviceId": {
-        "type": "String",
-        "placeholders": {}
-    },
     "createNewSpace": "مساحة جديدة",
     "@createNewSpace": {
         "type": "String",
@@ -1542,16 +1272,6 @@
     },
     "contentHasBeenReported": "أّرسل الابلاغ الى مدير الخادم",
     "@contentHasBeenReported": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "containsUserName": "يحوي اسم المستخدم",
-    "@containsUserName": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "containsDisplayName": "يحوي الاسم العلني",
-    "@containsDisplayName": {
         "type": "String",
         "placeholders": {}
     },
@@ -1635,14 +1355,11 @@
         "description": "Usage hint for the command /ban"
     },
     "clearArchive": "امسح الأرشيف",
-    "@clearArchive": {},
     "chats": "المحادثات",
     "@chats": {
         "type": "String",
         "placeholders": {}
     },
-    "chatHasBeenAddedToThisSpace": "أُضيفت المحادثة الى هذا المساحة",
-    "@chatHasBeenAddedToThisSpace": {},
     "chatBackup": "النسخ الاحتياطي للمحادثات",
     "@chatBackup": {
         "type": "String",
@@ -1678,7 +1395,6 @@
         "placeholders": {}
     },
     "sendOnEnter": "أرسل عند الدخول",
-    "@sendOnEnter": {},
     "autoplayImages": "شغِّل الملصقات والوجوه المتحركة تلقائيا",
     "@autoplayImages": {
         "type": "String",
@@ -1694,18 +1410,12 @@
         "type": "String",
         "placeholders": {}
     },
-    "allChats": "كل المحادثات",
-    "@allChats": {
-        "type": "String",
-        "placeholders": {}
-    },
     "all": "الكل",
     "@all": {
         "type": "String",
         "placeholders": {}
     },
     "addToSpace": "أضف إلى المساحة",
-    "@addToSpace": {},
     "addEmail": "أضف بريدًا إلكترونيًا",
     "@addEmail": {
         "type": "String",
@@ -1755,11 +1465,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "chatBackupDescription": "يتم تأمين رسائلك القديمة باستخدام مفتاح الاسترداد. يرجى التأكد من أنك لا تضيعه.",
-    "@chatBackupDescription": {
-        "type": "String",
-        "placeholders": {}
-    },
     "shareLocation": "شارك الموقع",
     "@shareLocation": {
         "type": "String",
@@ -1767,11 +1472,6 @@
     },
     "pleaseChooseAPasscode": "اختر رمز المرور",
     "@pleaseChooseAPasscode": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "pleaseChoose": "اختر رجاء",
-    "@pleaseChoose": {
         "type": "String",
         "placeholders": {}
     },
@@ -1795,37 +1495,17 @@
         "type": "String",
         "placeholders": {}
     },
-    "serverRequiresEmail": "يتطلب هذا الخادم التحقق من بريدك الإلكتروني.",
-    "@serverRequiresEmail": {},
     "link": "رابط",
-    "@link": {},
     "openInMaps": "افتح في الخريطة",
     "@openInMaps": {
         "type": "String",
         "placeholders": {}
     },
-    "enableMultiAccounts": "(ميزة تجربية) فعّل تعدد الحسابات",
-    "@enableMultiAccounts": {},
     "bundleName": "اسم الحزمة",
-    "@bundleName": {},
     "removeFromBundle": "أزله من الحزمة",
-    "@removeFromBundle": {},
     "addToBundle": "أضفه الى حزمة",
-    "@addToBundle": {},
     "editBundlesForAccount": "عدّل حزم هذا الحساب",
-    "@editBundlesForAccount": {},
     "addAccount": "أضف حسابًا",
-    "@addAccount": {},
-    "online": "متصل",
-    "@online": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offline": "غير متصل",
-    "@offline": {
-        "type": "String",
-        "placeholders": {}
-    },
     "numUsersTyping": "{count} يكتبون…",
     "@numUsersTyping": {
         "type": "String",
@@ -1835,28 +1515,8 @@
             }
         }
     },
-    "notificationsEnabledForThisAccount": "الإشعارات مفعلة لهذا الحساب",
-    "@notificationsEnabledForThisAccount": {
-        "type": "String",
-        "placeholders": {}
-    },
     "spaceIsPublic": "عام في المساحة",
     "@spaceIsPublic": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "toggleFavorite": "بدّل حالة التفضيل",
-    "@toggleFavorite": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "toggleUnread": "علّمه كمقروء/غير مقروء",
-    "@toggleUnread": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "unavailable": "غير متوفر",
-    "@unavailable": {
         "type": "String",
         "placeholders": {}
     },
@@ -1867,21 +1527,6 @@
     },
     "withTheseAddressesRecoveryDescription": "يمكنك استعادة كلمة السر بهذه العناوين.",
     "@withTheseAddressesRecoveryDescription": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "singlesignon": "تسجيل دخول أحادي",
-    "@singlesignon": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "toggleMuted": "بدّل حالة الكتم",
-    "@toggleMuted": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "showPassword": "أظهر كلمة السر",
-    "@showPassword": {
         "type": "String",
         "placeholders": {}
     },
@@ -1920,16 +1565,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "transferFromAnotherDevice": "أنقله من جهاز آخر",
-    "@transferFromAnotherDevice": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "wipeChatBackup": "مسح نسخة المحادثة الاحتياطية لإنشاء مفتاح استرداد جديد؟",
-    "@wipeChatBackup": {
-        "type": "String",
-        "placeholders": {}
-    },
     "saveFile": "احفظ الملف",
     "@saveFile": {
         "type": "String",
@@ -1945,11 +1580,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "botMessages": "رسائل البوت",
-    "@botMessages": {
-        "type": "String",
-        "placeholders": {}
-    },
     "sendAsText": "أرسل نصًا",
     "@sendAsText": {
         "type": "String"
@@ -1959,18 +1589,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "inviteForMe": "دعوات لي",
-    "@inviteForMe": {
-        "type": "String",
-        "placeholders": {}
-    },
     "replaceRoomWithNewerVersion": "استبدل الغرفة باصدار أحدث",
     "@replaceRoomWithNewerVersion": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "register": "سجّل",
-    "@register": {
         "type": "String",
         "placeholders": {}
     },
@@ -1979,33 +1599,12 @@
         "type": "String",
         "placeholders": {}
     },
-    "sendSticker": "أرسل ملصقًا",
-    "@sendSticker": {
-        "type": "String",
-        "placeholders": {}
-    },
     "defaultPermissionLevel": "مستوى الأذونات الافتراضية للمستخدمين الجدد",
     "@defaultPermissionLevel": {
         "type": "String",
         "placeholders": {}
     },
-    "setPermissionsLevel": "تعيين مستوى الأذونات",
-    "@setPermissionsLevel": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "setCustomEmotes": "عيّن وجوهًا تعبيرية مخصصة",
-    "@setCustomEmotes": {
-        "type": "String",
-        "placeholders": {}
-    },
     "oneClientLoggedOut": "أُ خرج أحد العملاء الذي تسختدمها",
-    "@oneClientLoggedOut": {},
-    "pleaseEnter4Digits": "أدخل 4 أرقام أو أتركه فارغ لتعطيل القفل.",
-    "@pleaseEnter4Digits": {
-        "type": "String",
-        "placeholders": {}
-    },
     "redactMessage": "احذف رسالة",
     "@redactMessage": {
         "type": "String",
@@ -2022,26 +1621,17 @@
         "placeholders": {}
     },
     "repeatPassword": "كرّر كلمة السر",
-    "@repeatPassword": {},
     "removeFromSpace": "أزل من المساحة",
-    "@removeFromSpace": {},
     "unverified": "غير مؤكد",
-    "@unverified": {},
     "whoCanPerformWhichAction": "من يستطيع القيام بأي عمل",
     "@whoCanPerformWhichAction": {
         "type": "String",
         "placeholders": {}
     },
     "messageInfo": "معلومات الرسالة",
-    "@messageInfo": {},
-    "messageType": "نوع الرسالة",
-    "@messageType": {},
     "sender": "المرسل",
-    "@sender": {},
     "openGallery": "افتخ المعرض",
-    "@openGallery": {},
     "time": "الوقت",
-    "@time": {},
     "badServerLoginTypesException": "يدعم الخادم المستخدم أنواع تسجيل الدخول التالية:\n{serverVersions}\nلكن هذا التطبيق يدعم فقط:\n{supportedVersions}",
     "@badServerLoginTypesException": {
         "type": "String",
@@ -2064,11 +1654,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "hideRedactedEvents": "إخفاء الأحداث المنقحة",
-    "@hideRedactedEvents": {
-        "type": "String",
-        "placeholders": {}
-    },
     "commandHint_discardsession": "إنهاء الجلسة",
     "@commandHint_discardsession": {
         "type": "String",
@@ -2079,40 +1664,14 @@
         "type": "String",
         "placeholders": {}
     },
-    "badServerVersionsException": "يدعم الخادم الرئيسي المستخدم إصدارات المواصفات:\n{serverVersions}\nلكن هذا التطبيق يدعم فقط:\n{supportedVersions}",
-    "@badServerVersionsException": {
-        "type": "String",
-        "placeholders": {
-            "serverVersions": {
-                "type": "String"
-            },
-            "supportedVersions": {
-                "type": "String"
-            }
-        }
-    },
-    "offensive": "عدواني",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "yourChatBackupHasBeenSetUp": "تم إعداد النسخ الاحتياطي لمحادثاتك.",
-    "@yourChatBackupHasBeenSetUp": {},
     "noEncryptionForPublicRooms": "يمكنك فقط تفعيل التشفير عندما تصبح الغرفة غير متاحة للعامة.",
     "@noEncryptionForPublicRooms": {
         "type": "String",
         "placeholders": {}
     },
     "emojis": "إيموجي",
-    "@emojis": {},
-    "voiceCall": "مكالمة صوتية",
-    "@voiceCall": {},
     "unsupportedAndroidVersion": "نسخة أندرويد غير مدعومة",
-    "@unsupportedAndroidVersion": {},
     "unsupportedAndroidVersionLong": "تتطلب هذه الميزة إصدار Android أحدث. يرجى التحقق من وجود تحديثات أو دعم Lineage OS.",
-    "@unsupportedAndroidVersionLong": {},
-    "experimentalVideoCalls": "مكالمات الفيديو التجريبية",
-    "@experimentalVideoCalls": {},
     "commandHint_create": "أنشأ محادثة جماعية فارغة\nاستخدم --لا-تشفير لتعطيل التشفير",
     "@commandHint_create": {
         "type": "String",
@@ -2138,23 +1697,6 @@
         "type": "String",
         "description": "Usage hint for the command /myroomavatar"
     },
-    "videoCallsBetaWarning": "يرجى ملاحظة أن مكالمات الفيديو حالياً في مرحلة تجريبية. قد لا تعمل كما هو متوقع أو تعمل على الإطلاق على جميع المنصات.",
-    "@videoCallsBetaWarning": {},
-    "placeCall": "إجراء مكالمة",
-    "@placeCall": {},
-    "videoWithSize": "فيديو ({size})",
-    "@videoWithSize": {
-        "type": "String",
-        "placeholders": {
-            "size": {
-                "type": "String"
-            }
-        }
-    },
-    "emailOrUsername": "البريد الإلكتروني أو اسم المستخدم",
-    "@emailOrUsername": {},
-    "dismiss": "رفض",
-    "@dismiss": {},
     "setAsCanonicalAlias": "تعيين كاسم مستعار رئيسي",
     "@setAsCanonicalAlias": {
         "type": "String",
@@ -2167,11 +1709,6 @@
     },
     "pleaseEnterYourPin": "الرجاء إدخال رقم التعريف الشخصي الخاص بك",
     "@pleaseEnterYourPin": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "pushRules": "قواعد الإشعارات",
-    "@pushRules": {
         "type": "String",
         "placeholders": {}
     },
@@ -2188,26 +1725,9 @@
         }
     },
     "markAsRead": "حدد كمقروء",
-    "@markAsRead": {},
-    "openVideoCamera": "افتح الكاميرا لمقطع فيديو",
-    "@openVideoCamera": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "start": "إبدأ",
-    "@start": {},
-    "publish": "انشر",
-    "@publish": {},
-    "addToSpaceDescription": "إختر مساحة لإضافة هذه المحادثة إليها.",
-    "@addToSpaceDescription": {},
     "reportUser": "التبيلغ عن المستخدم",
-    "@reportUser": {},
-    "openChat": "فتح المحادثة",
-    "@openChat": {},
     "pinMessage": "تثبيت في الغرفة",
-    "@pinMessage": {},
     "confirmEventUnpin": "هل أنت متأكد من إلغاء تثبيت الحدث بشكل دائم؟",
-    "@confirmEventUnpin": {},
     "fileHasBeenSavedAt": "تم حفظ الملف في {path}",
     "@fileHasBeenSavedAt": {
         "type": "String",
@@ -2218,9 +1738,7 @@
         }
     },
     "user": "مستخدم",
-    "@user": {},
     "custom": "مُخصّص",
-    "@custom": {},
     "googlyEyesContent": "{senderName} يرسل لك عيون googly",
     "@googlyEyesContent": {
         "type": "String",
@@ -2230,14 +1748,7 @@
             }
         }
     },
-    "widgetVideo": "فيديو",
-    "@widgetVideo": {},
-    "recoveryKeyLost": "هل فقدت مفتاح الاسترداد؟",
-    "@recoveryKeyLost": {},
-    "pleaseEnterRecoveryKeyDescription": "لإلغاء قفل رسائلك القديمة ، يرجى إدخال مفتاح الاسترداد الذي تم إنشاؤه في جلسة سابقة. مفتاح الاسترداد ليس كلمة المرور الخاصة بك.",
-    "@pleaseEnterRecoveryKeyDescription": {},
     "confirmMatrixId": "يرجى تأكيد معرف Matrix الخاص بك من أجل حذف حسابك.",
-    "@confirmMatrixId": {},
     "supposedMxid": "يجب أن يكون هذا {mxid}",
     "@supposedMxid": {
         "type": "String",
@@ -2247,14 +1758,9 @@
             }
         }
     },
-    "hydrateTor": "مستخدمو تور: استيراد تصدير الجلسة",
-    "@hydrateTor": {},
     "commandHint_googly": "أرسل بعض عيون googly",
-    "@commandHint_googly": {},
     "commandHint_cuddle": "أرسل عناق",
-    "@commandHint_cuddle": {},
     "commandHint_hug": "إرسال حضن",
-    "@commandHint_hug": {},
     "cuddleContent": "{senderName} يحتضنك",
     "@cuddleContent": {
         "type": "String",
@@ -2264,43 +1770,13 @@
             }
         }
     },
-    "unlockOldMessages": "إلغاء قفل الرسائل القديمة",
-    "@unlockOldMessages": {},
     "commandHint_markasdm": "وضع علامة على أنها غرفة رسائل مباشرة لمعرف المصفوفة",
-    "@commandHint_markasdm": {},
-    "allRooms": "جميع الدردشات الجماعية",
-    "@allRooms": {
-        "type": "String",
-        "placeholders": {}
-    },
     "dehydrate": "تصدير الجلسة ومسح الجهاز",
-    "@dehydrate": {},
     "dehydrateWarning": "لا يمكن التراجع عن هذا الإجراء. تأكد من تخزين ملف النسخ الاحتياطي بأمان.",
-    "@dehydrateWarning": {},
-    "dehydrateTorLong": "بالنسبة لمستخدمي تور ، يوصى بتصدير الجلسة قبل إغلاق النافذة.",
-    "@dehydrateTorLong": {},
-    "dehydrateTor": "مستخدمو تور: تصدير الجلسة",
-    "@dehydrateTor": {},
     "hydrate": "استعادة من ملف النسخ الاحتياطي",
-    "@hydrate": {},
-    "pleaseEnterRecoveryKey": "الرجاء إدخال مفتاح الاسترداد:",
-    "@pleaseEnterRecoveryKey": {},
-    "recoveryKey": "مفتاح الاسترداد",
-    "@recoveryKey": {},
-    "startFirstChat": "ابدأ محادثتك الأولى",
-    "@startFirstChat": {},
-    "widgetCustom": "مُخصّص",
-    "@widgetCustom": {},
-    "widgetNameError": "يرجى تقديم اسم العرض.",
-    "@widgetNameError": {},
-    "errorAddingWidget": "خطأ في إضافة الأداة.",
-    "@errorAddingWidget": {},
     "youRejectedTheInvitation": "لقد رفضت الدعوة",
-    "@youRejectedTheInvitation": {},
     "youJoinedTheChat": "لقد انضممت إلى المحادثة",
-    "@youJoinedTheChat": {},
     "youAcceptedTheInvitation": "👍 لقد قبلت الدعوة",
-    "@youAcceptedTheInvitation": {},
     "youBannedUser": "لقد حظرت {user}",
     "@youBannedUser": {
         "placeholders": {
@@ -2326,11 +1802,8 @@
         }
     },
     "storeInAndroidKeystore": "تخزين في سجل مفاتيح اندرويد",
-    "@storeInAndroidKeystore": {},
     "storeInAppleKeyChain": "تخزين في سلسلة مفاتيح ابل",
-    "@storeInAppleKeyChain": {},
     "storeSecurlyOnThisDevice": "احفظه بأمان على هذا الجهاز",
-    "@storeSecurlyOnThisDevice": {},
     "countFiles": "ملفات {count}",
     "@countFiles": {
         "placeholders": {
@@ -2339,34 +1812,8 @@
             }
         }
     },
-    "foregroundServiceRunning": "يظهر هذا الإشعار عند تشغيل الخدمة الأمامية.",
-    "@foregroundServiceRunning": {},
-    "screenSharingTitle": "مشاركة الشاشة",
-    "@screenSharingTitle": {},
-    "appearOnTop": "يظهر في الأعلى",
-    "@appearOnTop": {},
-    "otherCallingPermissions": "الميكروفون والكاميرا وأذونات hermes الأخرى",
-    "@otherCallingPermissions": {},
-    "enterSpace": "أدخل المساحة",
-    "@enterSpace": {},
-    "enterRoom": "أدخل الغرفة",
-    "@enterRoom": {},
-    "deviceKeys": "مفاتيح الجهاز:",
-    "@deviceKeys": {},
     "whyIsThisMessageEncrypted": "لماذا هذه الرسالة غير قابلة للقراءة؟",
-    "@whyIsThisMessageEncrypted": {},
-    "nextAccount": "الحساب التالي",
-    "@nextAccount": {},
-    "previousAccount": "الحساب السابق",
-    "@previousAccount": {},
     "encryptThisChat": "تشفير هذه المحادثة",
-    "@encryptThisChat": {},
-    "screenSharingDetail": "أنت تشارك شاشتك في FuffyChat",
-    "@screenSharingDetail": {},
-    "hideUnimportantStateEvents": "إخفاء أحداث الحالة غير المهمة",
-    "@hideUnimportantStateEvents": {},
-    "newGroup": "مجموعة جديدة",
-    "@newGroup": {},
     "youKicked": "👞 لقد ركلت {user}",
     "@youKicked": {
         "placeholders": {
@@ -2376,14 +1823,7 @@
         }
     },
     "newSpace": "مساحة جديدة",
-    "@newSpace": {},
     "commandHint_markasgroup": "وضع علامة كمجموعة",
-    "@commandHint_markasgroup": {},
-    "separateChatTypes": "الدردشات المباشرة والمجموعات المنفصلة",
-    "@separateChatTypes": {
-        "type": "String",
-        "placeholders": {}
-    },
     "hugContent": "{senderName} يعانقك",
     "@hugContent": {
         "type": "String",
@@ -2393,27 +1833,6 @@
             }
         }
     },
-    "hydrateTorLong": "هل قمت بتصدير جلستك الأخيرة على تور؟ قم باستيرادها بسرعة واستمر في المحادثة.",
-    "@hydrateTorLong": {},
-    "widgetUrlError": "هذا ليس عنوان URL صالحًا.",
-    "@widgetUrlError": {},
-    "indexedDbErrorTitle": "مشاكل الوضع الخاص",
-    "@indexedDbErrorTitle": {},
-    "indexedDbErrorLong": "للأسف ، لم يتم تمكين تخزين الرسائل في الوضع الخاص افتراضيا.\nيرجى زيارة\n - حول:التكوين\n - تعيين dom.indexedDB.privateBrowsing.enabled إلى true\nخلاف ذلك ، لا يمكن تشغيل hermes.",
-    "@indexedDbErrorLong": {},
-    "switchToAccount": "التبديل إلى الحساب {number}",
-    "@switchToAccount": {
-        "type": "number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
-    "addWidget": "إضافة اداة",
-    "@addWidget": {},
-    "widgetEtherpad": "ملاحظة نصية",
-    "@widgetEtherpad": {},
     "youKickedAndBanned": "🙅 لقد ركلت وحظرت {user}",
     "@youKickedAndBanned": {
         "placeholders": {
@@ -2430,10 +1849,6 @@
             }
         }
     },
-    "saveKeyManuallyDescription": "احفظ هذا المفتاح يدويا عن طريق تشغيل مربع حوار مشاركة النظام أو الحافظة.",
-    "@saveKeyManuallyDescription": {},
-    "widgetJitsi": "اجتماعات جيتسي",
-    "@widgetJitsi": {},
     "youInvitedUser": "📩 قمت بدعوة {user}",
     "@youInvitedUser": {
         "placeholders": {
@@ -2442,39 +1857,11 @@
             }
         }
     },
-    "storeInSecureStorageDescription": "قم بتخزين مفتاح الاسترداد في التخزين الآمن لهذا الجهاز.",
-    "@storeInSecureStorageDescription": {},
-    "widgetName": "الاسم",
-    "@widgetName": {},
     "users": "المستخدمون",
-    "@users": {},
-    "callingPermissions": "أذونات الاتصال",
-    "@callingPermissions": {},
-    "callingAccount": "الاتصال بالحساب",
-    "@callingAccount": {},
-    "callingAccountDetails": "يسمح لـ hermes باستخدام تطبيق android Dialer الأصلي.",
-    "@callingAccountDetails": {},
-    "appearOnTopDetails": "يسمح للتطبيق بالظهور في الأعلى (ليست هناك حاجة إذا قمت بالفعل بإعداد hermes كحساب اتصال)",
-    "@appearOnTopDetails": {},
-    "numChats": "{number} الدردشات",
-    "@numChats": {
-        "type": "number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "jump": "قفز",
-    "@jump": {},
     "report": "الإبلاغ",
-    "@report": {},
     "noKeyForThisMessage": "يمكن أن يحدث هذا إذا تم إرسال الرسالة قبل تسجيل الدخول إلى حسابك على هذا الجهاز.\n\nمن الممكن أيضا أن يكون المرسل قد حظر جهازك أو حدث خطأ ما في الاتصال بالإنترنت.\n\nهل يمكنك قراءة الرسالة في جلسة أخرى؟ ثم يمكنك نقل الرسالة منه! انتقل إلى الإعدادات > الأجهزة وتأكد من أن أجهزتك قد تحققت من بعضها البعض. عندما تفتح الغرفة في المرة التالية وتكون كلتا الجلستين في المقدمة ، سيتم إرسال المفاتيح تلقائيا.\n\nألا تريد أن تفقد المفاتيح عند تسجيل الخروج أو تبديل الأجهزة؟ تأكد من تمكين النسخ الاحتياطي للدردشة في الإعدادات.",
-    "@noKeyForThisMessage": {},
-    "allSpaces": "كل المساحات",
-    "@allSpaces": {},
     "doNotShowAgain": "لا تظهر مرة أخرى",
-    "@doNotShowAgain": {},
     "wasDirectChatDisplayName": "محادثة فارغة (كانت {oldDisplayName})",
     "@wasDirectChatDisplayName": {
         "type": "String",
@@ -2485,74 +1872,30 @@
         }
     },
     "disableEncryptionWarning": "لأسباب أمنية ، لا يمكنك تعطيل التشفير في المحادثة ، حيث تم تمكينه من قبل.",
-    "@disableEncryptionWarning": {},
     "reportErrorDescription": "😭 أوه لا. هناك خطأ ما. إذا كنت تريد، يمكنك الإبلاغ عن هذا الخطأ إلى المطورين.",
-    "@reportErrorDescription": {},
     "newSpaceDescription": "يسمح لك تطبيق المساحات بتوحيد دردشاتك وبناء مجتمعات خاصة أو عامة.",
-    "@newSpaceDescription": {},
     "sorryThatsNotPossible": "معذرة... هذا غير ممكن",
-    "@sorryThatsNotPossible": {},
     "openLinkInBrowser": "فتح الرابط في المتصفح",
-    "@openLinkInBrowser": {},
     "reopenChat": "إعادة فتح المحادثة",
-    "@reopenChat": {},
     "noBackupWarning": "تحذير! بدون تمكين النسخ الاحتياطي للدردشة ، ستفقد الوصول إلى رسائلك المشفرة. يوصى بشدة بتمكين النسخ الاحتياطي للدردشة أولاً قبل تسجيل الخروج.",
-    "@noBackupWarning": {},
     "noOtherDevicesFound": "لم يتم العثور على أجهزة أخرى",
-    "@noOtherDevicesFound": {},
     "fileIsTooBigForServer": "تعذر الإرسال! لا يدعم الخادم سوى المرفقات التي تصل إلى {max}.",
-    "@fileIsTooBigForServer": {},
     "jumpToLastReadMessage": "الانتقال إلى آخر رسالة مقروءة",
-    "@jumpToLastReadMessage": {},
     "readUpToHere": "اقرأ حتى هنا",
-    "@readUpToHere": {},
-    "signInWithPassword": "سجل الدخول بكلمة السر",
-    "@signInWithPassword": {},
-    "pleaseTryAgainLaterOrChooseDifferentServer": "رجاء حاول مجددا أو اختر خادما مختلفا.",
-    "@pleaseTryAgainLaterOrChooseDifferentServer": {},
-    "signInWith": "تسجيل الدخول باستخدام {provider}",
-    "@signInWith": {
-        "type": "String",
-        "placeholders": {
-            "provider": {
-                "type": "String"
-            }
-        }
-    },
     "importNow": "استيراد الآن",
-    "@importNow": {},
     "importEmojis": "استيراد الرموز التعبيرية",
-    "@importEmojis": {},
     "exportEmotePack": "تصدير حزمة الرموز التعبيرية بتنسيق zip",
-    "@exportEmotePack": {},
     "notAnImage": "ليس ملف صورة.",
-    "@notAnImage": {},
     "importFromZipFile": "الاستيراد من ملف .zip",
-    "@importFromZipFile": {},
     "replace": "استبدال",
-    "@replace": {},
     "sendTypingNotifications": "إرسال إشعارات الكتابة",
-    "@sendTypingNotifications": {},
     "createGroup": "إنشاء مجموعة",
-    "@createGroup": {},
     "messagesStyle": "الرسائل:",
-    "@messagesStyle": {},
     "shareInviteLink": "شارك رابط الدعوة",
-    "@shareInviteLink": {},
-    "profileNotFound": "لا يمكن العثور على المستخدم على الخادم. ربما هناك مشكلة في الاتصال أو المستخدم غير موجود.",
-    "@profileNotFound": {},
-    "setTheme": "تعيين السمة:",
-    "@setTheme": {},
     "setColorTheme": "تعيين لون السمة:",
-    "@setColorTheme": {},
-    "inviteContactToGroupQuestion": "هل تريد دعوة {contact} إلى المحادثة \"{groupName}\"؟?",
-    "@inviteContactToGroupQuestion": {},
     "tryAgain": "أعد المحاولة",
-    "@tryAgain": {},
     "redactMessageDescription": "سيتم تنقيح الرسالة لجميع المشاركين في هذه المحادثة. هذا لا يمكن التراجع عنها.",
-    "@redactMessageDescription": {},
     "optionalRedactReason": "(اختياري) سبب تنقيح هذه الرسالة ...",
-    "@optionalRedactReason": {},
     "redactedBy": "منقح بواسطة {username}",
     "@redactedBy": {
         "type": "String",
@@ -2575,34 +1918,19 @@
         }
     },
     "invite": "دعوة",
-    "@invite": {},
-    "addChatDescription": "أضف وصفًا للدردشة...",
-    "@addChatDescription": {},
     "chatPermissions": "صلاحيات المحادثة",
-    "@chatPermissions": {},
     "chatDescription": "وصف المحادثة",
-    "@chatDescription": {},
     "chatDescriptionHasBeenChanged": "تغير وصف المجموعة",
-    "@chatDescriptionHasBeenChanged": {},
     "noChatDescriptionYet": "لم يتم إنشاء وصف للمحادثة حتى الآن.",
-    "@noChatDescriptionYet": {},
     "invalidServerName": "اسم الخادم غير متاح",
-    "@invalidServerName": {},
     "setChatDescription": "تعيين وصفًا للدردشة",
-    "@setChatDescription": {},
-    "directChat": "محادثة مباشرة",
-    "@directChat": {},
     "inviteGroupChat": "📨 دعوة للمحادثة الجماعية",
-    "@inviteGroupChat": {},
-    "invitePrivateChat": "📨 دعوة دردشة خاصة",
-    "@invitePrivateChat": {},
     "emoteKeyboardNoRecents": "التعبيرات المستخدمة مؤخرًا ستظهر هنا ...",
     "@emoteKeyboardNoRecents": {
         "type": "String",
         "placeholders": {}
     },
     "invalidInput": "مدخل غير صالح!",
-    "@invalidInput": {},
     "wrongPinEntered": "تم إدخال رمز خاطئ! حاول مرة أخرى خلال {seconds} ثانية...",
     "@wrongPinEntered": {
         "type": "String",
@@ -2621,29 +1949,17 @@
         }
     },
     "pleaseEnterANumber": "الرجاء إدخال رقم أكبر من 0",
-    "@pleaseEnterANumber": {},
     "banUserDescription": "سيتم حظر المستخدم من المحادثة ولن يتمكن من الدخول إلى المحادثة مرة أخرى حتى يتم رفع الحظر عنه.",
-    "@banUserDescription": {},
     "removeDevicesDescription": "سيتم تسجيل خروجك من هذا الجهاز ولن تتمكن بعد ذلك من تلقي الرسائل.",
-    "@removeDevicesDescription": {},
     "unbanUserDescription": "سيتمكن المستخدم من الدخول إلى المحادثة مرة أخرى إذا حاول.",
-    "@unbanUserDescription": {},
     "pushNotificationsNotAvailable": "دفع الإخطارات غير متوفرة",
-    "@pushNotificationsNotAvailable": {},
     "makeAdminDescription": "بمجرد تعيين هذا المستخدم كمسؤول، قد لا تتمكن من التراجع عن هذا لأنه سيكون لديه نفس الأذونات التي تتمتع بها.",
-    "@makeAdminDescription": {},
     "archiveRoomDescription": "سيتم نقل المحادثة إلى الأرشيف. سيتمكن المستخدمون الآخرون من رؤية أنك غادرت المحادثة.",
-    "@archiveRoomDescription": {},
     "learnMore": "تعلم المزيد",
-    "@learnMore": {},
     "roomUpgradeDescription": "سيتم بعد ذلك إعادة إنشاء المحادثة باستخدام إصدار الغرفة الجديد. سيتم إخطار جميع المشاركين بأنهم بحاجة إلى التبديل إلى المحادثة الجديدة. يمكنك معرفة المزيد حول إصدارات الغرف على https://spec.matrix.org/latest/rooms/",
-    "@roomUpgradeDescription": {},
     "kickUserDescription": "يتم طرد المستخدم من المحادثة ولكن لا يتم حظره. في المحادثات العامة، يمكن للمستخدم الانضمام مرة أخرى في أي وقت.",
-    "@kickUserDescription": {},
     "createGroupAndInviteUsers": "إنشاء مجموعة ودعوة المستخدمين",
-    "@createGroupAndInviteUsers": {},
     "groupCanBeFoundViaSearch": "يمكن العثور على المجموعة عبر البحث",
-    "@groupCanBeFoundViaSearch": {},
     "noUsersFoundWithQuery": "لسوء الحظ، لا يمكن العثور على مستخدم لديه \"{query}\". يرجى التحقق مما إذا كنت قد ارتكبت خطأ كتابي.",
     "@noUsersFoundWithQuery": {
         "type": "String",
@@ -2654,75 +1970,30 @@
         }
     },
     "yourGlobalUserIdIs": "معرف المستخدم العمومي الخاص بك هو: ",
-    "@yourGlobalUserIdIs": {},
     "groupName": "أسم المجموعة",
-    "@groupName": {},
     "searchChatsRooms": "ابحث عن #الدردشات، @المستخدمين...",
-    "@searchChatsRooms": {},
-    "startConversation": "بدء محادثة",
-    "@startConversation": {},
     "commandHint_sendraw": "إرسال جيسون الخام",
-    "@commandHint_sendraw": {},
     "wrongRecoveryKey": "عذرًا... لا يبدو أن هذا هو مفتاح الاسترداد الصحيح.",
-    "@wrongRecoveryKey": {},
     "blockListDescription": "يمكنك حظر المستخدمين الذين يزعجونك. لن تتمكن من تلقي أي رسائل أو دعوات للغرفة من المستخدمين الموجودين في قائمة الحظر الشخصية الخاصة بك.",
-    "@blockListDescription": {},
     "blockedUsers": "المستخدمون المحظورون",
-    "@blockedUsers": {},
     "block": "حظر",
-    "@block": {},
     "blockUsername": "تجاهل اسم المستخدم",
-    "@blockUsername": {},
     "databaseMigrationTitle": "تم تحسين قاعدة البيانات",
-    "@databaseMigrationTitle": {},
     "databaseMigrationBody": "انتظر من فضلك. قد يستغرق ذلك بعض الوقت.",
-    "@databaseMigrationBody": {},
     "thisDevice": "هذا الجهاز:",
-    "@thisDevice": {},
     "publicSpaces": "مساحة عامة",
-    "@publicSpaces": {},
     "passwordIsWrong": "كلمة السر للدخول خاطئة",
-    "@passwordIsWrong": {},
     "pleaseEnterYourCurrentPassword": "من فضلك أدخل كلمة السر الحالية",
-    "@pleaseEnterYourCurrentPassword": {},
-    "publicLink": "رابط عام",
-    "@publicLink": {},
     "nothingFound": "لم نجد شيئاً.",
-    "@nothingFound": {},
-    "decline": "رفض",
-    "@decline": {},
     "newPassword": "كلمة المرور الجديدة",
-    "@newPassword": {},
     "passwordsDoNotMatch": "كلمات المرور لا تتطابق",
-    "@passwordsDoNotMatch": {},
-    "subspace": "مساحة فرعية",
-    "@subspace": {},
     "select": "اختر",
-    "@select": {},
     "pleaseChooseAStrongPassword": "الرجاء اختيار كلمة مرور قوية",
-    "@pleaseChooseAStrongPassword": {},
     "addChatOrSubSpace": "إضافة دردشة أو مساحة فرعية",
-    "@addChatOrSubSpace": {},
     "leaveEmptyToClearStatus": "اتركه فارغًا لمسح حالتك.",
-    "@leaveEmptyToClearStatus": {},
     "joinSpace": "انضم إلى المساحة",
-    "@joinSpace": {},
     "searchForUsers": "ابحث عن @users...",
-    "@searchForUsers": {},
-    "databaseBuildErrorBody": "غير قادر على بناء قاعدة بيانات SQlite. يحاول التطبيق استخدام قاعدة بيانات قديمة في الوقت الحالي. الرجاء الإبلاغ عن هذا الخطأ للمطورين على {url}. رسالة الخطأ هي: {error}",
-    "@databaseBuildErrorBody": {
-        "type": "String",
-        "placeholders": {
-            "url": {
-                "type": "String"
-            },
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "initAppError": "حدث خطأ بداخل التطبيق",
-    "@initAppError": {},
     "sessionLostBody": "جلستك مفقودة يرجى إبلاغ المطورين بهذا الخطأ في {url}. رسالة الخطأ هي: {error}",
     "@sessionLostBody": {
         "type": "String",
@@ -2765,43 +2036,15 @@
             }
         }
     },
-    "transparent": "شفّاف",
-    "@transparent": {},
-    "youInvitedToBy": "📩 تمت دعوتك عبر الرابط إلى:\n{alias}",
-    "@youInvitedToBy": {
-        "placeholders": {
-            "alias": {
-                "type": "String"
-            }
-        }
-    },
     "formattedMessagesDescription": "عرض محتوى الرسالة الغنية مثل النص الغامق باستخدام الماركداون.",
-    "@formattedMessagesDescription": {},
     "verifyOtherUserDescription": "إذا قمت بالتحقق من مستخدم آخر، فيمكنك التأكد من أنك تعرف من تكتب إليه حقًا. 💪\n\nعند بدء عملية التحقق، سترى أنت والمستخدم الآخر نافذة منبثقة في التطبيق. هناك سترى بعد ذلك سلسلة من الرموز التعبيرية أو الأرقام التي يتعين عليك مقارنتها مع بعضها البعض.\n\nأفضل طريقة للقيام بذلك هي الالتقاء أو بدء مكالمة فيديو. 👭",
-    "@verifyOtherUserDescription": {},
     "verifyOtherDeviceDescription": "عند التحقق من جهاز آخر، يمكن لهذه الأجهزة تبادل المفاتيح، مما يزيد من أمانك بشكل عام. 💪 عند بدء عملية التحقق، ستظهر نافذة منبثقة في التطبيق على كلا الجهازين. هناك سترى بعد ذلك سلسلة من الرموز التعبيرية أو الأرقام التي يتعين عليك مقارنتها مع بعضها البعض. من الأفضل أن يكون كلا الجهازين في متناول يديك قبل بدء عملية التحقق. 🤳",
-    "@verifyOtherDeviceDescription": {},
     "formattedMessages": "رسائل منسقة",
-    "@formattedMessages": {},
     "sendReadReceipts": "إرسال بالقراءة",
-    "@sendReadReceipts": {},
     "verifyOtherDevice": "🔐 التحقق من الجهاز الآخر",
-    "@verifyOtherDevice": {},
-    "forwardMessageTo": "هل تريد إعادة توجيه الرسالة إلى {roomName}؟",
-    "@forwardMessageTo": {
-        "type": "String",
-        "placeholders": {
-            "roomName": {
-                "type": "String"
-            }
-        }
-    },
     "sendTypingNotificationsDescription": "يستطيع المشاركون الآخرون في المحادثة رؤيتك عند كتابة رسالة جديدة.",
-    "@sendTypingNotificationsDescription": {},
     "sendReadReceiptsDescription": "يمكن للمشاركين الآخرين في المحادثة معرفة متى قرأت الرسالة.",
-    "@sendReadReceiptsDescription": {},
     "verifyOtherUser": "🔐 التحقق من المستخدم الآخر",
-    "@verifyOtherUser": {},
     "acceptedKeyVerification": "وافق {sender} على التحقق من المفتاح",
     "@acceptedKeyVerification": {
         "type": "String",
@@ -2838,28 +2081,11 @@
             }
         }
     },
-    "hidePresences": "إخفاء قائمة الحالة؟",
-    "@hidePresences": {},
     "incomingMessages": "الرسائل الواردة",
-    "@incomingMessages": {},
-    "presenceStyle": "الحضور:",
-    "@presenceStyle": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "presencesToggle": "إظهار رسائل الحالة من المستخدمين الآخرين",
-    "@presencesToggle": {
-        "type": "String",
-        "placeholders": {}
-    },
     "stickers": "الملصقات",
-    "@stickers": {},
     "discover": "استكشف",
-    "@discover": {},
     "commandHint_ignore": "تجاهل معرف المصفوفة المعطى",
-    "@commandHint_ignore": {},
     "commandHint_unignore": "إلغاء تجاهل معرف المصفوفة المحدد",
-    "@commandHint_unignore": {},
     "unreadChatsInApp": "{appname}: {unread} الدردشات غير المقروءة",
     "@unreadChatsInApp": {
         "type": "String",
@@ -2873,39 +2099,18 @@
         }
     },
     "noDatabaseEncryption": "تشفير قاعدة البيانات غير مدعوم على هذا النظام الأساسي",
-    "@noDatabaseEncryption": {},
     "appLockDescription": "قفل التطبيق عند عدم استخدامه بالرمز السري",
-    "@appLockDescription": {},
     "accessAndVisibility": "الوصول والرؤية",
-    "@accessAndVisibility": {},
     "calls": "المكالمات",
-    "@calls": {},
     "customEmojisAndStickers": "الرموز التعبيرية والملصقات المخصصة",
-    "@customEmojisAndStickers": {},
     "hideRedactedMessagesBody": "إذا قام شخص ما بتنقيح رسالة، فلن تكون هذه الرسالة مرئية في المحادثة بعد الآن.",
-    "@hideRedactedMessagesBody": {},
     "hideInvalidOrUnknownMessageFormats": "إخفاء تنسيقات الرسائل غير الصالحة أو غير المعروفة",
-    "@hideInvalidOrUnknownMessageFormats": {},
-    "overview": "نظرة عامة",
-    "@overview": {},
-    "notifyMeFor": "أعلمني بـ",
-    "@notifyMeFor": {},
     "passwordRecoverySettings": "إعدادات استعادة كلمة المرور",
-    "@passwordRecoverySettings": {},
     "globalChatId": "معرف المحادثة العامة",
-    "@globalChatId": {},
     "accessAndVisibilityDescription": "من المسموح له بالانضمام إلى هذه المحادثة وكيف يمكن اكتشاف المحادثة.",
-    "@accessAndVisibilityDescription": {},
     "customEmojisAndStickersBody": "قم بإضافة أو مشاركة الرموز التعبيرية أو الملصقات المخصصة التي يمكن استخدامها في أي دردشة.",
-    "@customEmojisAndStickersBody": {},
     "hideRedactedMessages": "إخفاء الرسائل المكررة",
-    "@hideRedactedMessages": {},
-    "hideMemberChangesInPublicChats": "إخفاء تغييرات الأعضاء في الدردشات العامة",
-    "@hideMemberChangesInPublicChats": {},
-    "hideMemberChangesInPublicChatsBody": "لا تظهر في المخطط الزمني للدردشة إذا انضم شخص ما إلى محادثة عامة أو غادرها لتحسين إمكانية القراءة.",
-    "@hideMemberChangesInPublicChatsBody": {},
     "usersMustKnock": "المستخدم يجب أن يطرق الباب",
-    "@usersMustKnock": {},
     "chatCanBeDiscoveredViaSearchOnServer": "يمكن اكتشاف الشات عن طريق البحث في {server}",
     "@chatCanBeDiscoveredViaSearchOnServer": {
         "type": "String",
@@ -2916,41 +2121,15 @@
         }
     },
     "noOneCanJoin": "لا أحد يستطيع الانضمام",
-    "@noOneCanJoin": {},
     "knocking": "طرق",
-    "@knocking": {},
-    "userWouldLikeToChangeTheChat": "{user} يرغب في الانضمام إلى المحادثة.",
-    "@userWouldLikeToChangeTheChat": {
-        "placeholders": {
-            "user": {
-                "type": "String"
-            }
-        }
-    },
-    "noPublicLinkHasBeenCreatedYet": "لم يتم بعد إنشاء أي رابط عام",
-    "@noPublicLinkHasBeenCreatedYet": {},
     "knock": "دق",
-    "@knock": {},
     "thereAreCountUsersBlocked": "يوجد حاليًا {count} من المستخدمين المحظورين.",
     "@thereAreCountUsersBlocked": {
         "type": "String",
         "count": {}
     },
     "publicChatAddresses": "عناوين المحادثة العامة",
-    "@publicChatAddresses": {},
     "createNewAddress": "إنشاء عنوان جديد",
-    "@createNewAddress": {},
-    "userRole": "دور المستخدم",
-    "@userRole": {},
-    "minimumPowerLevel": "{level} هو الحد الأدنى من مستوى الطاقة.",
-    "@minimumPowerLevel": {
-        "type": "String",
-        "placeholders": {
-            "level": {
-                "type": "String"
-            }
-        }
-    },
     "searchIn": "بحث في {chat}...",
     "@searchIn": {
         "type": "String",
@@ -2961,45 +2140,13 @@
         }
     },
     "files": "الملفات",
-    "@files": {},
-    "restricted": "مقيد",
-    "@restricted": {},
-    "knockRestricted": "قيود النقر",
-    "@knockRestricted": {},
     "searchMore": "ابحث أكثر...",
-    "@searchMore": {},
     "gallery": "المعرض",
-    "@gallery": {},
     "swipeRightToLeftToReply": "اسحب من اليمين إلى اليسار للرد",
-    "@swipeRightToLeftToReply": {},
-    "alwaysUse24HourFormat": "علّم لعرض الوقت بنسق 24 ساعة دائما.‏",
-    "@alwaysUse24HourFormat": {
-        "description": "Set to true to always display time of day in 24 hour format."
-    },
-    "countChatsAndCountParticipants": "{chats} دردشات و {participants} مشاركين",
-    "@countChatsAndCountParticipants": {
-        "type": "String",
-        "placeholders": {
-            "chats": {
-                "type": "int"
-            },
-            "participants": {
-                "type": "int"
-            }
-        }
-    },
     "noMoreChatsFound": "لم يتم العثور على دردشات...",
-    "@noMoreChatsFound": {},
-    "joinedChats": "انضم إلى الدردشة",
-    "@joinedChats": {},
     "unread": "غير المقروءة",
-    "@unread": {},
     "space": "المساحة",
-    "@space": {},
-    "spaces": "المساحات",
-    "@spaces": {},
     "markAsUnread": "تحديد كغير مقروء",
-    "@markAsUnread": {},
     "goToSpace": "انتقل إلى المساحة: {space}",
     "@goToSpace": {
         "type": "String",
@@ -3033,31 +2180,14 @@
         }
     },
     "changeGeneralChatSettings": "تغيير إعدادات الدردشة العامة",
-    "@changeGeneralChatSettings": {},
     "inviteOtherUsers": "دعوة مستخدمين آخرين إلى هذه الدردشة",
-    "@inviteOtherUsers": {},
     "changeTheChatPermissions": "تغيير أذونات الدردشة",
-    "@changeTheChatPermissions": {},
     "changeTheVisibilityOfChatHistory": "تغيير رؤية سجل الدردشة",
-    "@changeTheVisibilityOfChatHistory": {},
     "changeTheCanonicalRoomAlias": "تغيير عنوان الدردشة العامة الرئيسي",
-    "@changeTheCanonicalRoomAlias": {},
     "sendRoomNotifications": "إرسال إشعارات @room",
-    "@sendRoomNotifications": {},
     "changeTheDescriptionOfTheGroup": "تغيير وصف الدردشة",
-    "@changeTheDescriptionOfTheGroup": {},
-    "invitedBy": "📩 تمت دعوته من قبل {user}",
-    "@invitedBy": {
-        "placeholders": {
-            "user": {
-                "type": "String"
-            }
-        }
-    },
     "chatPermissionsDescription": "‪حدد مستوى الصلاحية الضروري لإجراءات معينة في هذه الدردشة. عادة ما تمثل مستويات الصلاحية 0 و 50 و 100 المستخدمين والمشرفين ولكن أي تدرج ممكن.",
-    "@chatPermissionsDescription": {},
     "changelog": "سجل التغييرات",
-    "@changelog": {},
     "updateInstalled": "تم تثبيت🎉 تحديث {version}!",
     "@updateInstalled": {
         "type": "String",
@@ -3068,82 +2198,25 @@
         }
     },
     "sendCanceled": "تم إلغاء الإرسال",
-    "@sendCanceled": {},
     "noChatsFoundHere": "لم يتم العثور على دردشات هنا حتى الآن. ابدأ محادثة جديدة مع شخص ما باستخدام الزر أدناه. ⤵️",
-    "@noChatsFoundHere": {},
     "loginWithMatrixId": "تسجيل الدخول باستخدام معرف ماتريكس",
-    "@loginWithMatrixId": {},
-    "discoverHomeservers": "اكتشف الخوادم المنزلية",
-    "@discoverHomeservers": {},
-    "whatIsAHomeserver": "ما هو خادم المنزل ؟",
-    "@whatIsAHomeserver": {},
-    "homeserverDescription": "يتم تخزين جميع بياناتك على خادم المنزل، تمامًا مثل مزود خدمة البريد الإلكتروني. يمكنك اختيار خادم البيت الذي تريد استخدامه، بينما لا يزال بإمكانك التواصل مع الجميع. اعرف المزيد على https://matrix.org.",
-    "@homeserverDescription": {},
     "doesNotSeemToBeAValidHomeserver": "لا يبدو أنه خادم منزلي متوافق. عنوان URL غير صحيح ؟",
-    "@doesNotSeemToBeAValidHomeserver": {},
     "calculatingFileSize": "جارٍ حساب حجم الملف...",
-    "@calculatingFileSize": {},
-    "prepareSendingAttachment": "إعداد مرفق الإرسال...",
-    "@prepareSendingAttachment": {},
-    "sendingAttachment": "جارٍ إرسال المرفق...",
-    "@sendingAttachment": {},
-    "generatingVideoThumbnail": "جارٍ إنشاء صورة مصغرة للفيديو...",
-    "@generatingVideoThumbnail": {},
-    "compressVideo": "جارٍ ضغط الفيديو...",
-    "@compressVideo": {},
-    "sendingAttachmentCountOfCount": "جارٍ إرسال المرفق {index} من {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "تم الوصول إلى حد الخادم! انتظر {seconds} ثانية...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "لم يتم التحقق من أحد أجهزتك",
-    "@oneOfYourDevicesIsNotVerified": {},
     "noticeChatBackupDeviceVerification": "ملاحظة: عند توصيل جميع أجهزتك بنسخة احتياطية للدردشة، يتم التحقق منها تلقائيًا.",
-    "@noticeChatBackupDeviceVerification": {},
     "continueText": "استمرار",
-    "@continueText": {},
-    "welcomeText": "مرحبًا، 👋 معك hermes. يمكنك تسجيل الدخول إلى أي خادم منزلي، وهو متوافق مع https://matrix.org. ثم دردش مع أي شخص. إنها شبكة مراسلة لا مركزية ضخمة!",
-    "@welcomeText": {},
     "blur": "الضبابية:",
-    "@blur": {},
     "setWallpaper": "تعيين الخلفية",
-    "@setWallpaper": {},
     "opacity": "التعتيم:",
-    "@opacity": {},
     "manageAccount": "‫إدارة الحساب‬",
-    "@manageAccount": {},
     "noContactInformationProvided": "لا يقدم السيرفر أي معلومات اتصال صحيحة",
-    "@noContactInformationProvided": {},
     "contactServerAdmin": "اتصل بمسؤول الخادم",
-    "@contactServerAdmin": {},
     "contactServerSecurity": "الاتصال بمسؤول أمان ااخادم",
-    "@contactServerSecurity": {},
     "supportPage": "صفحة الدعم",
-    "@supportPage": {},
     "serverInformation": "معلومات الخادم:",
-    "@serverInformation": {},
     "name": "الإسم",
-    "@name": {},
     "version": "اﻹصدار",
-    "@version": {},
     "website": "الموقع اﻹلكتروني",
-    "@website": {},
     "aboutHomeserver": "حول {homeserver}",
     "@aboutHomeserver": {
         "type": "String",
@@ -3154,19 +2227,12 @@
         }
     },
     "boldText": "خط غامق",
-    "@boldText": {},
     "italicText": "خط مائل",
-    "@italicText": {},
     "strikeThrough": "يتوسطه خط",
-    "@strikeThrough": {},
     "invalidUrl": "رابط غير صحيح",
-    "@invalidUrl": {},
     "addLink": "إضافة رابط",
-    "@addLink": {},
     "pleaseFillOut": "من فضلك قم بتعبئته",
-    "@pleaseFillOut": {},
     "unableToJoinChat": "يتعذر الانضمام إلى الدردشة. ربما يكون الطرف الآخر قد أغلق المحادثة بالفعل.",
-    "@unableToJoinChat": {},
     "sendImages": "إرسال {count} صورة",
     "@sendImages": {
         "type": "String",
@@ -3177,11 +2243,431 @@
         }
     },
     "compress": "ضغط",
-    "@compress": {},
     "previous": "السابق",
-    "@previous": {},
     "otherPartyNotLoggedIn": "لم يقم الطرف الآخر بتسجيل الدخول حالياً وبالتالي لا يمكنه تلقي الرسائل!",
-    "@otherPartyNotLoggedIn": {},
-    "setCustomPermissionLevel": "حدد مستوى صلاحية مخصص",
-    "@setCustomPermissionLevel": {}
+    "commandHint_roomupgrade": "قم بترقية هذه الغرفة إلى إصدار الغرفة المحدد",
+    "discardEdits": "لديك تغييرات غير محفوظة. هل تريد تجاهل تعديلاتك؟",
+    "@discardEdits": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "changedTheChatDescription": "{username}تم تغيير وصف المحادثة",
+    "changedTheChatName": "{username}تم تغيير اسم المحادثة",
+    "checkList": "قائمة التحقق",
+    "countInvited": "{count}تمت دعوتهم",
+    "@countInvited": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "synchronizingPleaseWaitCounter": " جارٍ المزامنة... {percentage}%",
+    "@synchronizingPleaseWaitCounter": {
+        "type": "String",
+        "placeholders": {
+            "percentage": {
+                "type": "String"
+            }
+        }
+    },
+    "appWantsToUseForLogin": "استخدم '{server}' لتسجيل الدخول",
+    "@appWantsToUseForLogin": {
+        "type": "String",
+        "placeholders": {
+            "server": {
+                "type": "String"
+            }
+        }
+    },
+    "appWantsToUseForLoginDescription": "أنت بذلك تسمح للتطبيق والموقع الإلكتروني بمشاركة معلومات عنك.",
+    "open": "مفتوح",
+    "waitingForServer": "في انتظار الخادم...",
+    "newChatRequest": "طلب دردشة جديد",
+    "contentNotificationSettings": "إعدادات إشعارات المحتوى",
+    "generalNotificationSettings": "إعدادات الإشعارات العامة",
+    "roomNotificationSettings": "إعدادات إشعارات الغرفة",
+    "userSpecificNotificationSettings": "إعدادات الإشعارات الخاصة بالمستخدم",
+    "otherNotificationSettings": "إعدادات الإشعارات الأخرى",
+    "notificationRuleContainsUserName": "يحتوي على اسم المستخدم",
+    "notificationRuleContainsUserNameDescription": "يُعلم المستخدم عندما تحتوي الرسالة على اسم المستخدم الخاص به.",
+    "notificationRuleMaster": "كتم جميع الإشعارات",
+    "notificationRuleMasterDescription": "يتجاوز جميع القواعد الأخرى ويعطل جميع الإشعارات.",
+    "notificationRuleSuppressNotices": "كتم الرسائل الآلية",
+    "notificationRuleSuppressNoticesDescription": "يقوم بحجب الإشعارات من العملاء الآليين مثل برامج الروبوت.",
+    "notificationRuleInviteForMe": "ادعُني",
+    "notificationRuleInviteForMeDescription": "يقوم بإخطار المستخدم عندما تتم دعوته إلى غرفة.",
+    "notificationRuleMemberEvent": "فعالية للأعضاء",
+    "notificationRuleMemberEventDescription": "يقوم بإيقاف الإشعارات الخاصة بفعاليات العضوية.",
+    "notificationRuleIsUserMention": "إشارة المستخدم",
+    "notificationRuleIsUserMentionDescription": "يقوم بإخطار المستخدم عندما يتم ذكره بشكل مباشر في رسالة.",
+    "notificationRuleContainsDisplayName": "يحتوي على اسم العرض",
+    "notificationRuleContainsDisplayNameDescription": "يقوم بإخطار المستخدم عندما تحتوي الرسالة على اسم العرض الخاص به.",
+    "notificationRuleIsRoomMention": "ذكر الغرفة",
+    "notificationRuleIsRoomMentionDescription": "يُعلم المستخدم عند ذكر الغرفة.",
+    "notificationRuleRoomnotif": "إشعار الغرفة",
+    "notificationRuleRoomnotifDescription": "يقوم بإخطار المستخدم عندما تحتوي الرسالة على '@room'.",
+    "notificationRuleTombstoneDescription": "يُعلم المستخدم برسائل إلغاء تفعيل الغرفة.",
+    "notificationRuleReaction": "رد فعل",
+    "notificationRuleReactionDescription": "يكتم الإشعارات الخاصة بالتفاعلات.",
+    "notificationRuleRoomServerAcl": "قائمة التحكم في خادم الغرفة",
+    "notificationRuleRoomServerAclDescription": "يقوم بإيقاف الإشعارات الخاصة بقوائم التحكم في الوصول (ACL) لخادم الغرفة.",
+    "notificationRuleSuppressEdits": "إخفاء التعديلات",
+    "notificationRuleSuppressEditsDescription": "يقوم بإيقاف الإشعارات الخاصة بالرسائل المعدلة.",
+    "notificationRuleCall": "اتصال",
+    "notificationRuleCallDescription": "يُعلم المستخدم بالمكالمات.",
+    "notificationRuleEncryptedRoomOneToOne": "غرفة مشفرة فردية",
+    "notificationRuleEncryptedRoomOneToOneDescription": "يقوم بإخطار المستخدم بالرسائل الموجودة في غرف الدردشة المشفرة الخاصة بالأفراد.",
+    "notificationRuleRoomOneToOne": "غرفة فردية",
+    "notificationRuleRoomOneToOneDescription": "يقوم بإخطار المستخدم بالرسائل في الغرف الفردية.",
+    "notificationRuleMessage": "رسالة",
+    "notificationRuleMessageDescription": "يُعلم المستخدم بالرسائل العامة.",
+    "notificationRuleEncrypted": "مشفر",
+    "notificationRuleEncryptedDescription": "يُعلم المستخدم بالرسائل الموجودة في الغرف المشفرة.",
+    "notificationRuleJitsiDescription": "يُعلم المستخدم بأحداث أداة Jitsi.",
+    "notificationRuleServerAcl": "كبت أحداث التحكم في الوصول للخادم",
+    "notificationRuleServerAclDescription": "يقوم بإيقاف الإشعارات الخاصة بأحداث التحكم في الوصول للخادم.",
+    "unknownPushRule": "قاعدة دفع غير معروفة '{rule}'",
+    "@unknownPushRule": {
+        "type": "String",
+        "placeholders": {
+            "rule": {
+                "type": "String"
+            }
+        }
+    },
+    "sentVoiceMessage": "{duration}رسالة صوتية من {sender}",
+    "@sentVoiceMessage": {
+        "type": "String",
+        "placeholders": {
+            "sender": {
+                "type": "String"
+            },
+            "duration": {
+                "type": "String"
+            }
+        }
+    },
+    "deletePushRuleCanNotBeUndone": "إذا قمت بحذف إعداد الإشعار هذا، فلا يمكن التراجع عن ذلك.",
+    "more": "أكثر",
+    "shareKeysWith": "مشاركة المفاتيح مع...",
+    "shareKeysWithDescription": "ما هي الأجهزة التي يجب الوثوق بها حتى تتمكن من قراءة رسائلك في المحادثات المشفرة؟",
+    "allDevices": "جميع الأجهزة",
+    "crossVerifiedDevicesIfEnabled": "الأجهزة التي تم التحقق منها بشكل متبادل (إذا تم تمكين ذلك)",
+    "crossVerifiedDevices": "الأجهزة التي تم التحقق منها بشكل متبادل",
+    "verifiedDevicesOnly": "الأجهزة المعتمدة فقط",
+    "takeAPhoto": "التقط صورة",
+    "recordAVideo": "سجل فيديو",
+    "optionalMessage": "(اختياري) رسالة...",
+    "notSupportedOnThisDevice": "غير مدعوم على هذا الجهاز",
+    "enterNewChat": "ادخل إلى دردشة جديدة",
+    "approve": "موافقة",
+    "youHaveKnocked": "لقد طرقت الباب",
+    "pleaseWaitUntilInvited": "يرجى الانتظار الآن حتى يدعوك أحد الأشخاص من الغرفة.",
+    "commandHint_logout": "قم بتسجيل الخروج من جهازك الحالي",
+    "commandHint_logoutall": "قم بتسجيل الخروج من جميع الأجهزة النشطة",
+    "displayNavigationRail": "عرض شريط التنقل على الهاتف المحمول",
+    "customReaction": "رد فعل مخصص",
+    "moreEvents": "المزيد من الفعاليات",
+    "showMore": "عرض المزيد",
+    "showLess": "عرض أقل",
+    "declineInvitation": "رفض الدعوة",
+    "noMessagesYet": "لا يوجد اي رسائل بعد",
+    "longPressToRecordVoiceMessage": "اضغط مطولاً لتسجيل رسالة صوتية.",
+    "pause": "توقف مؤقت",
+    "resume": "استئناف",
+    "removeFromSpaceDescription": "ستتم إزالة المحادثة من المساحة ولكنها ستظل تظهر في قائمة المحادثات الخاصة بك.",
+    "countChats": "{chats} المحادثات",
+    "@countChats": {
+        "type": "String",
+        "placeholders": {
+            "chats": {
+                "type": "int"
+            }
+        }
+    },
+    "spaceMemberOf": "عضو مساحة في{spaces}",
+    "@spaceMemberOf": {
+        "type": "String",
+        "placeholders": {
+            "spaces": {
+                "type": "String"
+            }
+        }
+    },
+    "startPoll": "استطلاع رأي",
+    "endPoll": "إنهاء الاستطلاع",
+    "answersVisible": "الإجابات مرئية",
+    "pollQuestion": "سؤال الاستطلاع",
+    "answerOption": "خيار الإجابة",
+    "addAnswerOption": "إضافة خيار الإجابة",
+    "allowMultipleAnswers": "السماح بإجابات متعددة",
+    "pollHasBeenEnded": "تم إنهاء التصويت",
+    "answersWillBeVisibleWhenPollHasEnded": "ستظهر الإجابات عند انتهاء الاستطلاع",
+    "replyInThread": "الرد في الموضوع",
+    "thread": "خيط",
+    "backToMainChat": "العودة إلى المحادثة الرئيسية",
+    "saveChanges": "حفظ التغييرات",
+    "createSticker": "أنشئ ملصقًا أو رمزًا تعبيريًا",
+    "useAsSticker": "استخدم كملصق",
+    "useAsEmoji": "استخدم كرمز تعبيري",
+    "stickerPackNameAlreadyExists": "اسم حزمة الملصقات موجود بالفعل",
+    "newStickerPack": "مجموعة ملصقات جديدة",
+    "stickerPackName": "اسم حزمة الملصقات",
+    "skipChatBackup": "تخطي النسخ الاحتياطي للمحادثة",
+    "skipChatBackupWarning": "هل أنت متأكد؟ بدون تفعيل خاصية النسخ الاحتياطي للمحادثات، قد تفقد الوصول إلى رسائلك إذا قمت بتغيير جهازك.",
+    "noMoreResultsFound": "لم يتم العثور على نتائج أخرى",
+    "spaceMemberOfCanKnock": "عضو مساحة {spaces} يستطيع يطرق",
+    "@spaceMemberOfCanKnock": {
+        "type": "String",
+        "placeholders": {
+            "spaces": {
+                "type": "String"
+            }
+        }
+    },
+    "attribution": "الإسناد",
+    "chatSearchedUntil": "تم بحث المحادثه حتى {time}",
+    "@chatSearchedUntil": {
+        "type": "String",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "federationBaseUrl": "عنوان URL الأساسي للاتحاد",
+    "clientWellKnownInformation": "معلومات معروفة لدى العميل:",
+    "baseUrl": "عنوان URL الأساسي",
+    "identityServer": "خادم الهوية:",
+    "versionWithNumber": "إصدار:{version}",
+    "@versionWithNumber": {
+        "type": "String",
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "logs": "سجلات",
+    "advancedConfigs": "الإعدادات المتقدمة",
+    "advancedConfigurations": "التكويناتالمتقدمة",
+    "signIn": "تسجيل الدخول",
+    "createNewAccount": "إنشاء حساب جديد",
+    "signUpGreeting": "Hermes لا مركزي! اختر الخادم الذي تريد إنشاء حسابك عليه ولنبدأ!",
+    "signInGreeting": "هل لديك حساب بالفعل في ماتريكس؟ أهلاً بك مجدداً! اختر خادمك المنزلي وسجّل الدخول.",
+    "theProcessWasCanceled": "تم إلغاء العملية.",
+    "join": "انضمام",
+    "searchOrEnterHomeserverAddress": "ابحث عن عنوان الخادم المنزلي أو أدخله",
+    "matrixId": "معرف المصفوفة",
+    "setPowerLevel": "ضبط مستوى الطاقة",
+    "makeAdmin": "إنشاء مسؤول",
+    "removeModeratorRights": "إزالة صلاحيات المشرف",
+    "removeAdminRights": "إزالة صلاحيات المسؤول",
+    "powerLevel": "مستوى الطاقة",
+    "setPowerLevelDescription": "تحدد مستويات القوة ما يُسمح للعضو بفعله في هذه الغرفة، وعادة ما تتراوح بين 0 و 100.",
+    "owner": "مالك",
+    "mute": "صامت",
+    "@mute": {
+        "description": "This should be a very short string because there is not much space in the button!"
+    },
+    "createNewChat": "إنشاء محادثة جديدة",
+    "reset": "إعادة تعيين",
+    "supportFluffyChat": "ادعم FluffyChat",
+    "support": "دعم",
+    "setLowPriority": "حدد أولوية منخفضة",
+    "unsetLowPriority": "إلغاء تعيين الأولوية المنخفضة",
+    "playSoundOnNotification": "تشغيل الصوت عند الإشعار",
+    "addTag": "إضافة وسم",
+    "removeTag": "إزالة الوسم",
+    "tagName": "اسم الوسم",
+    "createNewTag": "إنشاء وسم جديد",
+    "hideRoomsInSpaces": "إخفاء الغرف الموجودة في مساحة",
+    "possibleByYou": "لم يكن هذا الإصدار ليتحقق لولا دعمكم. سيظل Hermes مجانيًا ومفتوح المصدر، ويعتمد كليًا على جهود المجتمع.",
+    "showThumbnailsInTimeline": "عرض الصور المصغرة للصور ومقاطع الفيديو",
+    "appSubtitle": "اتصال آمن [مصفوفة]",
+    "appDescription": "التواصل بشكل مشفر عبر شبكة [المصفوفة] اللامركزية بطريقة سهلة ومتاحة للجميع.",
+    "interactiveVerification": "التحقق التفاعلي",
+    "interactiveVerificationDescription": "إذا كنتم بجانب بعضكم البعض أو تتواصلون عبر قناة آمنة، فيمكنكم التحقق من جميع الأجهزة في وقت واحد عن طريق مقارنة رقم الأمان أو الرموز التعبيرية.",
+    "countUnverifiedDevices": "{count}الأجهزة غير الموثقة في المحادثة.",
+    "@countUnverifiedDevices": {
+        "type": "int",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "encryptedMessage": "رسالة مشفرة",
+    "unencryptedMessage": "رسالة غير مشفرة",
+    "messageCanOnlyBeReadByUser": "رسالتك مشفرة تشفيراً تاماً ولا يمكن قراءتها إلا من قبل هذا المستخدم:",
+    "messageCanOnlyBeReadByUsers": "رسالتك مشفرة تشفيراً تاماً ولا يمكن قراءتها إلا من قبل هؤلاء المستخدمين:",
+    "publicKey": "المفتاح العام:{key}",
+    "@publicKey": {
+        "type": "String",
+        "placeholders": {
+            "key": {
+                "type": "String"
+            }
+        }
+    },
+    "deviceIdentityKey": "مفتاح تعريف الجهاز",
+    "restoreBootstrapEmptyDevicesDescription": "يرجى إدخال عبارة المرور أو مفتاح الاسترداد للتحقق من هذا الجهاز والوصول إلى نسخة احتياطية من رسائلك المشفرة.",
+    "@restoreBootstrapEmptyDevicesDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "restoreBootstrapDevicesDescription": "يرجى اختيار أحد أجهزتك الأخرى للتحقق من هذه الجلسة:",
+    "@restoreBootstrapDevicesDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "resetAccount": "إعادة تعيين الحساب",
+    "@resetAccount": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "restoreCryptoIdentity": "استعادة هوية العملة المشفرة",
+    "@restoreCryptoIdentity": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "waitingForKeys": "جارٍ انتظار المفاتيح... يرجى إبقاء الجهاز الآخر نشطًا.",
+    "@waitingForKeys": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "noKeysTransmitted": "لم يتم إرسال المفاتيح. يرجى المحاولة مرة أخرى.",
+    "@noKeysTransmitted": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unlock": "فتح",
+    "@unlock": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "openFile": "فتح الملف",
+    "@openFile": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "resetAccountWarning": "عند إعادة ضبط حسابك، ستفقد الوصول إلى رسائلك القديمة نهائيًا. ستحتاج إلى إعادة التحقق من جميع أجهزتك الحالية. يُرجى القيام بهذا الإجراء فقط عندما لا يتبقى لديك أي أجهزة أخرى للتحقق من جلستك، وعندما تكون قد فقدت مفتاح الاسترداد وكلمة المرور!",
+    "@resetAccountWarning": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "newPassphraseDescription": "يستخدم تطبيق Hermes التشفير التام بين الطرفين. ولضمان عدم فقدان رسائلك، يُرجى اختيار عبارة مرور قوية لحماية هويتك الرقمية ونسخة احتياطية من رسائلك المشفرة.",
+    "@newPassphraseDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "newPassphrase": "عبارة مرور جديدة",
+    "@newPassphrase": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "repeatPassphrase": "كرر عبارة المرور",
+    "@repeatPassphrase": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "passphrasesMatch": "عبارات المرور متطابقة",
+    "@passphrasesMatch": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "passphraseLengthRequirement": "يجب ألا يقل طولها عن 12 حرفًا.",
+    "@passphraseLengthRequirement": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "passphraseUpperAndLowerCaseRequirement": "يحتوي على أحرف كبيرة وصغيرة.",
+    "@passphraseUpperAndLowerCaseRequirement": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "passphraseSpecialCharactersRequirement": "يحتوي على أحرف خاصة.",
+    "@passphraseSpecialCharactersRequirement": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "passphraseNumberRequirement": "يحتوي على رقم واحد.",
+    "@passphraseNumberRequirement": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "storeRecoveryKeyDescription": "يرجى تدوين مفتاح الاسترداد الخاص بك لتتمكن من استعادة رسائلك المشفرة وهويتك الرقمية.",
+    "@storeRecoveryKeyDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "saveAsFile": "حفظ كملف",
+    "@saveAsFile": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "youAreReadyToStart": "أنت جاهز للبدء!",
+    "makeModerator": "تعيين مشرف",
+    "resetCryptoIdentity": "إعادة تعيين هوية العملات المشفرة",
+    "@resetCryptoIdentity": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "setUpCryptoIdentity": "إعداد هوية العملات المشفرة",
+    "@setUpCryptoIdentity": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "noUserKeyFound": "لم يتم العثور على مفتاح المستخدم",
+    "@noUserKeyFound": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "knownSince": "معروف منذ:{date}",
+    "@knownSince": {
+        "type": "String",
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    },
+    "unsignedDevice": "جهاز غير موقّع",
+    "@unsignedDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "signedDevice": "جهاز موقّع",
+    "@signedDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "noCurve25519KeyFound": "لم يتم العثور على مفتاح curve25519",
+    "@noCurve25519KeyFound": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageNotDecryptable": "الرسالة غير قابلة للفك",
+    "today": "اليوم",
+    "sending": "إرسال",
+    "generatingThumbnail": "إنشاء صورة مصغرة",
+    "encrypting": "التشفير",
+    "uploading": "جارٍ التحميل",
+    "edited": "(معدل)",
+    "couldNotBeSent": "تعذر الإرسال",
+    "yesterday": "أمس",
+    "resetRecoveryKey": "مفتاح استعادة إعادة التعيين",
+    "pleaseEnter6Digits": "يرجى إدخال 6 أرقام لتفعيل قفل التطبيق.",
+    "disableAppLock": "تعطيل قفل التطبيقات",
+    "disableAppLockAreYouSure": "هل أنت متأكد من رغبتك في تعطيل قفل التطبيقات؟",
+    "enableBiometrics": "تفعيل المصادقة البيومترية",
+    "disableBiometrics": "تعطيل المصادقة البيومترية",
+    "biometricsDescription": "باستخدام المصادقة البيومترية، يمكنك فتح التطبيق باستخدام وجهك أو بصمة إصبعك. وتختلف الإمكانيات المتاحة حسب جهازك.",
+    "useAppLock": "استخدم قفل التطبيقات",
+    "unlockWithBiometrics": "افتح القفل باستخدام المصادقة البيومترية",
+    "resetPin": "دبوس إعادة الضبط",
+    "notificationRuleJitsi": "جيتسي",
+    "notificationRuleTombstone": "علامة القبر"
 }

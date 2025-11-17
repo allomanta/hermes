@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
@@ -36,12 +39,12 @@ class SettingsIgnoreListView extends StatelessWidget {
               return const Center(child: CircularProgressIndicator.adaptive());
             }
             return Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize: .min,
                     children: [
                       TextField(
                         controller: controller.controller,
@@ -68,9 +71,7 @@ class SettingsIgnoreListView extends StatelessWidget {
                     ],
                   ),
                 ),
-                Divider(
-                  color: theme.dividerColor,
-                ),
+                Divider(color: theme.dividerColor),
                 Expanded(
                   child: ListView.builder(
                     itemCount: client.ignoredUsers.length,

@@ -1,7 +1,11 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
-
-import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -19,7 +23,18 @@ import 'widgets/hermes_app.dart';
 
 ReceivePort? mainIsolateReceivePort;
 
-void main() async {
+bool _vodozemacInitialized = false;
+
+bool isIntegrationTest = false;
+
+void main(List<String> args) => runZonedGuarded(() async {
+  // Forward Flutter errors to global error reporter
+  FlutterError.onError = (details) => Zone.current.handleUncaughtError(
+    details.exception,
+    details.stack ?? StackTrace.current,
+  );
+
+  isIntegrationTest = args.singleOrNull == 'integration_test';
   if (PlatformInfos.isAndroid) {
     final port = mainIsolateReceivePort = ReceivePort();
     IsolateNameServer.removePortNameMapping(AppConfig.mainIsolatePortName);
@@ -30,6 +45,14 @@ void main() async {
     await waitForPushIsolateDone();
   }
 
+  // Sanitize hash for OIDC:
+  if (kIsWeb) {
+    final hash = web.window.location.hash;
+    if (hash.isNotEmpty && !hash.startsWith('/')) {
+      web.window.location.hash = hash.replaceFirst('#', '#?');
+    }
+  }
+
   // Our background push shared isolate accesses flutter-internal things very early in the startup proccess
   // To make sure that the parts of flutter needed are started up already, we need to ensure that the
   // widget bindings are initialized already.
@@ -38,16 +61,24 @@ void main() async {
   final store = await AppSettings.init();
   Logs().i('Welcome to ${AppSettings.applicationName.value} <3');
 
-  await vod.init(wasmPath: './assets/assets/vodozemac/');
+  kEnableMatrixSdkBenchmarks = AppSettings.benchmarksInLogs.value;
+
+  if (!_vodozemacInitialized) {
+    await vod.init(wasmPath: './assets/assets/vodozemac/');
+    _vodozemacInitialized = true;
+  }
 
   Logs().nativeColors = !PlatformInfos.isIOS;
-  final clients = await ClientManager.getClients(store: store);
 
   // If the app starts in detached mode, we assume that it is in
   // background fetch mode for processing push notifications. This is
   // currently only supported on Android.
   if (PlatformInfos.isAndroid &&
       AppLifecycleState.detached == WidgetsBinding.instance.lifecycleState) {
+    await ForegroundServices.startService('background_push');
+
+    final clients = await ClientManager.getClients(store: store);
+
     // Do not send online presences when app is in background fetch mode.
     for (final client in clients) {
       client.backgroundSync = false;
@@ -56,7 +87,7 @@ void main() async {
 
     // In the background fetch mode we do not want to waste ressources with
     // starting the Flutter engine but process incoming push notifications.
-    BackgroundPush.clientOnly(clients.first);
+    BackgroundPush.clientOnly(clients);
     // To start the flutter engine afterwards we add an custom observer.
     WidgetsBinding.instance.addObserver(AppStarter(clients, store));
     Logs().i(
@@ -65,24 +96,32 @@ void main() async {
     return;
   }
 
+  final clients = await ClientManager.getClients(store: store);
+
   // Started in foreground mode.
   Logs().i(
     '${AppSettings.applicationName.value} started in foreground mode. Rendering GUI...',
   );
   await startGui(clients, store);
-}
+}, ErrorReporter.onFlutterError);
 
 /// Fetch the pincode for the applock and start the flutter engine.
 Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   // Fetch the pin for the applock if existing for mobile applications.
   String? pin;
-  if (PlatformInfos.isMobile) {
+  var useBiometrics = false;
+  if (PlatformInfos.supportsAppLock) {
     try {
-      pin = await const FlutterSecureStorage()
-          .read(key: 'chat.pantheon.app_lock');
+      pin = await const FlutterSecureStorage().read(
+        key: 'chat.pantheon.app_lock',
+      );
     } catch (e, s) {
       Logs().d('Unable to read PIN from Secure storage', e, s);
     }
+  }
+
+  if (PlatformInfos.isLinux || PlatformInfos.isWindows) {
+    JustAudioMediaKit.ensureInitialized();
   }
 
   // Preload first client

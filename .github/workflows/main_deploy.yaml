@@ -14,12 +14,11 @@ jobs:
   deploy_web:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - run: cat .github/workflows/versions.env >> $GITHUB_ENV
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-      - uses: moonrepo/setup-rust@v1
+          flutter-version-file: .tool_versions.yaml
+      - uses: dtolnay/rust-toolchain@stable
       - run: rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
       - name: Prepare web
         run: ./scripts/prepare-web.sh
@@ -38,23 +37,21 @@ jobs:
 
   deploy_playstore_internal:
     runs-on: ubuntu-latest
+    concurrency:
+      group: deploy_playstore
+      queue: max
     steps:
-      - uses: actions/checkout@v5
-      - run: cat .github/workflows/versions.env >> $GITHUB_ENV
-      - uses: actions/setup-java@v5
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'zulu'
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version-file: .tool_versions.yaml
           cache: true
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
       - uses: ./.github/actions/free_up_space
-      - uses: moonrepo/setup-rust@v1
+      - uses: dtolnay/rust-toolchain@stable
       - name: Install Fastlane
         run: gem install fastlane -NV
       - name: Add Firebase Messaging

@@ -1,10 +1,12 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:ui';
 
 abstract class AppConfig {
-  // Const and final configuration values (immutable)
-  static const Color primaryColor = Color(0xFF5625BA);
-  static const Color primaryColorLight = Color(0xFFCCBDEA);
-  static const Color secondaryColor = Color(0xFF41a2bc);
+  static const Color primaryColor = Color(0xFF261386);
 
   static const Color chatColor = primaryColor;
   static const double messageFontSize = 16.0;
@@ -17,6 +19,7 @@ abstract class AppConfig {
   static const String pushNotificationsChannelId = 'hermes_push';
   static const String pushNotificationsAppId = 'chat.pantheon.hermes';
   static const double borderRadius = 18.0;
+  static const double spaceBorderRadius = 11.0;
   static const double columnWidth = 360.0;
   static const String website = 'https://hermes.im';
   static const String enablePushTutorial =
@@ -40,8 +43,8 @@ abstract class AppConfig {
   );
   static final Uri homeserverList = Uri(
     scheme: 'https',
-    host: 'servers.joinmatrix.org',
-    path: 'servers.json',
+    host: 'raw.githubusercontent.com',
+    path: 'krille-chan/fluffychat/refs/heads/main/recommended_homeservers.json',
   );
 
   // static bool swipePopEnableFullScreenDrag = true;
@@ -59,4 +62,5 @@ abstract class AppConfig {
 
   static const String mainIsolatePortName = 'main_isolate';
   static const String pushIsolatePortName = 'push_isolate';
+  static const String pushHelperCrashReportKey = 'push_helper_crash_report';
 }

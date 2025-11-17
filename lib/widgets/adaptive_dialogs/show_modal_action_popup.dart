@@ -1,5 +1,10 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 
 Future<T?> showModalActionPopup<T>({
   required BuildContext context,
@@ -32,10 +37,7 @@ Future<T?> showModalActionPopup<T>({
               ListTile(
                 title: title == null
                     ? null
-                    : Text(
-                        title,
-                        style: theme.textTheme.labelSmall,
-                      ),
+                    : Text(title, style: theme.textTheme.labelSmall),
                 subtitle: message == null ? null : Text(message),
               ),
               const Divider(height: 1),
@@ -49,8 +51,9 @@ Future<T?> showModalActionPopup<T>({
                   style: action.isDestructive
                       ? TextStyle(
                           color: theme.colorScheme.error,
-                          fontWeight:
-                              action.isDefaultAction ? FontWeight.bold : null,
+                          fontWeight: action.isDefaultAction
+                              ? FontWeight.bold
+                              : null,
                         )
                       : null,
                 ),

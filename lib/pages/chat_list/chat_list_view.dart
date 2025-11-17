@@ -12,6 +12,9 @@ class ChatListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final oneColumnSpacesMode =
+        !PantheonThemes.isColumnMode(context) &&
+        AppSettings.displayNavigationRail.value;
     return PopScope(
       canPop: !controller.isSearchMode && controller.activeSpaceId == null,
       onPopInvokedWithResult: (pop, _) {
@@ -35,10 +38,7 @@ class ChatListView extends StatelessWidget {
             onGoToChats: controller.clearActiveSpace,
             onGoToSpaceId: controller.setActiveSpace,
           ),
-          Container(
-            color: Theme.of(context).dividerColor,
-            width: 1,
-          ),
+          Container(color: Theme.of(context).dividerColor, width: 1),
           // ],
           Expanded(
             child: GestureDetector(
@@ -47,8 +47,8 @@ class ChatListView extends StatelessWidget {
               behavior: HitTestBehavior.translucent,
               child: Scaffold(
                 body: ChatListViewBody(controller),
-                floatingActionButton: !controller.isSearchMode &&
-                        controller.activeSpaceId == null
+                floatingActionButton:
+                    !controller.isSearchMode && controller.activeSpaceId == null
                     ? FloatingActionButton(
                         onPressed: () => context.go('/rooms/newprivatechat'),
                         shape: const CircleBorder(),

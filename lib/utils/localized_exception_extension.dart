@@ -1,9 +1,16 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/other_party_can_receive.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
@@ -20,8 +27,8 @@ extension LocalizedExceptionExtension on Object {
     final numString = round < 10
         ? num.toStringAsFixed(2)
         : round < 100
-            ? num.toStringAsFixed(1)
-            : round.toString();
+        ? num.toStringAsFixed(1)
+        : round.toString();
     return '$numString ${'kMGTPEZY'[i - 1]}B';
   }
 
@@ -31,9 +38,9 @@ extension LocalizedExceptionExtension on Object {
   ]) {
     if (this is FileTooBigMatrixException) {
       final exception = this as FileTooBigMatrixException;
-      return L10n.of(context).fileIsTooBigForServer(
-        _formatFileSize(exception.maxFileSize),
-      );
+      return L10n.of(
+        context,
+      ).fileIsTooBigForServer(_formatFileSize(exception.maxFileSize));
     }
     if (this is OtherPartyCanNotReceiveMessages) {
       return L10n.of(context).otherPartyNotLoggedIn;
@@ -57,6 +64,15 @@ extension LocalizedExceptionExtension on Object {
     if (this is InvalidPassphraseException) {
       return L10n.of(context).wrongRecoveryKey;
     }
+    if (this is PlatformException) {
+      if ((this as PlatformException).code == 'CANCELED') {
+        return L10n.of(context).theProcessWasCanceled;
+      }
+      final message = (this as PlatformException).message;
+      if (message != null) {
+        return message;
+      }
+    }
     if (this is BadServerLoginTypesException) {
       final serverVersions = (this as BadServerLoginTypesException)
           .serverLoginTypes
@@ -68,11 +84,9 @@ extension LocalizedExceptionExtension on Object {
           .toString()
           .replaceAll('{', '"')
           .replaceAll('}', '"');
-      return L10n.of(context).badServerLoginTypesException(
-        serverVersions,
-        supportedVersions,
-        supportedVersions,
-      );
+      return L10n.of(
+        context,
+      ).badServerLoginTypesException(serverVersions, supportedVersions);
     }
     if (this is IOException ||
         this is SocketException ||
@@ -95,8 +109,7 @@ extension LocalizedExceptionExtension on Object {
       return L10n.of(context).unableToJoinChat;
     }
 
-    Logs().w('Something went wrong: ', this);
-    return L10n.of(context).oopsSomethingWentWrong;
+    return L10n.of(context).unexpectedErrorOccurded(toString());
   }
 }
 

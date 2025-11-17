@@ -56,9 +56,7 @@ class SettingsChatView extends StatelessWidget {
               ),
               ListTile(
                 title: Text(L10n.of(context).swipeDistance),
-                subtitle: Text(
-                  L10n.of(context).swipeDistanceDescription,
-                ),
+                subtitle: Text(L10n.of(context).swipeDistanceDescription),
                 trailing: Text(
                   '${(controller.swipeMinimumDragFraction * 100).round()}%',
                 ),
@@ -80,8 +78,9 @@ class SettingsChatView extends StatelessWidget {
               ListTile(
                 title: Text(L10n.of(context).swipeVelocity),
                 subtitle: Text(L10n.of(context).swipeVelocityDescription),
-                trailing:
-                    Text('${controller.swipeVelocityThreshold.round()} px/s'),
+                trailing: Text(
+                  '${controller.swipeVelocityThreshold.round()} px/s',
+                ),
               ),
               Slider.adaptive(
                 min: 50,
@@ -107,6 +106,10 @@ class SettingsChatView extends StatelessWidget {
                 title: L10n.of(context).hideRedactedMessages,
                 subtitle: L10n.of(context).hideRedactedMessagesBody,
                 setting: AppSettings.hideRedactedEvents,
+              ),
+              SettingsSwitchListTile.adaptive(
+                title: L10n.of(context).hideRoomsInSpaces,
+                setting: AppSettings.hideRoomsInSpaces,
               ),
               SettingsSwitchListTile.adaptive(
                 title: L10n.of(context).hideInvalidOrUnknownMessageFormats,
@@ -149,11 +152,11 @@ class SettingsChatView extends StatelessWidget {
                     context: context,
                     futureWithProgress: (setProgress) =>
                         BackfillService.backfillAllChats(
-                      client,
-                      setProgress: setProgress,
-                      perRequest: 200,
-                      maxPerRoom: 2000,
-                    ),
+                          client,
+                          setProgress: setProgress,
+                          perRequest: 200,
+                          maxPerRoom: 2000,
+                        ),
                     title: 'Backfilling chats…',
                   );
 
@@ -196,14 +199,6 @@ class SettingsChatView extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              SettingsSwitchListTile.adaptive(
-                title: L10n.of(context).experimentalVideoCalls,
-                onChanged: (b) {
-                  Matrix.of(context).createVoipPlugin();
-                  return;
-                },
-                setting: AppSettings.experimentalVoip,
               ),
             ],
           ),

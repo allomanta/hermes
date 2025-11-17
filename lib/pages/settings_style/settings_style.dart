@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/setting_keys.dart';
@@ -17,21 +20,19 @@ class SettingsStyle extends StatefulWidget {
 }
 
 class SettingsStyleController extends State<SettingsStyle> {
-  void setChatColor(Color? color) async {
+  void setChatColor(Color? color) {
     AppSettings.colorSchemeSeedInt.setItem(
       color?.toARGB32() ?? AppSettings.colorSchemeSeedInt.defaultValue,
     );
     ThemeController.of(context).setPrimaryColor(color);
   }
 
-  void setWallpaper() async {
+  Future<void> setWallpaper() async {
     final client = Matrix.of(context).client;
-    final picked = await selectFiles(
-      context,
-      type: FileSelectorType.images,
-    );
+    final picked = await selectFiles(context, type: FileType.image);
     final pickedFile = picked.firstOrNull;
     if (pickedFile == null) return;
+    if (!mounted) return;
 
     await showFutureLoadingDialog(
       context: context,
@@ -54,7 +55,7 @@ class SettingsStyleController extends State<SettingsStyle> {
 
   double? _wallpaperOpacity;
 
-  void saveWallpaperOpacity(double opacity) async {
+  Future<void> saveWallpaperOpacity(double opacity) async {
     final client = Matrix.of(context).client;
     final result = await showFutureLoadingDialog(
       context: context,
@@ -81,7 +82,7 @@ class SettingsStyleController extends State<SettingsStyle> {
       0.5;
   double? _wallpaperBlur;
 
-  void saveWallpaperBlur(double blur) async {
+  Future<void> saveWallpaperBlur(double blur) async {
     final client = Matrix.of(context).client;
     final result = await showFutureLoadingDialog(
       context: context,
@@ -103,43 +104,14 @@ class SettingsStyleController extends State<SettingsStyle> {
   }
 
   void deleteChatWallpaper() => showFutureLoadingDialog(
-        context: context,
-        future: () => Matrix.of(context).client.setApplicationAccountConfig(
-              const ApplicationAccountConfig(
-                wallpaperUrl: null,
-                wallpaperBlur: null,
-              ),
-            ),
-      );
+    context: context,
+    future: () => Matrix.of(context).client.setApplicationAccountConfig(
+      const ApplicationAccountConfig(wallpaperUrl: null, wallpaperBlur: null),
+    ),
+  );
 
   ThemeMode get currentTheme => ThemeController.of(context).themeMode;
   Color? get currentColor => ThemeController.of(context).primaryColor;
-
-  static final List<Color?> customColors = [
-    null,
-    AppConfig.chatColor,
-    Colors.indigo,
-    Colors.blue,
-    Colors.blueAccent,
-    Colors.teal,
-    Colors.tealAccent,
-    Colors.green,
-    Colors.greenAccent,
-    Colors.yellow,
-    Colors.yellowAccent,
-    Colors.orange,
-    Colors.orangeAccent,
-    Colors.red,
-    Colors.redAccent,
-    Colors.pink,
-    Colors.pinkAccent,
-    Colors.purple,
-    Colors.purpleAccent,
-    Colors.blueGrey,
-    Colors.grey,
-    Colors.white,
-    Colors.black,
-  ];
 
   void switchTheme(ThemeMode? newTheme) {
     if (newTheme == null) return;
@@ -157,7 +129,7 @@ class SettingsStyleController extends State<SettingsStyle> {
     setState(() {});
   }
 
-  void changeFontSizeFactor(double d) async {
+  Future<void> changeFontSizeFactor(double d) async {
     await AppSettings.fontSizeFactor.setItem(d);
     setState(() {});
   }

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hermes/utils/horizontal_swipe_recognizer.dart';
 
-typedef ReplyBackgroundBuilder = Widget Function(
-  BuildContext context,
-  bool leftToRight,
-  double progress, // 0..1
-);
+typedef ReplyBackgroundBuilder =
+    Widget Function(
+      BuildContext context,
+      bool leftToRight,
+      double progress, // 0..1
+    );
 
 /// Swipe-to-reply that animates the child, fires [onReply] once threshold
 /// is crossed, then snaps back. Rejects early if initial motion is the
@@ -64,9 +65,10 @@ class _ReplySwipeState extends State<ReplySwipe> with TickerProviderStateMixin {
     );
     _snapBackAnimation = ctrl;
 
-    final anim = Tween<double>(begin: start, end: 0.0).animate(
-      CurvedAnimation(parent: ctrl, curve: Curves.easeOut),
-    );
+    final anim = Tween<double>(
+      begin: start,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: ctrl, curve: Curves.easeOut));
 
     void listener() => setState(() => _dragX = anim.value);
     ctrl.addListener(listener);
@@ -98,45 +100,42 @@ class _ReplySwipeState extends State<ReplySwipe> with TickerProviderStateMixin {
       gestures: {
         HorizontalSwipeRecognizer:
             GestureRecognizerFactoryWithHandlers<HorizontalSwipeRecognizer>(
-          () => HorizontalSwipeRecognizer(
-            allowedSign: allowedSign,
-            allowedPointerKinds: HorizontalSwipeRecognizer.touchPointerKinds,
-          ),
-          (rec) {
-            rec.allowedSign = allowedSign;
+              () => HorizontalSwipeRecognizer(
+                allowedSign: allowedSign,
+                allowedPointerKinds:
+                    HorizontalSwipeRecognizer.touchPointerKinds,
+              ),
+              (rec) {
+                rec.allowedSign = allowedSign;
 
-            rec
-              ..onStart = (details) {
-                _snapBackAnimation?.dispose();
-                _snapBackAnimation = null;
-              }
-              ..onUpdate = (details) {
-                final delta = details.delta.dx * sign;
-                if (delta >= 0) {
-                  _setDragX(_dragX + delta);
-                } else {
-                  final next = _dragX + delta;
-                  _setDragX(next >= 0 ? next : 0.0);
-                }
-              }
-              ..onEnd = (_) async {
-                final triggered = _dragX >= widget.thresholdPx;
-                if (triggered) widget.onReply();
-                await _snapBack();
-              };
-          },
-        ),
+                rec
+                  ..onStart = (details) {
+                    _snapBackAnimation?.dispose();
+                    _snapBackAnimation = null;
+                  }
+                  ..onUpdate = (details) {
+                    final delta = details.delta.dx * sign;
+                    if (delta >= 0) {
+                      _setDragX(_dragX + delta);
+                    } else {
+                      final next = _dragX + delta;
+                      _setDragX(next >= 0 ? next : 0.0);
+                    }
+                  }
+                  ..onEnd = (_) async {
+                    final triggered = _dragX >= widget.thresholdPx;
+                    if (triggered) widget.onReply();
+                    await _snapBack();
+                  };
+              },
+            ),
       },
       child: Stack(
         alignment: Alignment.center,
         children: [
           if (backgroundBuilder != null)
             Positioned.fill(
-              child: backgroundBuilder(
-                context,
-                widget.leftToRight,
-                progress,
-              ),
+              child: backgroundBuilder(context, widget.leftToRight, progress),
             ),
           Transform.translate(
             offset: Offset(sign * _dragX, 0.0),

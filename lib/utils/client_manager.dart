@@ -1,9 +1,17 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart';
-import 'package:desktop_notifications/desktop_notifications.dart';
+import 'package:hermes/config/setting_keys.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/custom_http_client.dart';
+import 'package:hermes/utils/custom_image_resizer.dart';
+import 'package:hermes/utils/init_with_restore.dart';
+import 'package:hermes/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
+import 'package:hermes/utils/platform_infos.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/encryption/utils/key_verification.dart';
@@ -17,6 +25,7 @@ import 'package:hermes/utils/custom_image_resizer.dart';
 import 'package:hermes/utils/init_with_restore.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
+import 'matrix_sdk_extensions/on_soft_logout.dart';
 
 abstract class ClientManager {
   static const String clientNamespace = 'im.hermes.store.clients';
@@ -34,25 +43,30 @@ abstract class ClientManager {
       await store.remove(clientNamespace);
     }
     if (clientNames.isEmpty) {
-      clientNames.add(PlatformInfos.clientName);
+      clientNames.add(PlatformInfos.appDisplayName);
       await store.setStringList(clientNamespace, clientNames.toList());
     }
-    final clients =
-        await Future.wait(clientNames.map((name) => createClient(name, store)));
+    final clients = await Future.wait(
+      clientNames.map((name) => createClient(name, store)),
+    );
     if (initialize) {
       await Future.wait(
         clients.map(
-          (client) => client.initWithRestore(
-            onMigration: () async {
-              final l10n = await lookupL10n(PlatformDispatcher.instance.locale);
-              sendInitNotification(
-                l10n.databaseMigrationTitle,
-                l10n.databaseMigrationBody,
-              );
-            },
-          ).catchError(
-            (e, s) => Logs().e('Unable to initialize client', e, s),
-          ),
+          (client) => client
+              .initWithRestore(
+                onMigration: () async {
+                  final l10n = await lookupL10n(
+                    PlatformDispatcher.instance.locale,
+                  );
+                  sendInitNotification(
+                    l10n.databaseMigrationTitle,
+                    l10n.databaseMigrationBody,
+                  );
+                },
+              )
+              .catchError(
+                (e, s) => Logs().e('Unable to initialize client', e, s),
+              ),
         ),
       );
     }
@@ -89,7 +103,10 @@ abstract class ClientManager {
   }
 
   static NativeImplementations get nativeImplementations => kIsWeb
-      ? const NativeImplementationsDummy()
+      ? NativeImplementationsWebWorker(
+          Uri.parse('native_executor.js'),
+          timeout: const Duration(minutes: 1),
+        )
       : NativeImplementationsIsolate(
           compute,
           vodozemacInit: () => vod.init(wasmPath: './assets/assets/vodozemac/'),
@@ -113,62 +130,54 @@ abstract class ClientManager {
       importantStateEvents: <String>{
         // To make room emotes work
         'im.ponies.room_emotes',
+        // To display call state in chat list
+        MatrixRtcCallMember.eventType,
       },
-      logLevel: kReleaseMode ? Level.warning : Level.verbose,
+      customImageResizer: PlatformInfos.supportsCustomImageResizer
+          ? customImageResizer
+          : null,
+      logLevel: Level.verbose,
       database: await flutterMatrixSdkDatabaseBuilder(clientName),
       supportedLoginTypes: {
         AuthenticationTypes.password,
         AuthenticationTypes.sso,
       },
       nativeImplementations: nativeImplementations,
-      customImageResizer:
-          PlatformInfos.isMobile || kIsWeb ? customImageResizer : null,
       defaultNetworkRequestTimeout: const Duration(minutes: 30),
       enableDehydratedDevices: true,
-      shareKeysWith: ShareKeysWith.values
-              .singleWhereOrNull((share) => share.name == shareKeysWith) ??
+      shareKeysWith:
+          ShareKeysWith.values.singleWhereOrNull(
+            (share) => share.name == shareKeysWith,
+          ) ??
           ShareKeysWith.all,
-      convertLinebreaksInFormatting: false,
-      onSoftLogout:
-          enableSoftLogout ? (client) => client.refreshAccessToken() : null,
+      onSoftLogout: enableSoftLogout ? onSoftLogout : null,
+      sendTimelineEventTimeout: Duration(
+        seconds: AppSettings.sendTimelineEventTimeout.value,
+      ),
     );
   }
 
-  static void sendInitNotification(String title, String body) async {
+  static Future<void> sendInitNotification(String title, String body) async {
     if (kIsWeb) {
-      html.Notification(
-        title,
-        body: body,
-      );
-      return;
-    }
-    if (Platform.isLinux) {
-      await NotificationsClient().notify(
-        title,
-        body: body,
-        appName: AppSettings.applicationName.value,
-        hints: [
-          NotificationHint.soundName('message-new-instant'),
-        ],
-      );
+      html.Notification(title, body: body);
       return;
     }
 
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
     await flutterLocalNotificationsPlugin.initialize(
-      const InitializationSettings(
+      settings: const InitializationSettings(
         android: AndroidInitializationSettings('notifications_icon'),
         iOS: DarwinInitializationSettings(),
         macOS: DarwinInitializationSettings(),
       ),
     );
 
-    flutterLocalNotificationsPlugin.show(
-      0,
-      title,
-      body,
-      const NotificationDetails(
+    await flutterLocalNotificationsPlugin.show(
+      id: 0,
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'error_message',
           'Error Messages',
