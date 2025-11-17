@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/setting_keys.dart';
@@ -219,12 +220,14 @@ class _FullScreenPopGestureDetectorState<T>
   /// Begin tracking a pointer if swiping back is currently allowed.
   void _handlePointerDown(PointerDownEvent event) {
     if (!widget.route.popGestureEnabled) return;
+    if (_isInBottomGestureZone(event.position)) return;
     _recognizer.addPointer(event);
   }
 
   /// Begin tracking a pan/zoom gesture initiated from devices like trackpads.
   void _handlePointerPanZoomStart(PointerPanZoomStartEvent event) {
     if (!widget.route.popGestureEnabled) return;
+    if (_isInBottomGestureZone(event.position)) return;
     _recognizer.addPointerPanZoom(event);
   }
 
@@ -269,6 +272,26 @@ class _FullScreenPopGestureDetectorState<T>
   double _convertToLogical(double value) {
     final td = Directionality.of(context);
     return td == TextDirection.rtl ? -value : value;
+  }
+
+  /// Ignore drags originating inside the Android system gesture area.
+  bool _isInBottomGestureZone(Offset globalPosition) {
+    if (defaultTargetPlatform != TargetPlatform.android) return false;
+    final safeZone = _bottomGestureSafeZone;
+    if (safeZone <= 0) return false;
+
+    final renderBox = context.findRenderObject();
+    if (renderBox is! RenderBox || !renderBox.hasSize) return false;
+
+    final localPosition = renderBox.globalToLocal(globalPosition);
+    final distanceFromBottom = renderBox.size.height - localPosition.dy;
+    return distanceFromBottom <= safeZone;
+  }
+
+  double get _bottomGestureSafeZone {
+    final mediaQuery = MediaQuery.maybeOf(context);
+    if (mediaQuery == null) return 0;
+    return mediaQuery.systemGestureInsets.bottom;
   }
 
   /// Wrap the child with pointer listeners that feed the recognizer.
