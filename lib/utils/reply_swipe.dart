@@ -100,6 +100,7 @@ class _ReplySwipeState extends State<ReplySwipe> with TickerProviderStateMixin {
             GestureRecognizerFactoryWithHandlers<HorizontalSwipeRecognizer>(
           () => HorizontalSwipeRecognizer(
             allowedSign: allowedSign,
+            allowedPointerKinds: HorizontalSwipeRecognizer.touchPointerKinds,
           ),
           (rec) {
             rec.allowedSign = allowedSign;

@@ -7,11 +7,21 @@ class HorizontalSwipeRecognizer extends HorizontalDragGestureRecognizer {
   HorizontalSwipeRecognizer({
     required this.allowedSign,
     this.onAccepted,
+    this.allowedPointerKinds,
     super.debugOwner,
   });
 
+  /// Pointer kinds callers can reuse when they only want touch/stylus input.
+  static const Set<PointerDeviceKind> touchPointerKinds = {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.invertedStylus,
+  };
+
   /// The horizontal direction we treat as a valid swipe (+1 or -1).
   int allowedSign;
+
+  final Set<PointerDeviceKind>? allowedPointerKinds;
 
   final VoidCallback? onAccepted;
   double _accumulatedDelta = 0.0;
@@ -26,6 +36,7 @@ class HorizontalSwipeRecognizer extends HorizontalDragGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    if (!_supportsKind(event.kind)) return;
     _resetState();
     _pointerKind = event.kind;
     super.addAllowedPointer(event);
@@ -33,6 +44,7 @@ class HorizontalSwipeRecognizer extends HorizontalDragGestureRecognizer {
 
   @override
   void addAllowedPointerPanZoom(PointerPanZoomStartEvent event) {
+    if (!_supportsPanZoomKind(event.kind)) return;
     _resetState();
     _pointerKind = event.kind;
     super.addAllowedPointerPanZoom(event);
@@ -71,5 +83,16 @@ class HorizontalSwipeRecognizer extends HorizontalDragGestureRecognizer {
   void didStopTrackingLastPointer(int pointer) {
     _resetState();
     super.didStopTrackingLastPointer(pointer);
+  }
+
+  bool _supportsKind(PointerDeviceKind kind) {
+    if (kind == PointerDeviceKind.unknown) return true;
+    final allowed = allowedPointerKinds;
+    return allowed == null || allowed.contains(kind);
+  }
+
+  bool _supportsPanZoomKind(PointerDeviceKind kind) {
+    if (kind == PointerDeviceKind.trackpad) return true;
+    return _supportsKind(kind);
   }
 }

@@ -185,6 +185,7 @@ class _FullScreenPopGestureDetectorState<T>
     _recognizer = HorizontalSwipeRecognizer(
       allowedSign: 1,
       debugOwner: this,
+      allowedPointerKinds: HorizontalSwipeRecognizer.touchPointerKinds,
     )
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
