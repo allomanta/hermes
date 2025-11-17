@@ -3,6 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:collection/collection.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:hermes/config/setting_keys.dart';
@@ -16,7 +21,6 @@ import 'package:hermes/utils/string_color.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/member_actions_popup_menu_button.dart';
-import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:hermes/utils/reply_swipe.dart';
@@ -101,87 +105,105 @@ class Message extends StatelessWidget {
     final local = overlay.globalToLocal(globalPosition);
     final size = overlay.size;
     final client = Matrix.of(context).client;
+    final ownMessage = client.userID == event.senderId;
+
+    final menuItems = <PopupMenuEntry<_MessageAction>>[
+      const PopupMenuItem(
+        value: _MessageAction.reply,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.reply_outlined, size: 18),
+            SizedBox(width: 12),
+            Text('Reply'),
+          ],
+        ),
+      ),
+      const PopupMenuItem(
+        value: _MessageAction.copy,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.copy_outlined, size: 18),
+            SizedBox(width: 12),
+            Text('Copy'),
+          ],
+        ),
+      ),
+      const PopupMenuItem(
+        value: _MessageAction.forward,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.forward, size: 18),
+            SizedBox(width: 12),
+            Text('Forward'),
+          ],
+        ),
+      ),
+      const PopupMenuItem(
+        value: _MessageAction.pin,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.push_pin_outlined, size: 18),
+            SizedBox(width: 12),
+            Text('Pin'),
+          ],
+        ),
+      ),
+      if (ownMessage)
+        const PopupMenuItem(
+          value: _MessageAction.edit,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.edit_outlined, size: 18),
+              SizedBox(width: 12),
+              Text('Edit'),
+            ],
+          ),
+        ),
+      if (ownMessage)
+        const PopupMenuItem(
+          value: _MessageAction.redact,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.delete_outlined, size: 18),
+              SizedBox(width: 12),
+              Text('Delete'),
+            ],
+          ),
+        ),
+    ];
+
+    const menuScreenPadding = 8.0; // Matches Flutter's internal padding.
+    final menuHeight = menuItems.fold<double>(
+      menuScreenPadding * 2,
+      (prev, entry) => prev + entry.height,
+    );
+    final keyboardHeight =
+        MediaQuery.maybeOf(context)?.viewInsets.bottom ?? 0.0;
+    final keyboardTop = size.height - keyboardHeight - menuScreenPadding;
+    var menuTop = local.dy;
+
+    if (keyboardHeight > 0 &&
+        (menuTop + menuHeight) > math.max(menuScreenPadding, keyboardTop)) {
+      menuTop = math.max(menuScreenPadding, keyboardTop - menuHeight);
+    }
 
     final result = await showMenu<_MessageAction>(
       context: context,
       useRootNavigator: true,
       position: RelativeRect.fromLTRB(
         local.dx,
-        local.dy,
+        menuTop,
         size.width - local.dx,
-        size.height - local.dy,
+        size.height - menuTop,
       ),
       requestFocus: false,
-      items: [
-        const PopupMenuItem(
-          value: _MessageAction.reply,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.reply_outlined, size: 18),
-              SizedBox(width: 12),
-              Text('Reply'),
-            ],
-          ),
-        ),
-        const PopupMenuItem(
-          value: _MessageAction.copy,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.copy_outlined, size: 18),
-              SizedBox(width: 12),
-              Text('Copy'),
-            ],
-          ),
-        ),
-        const PopupMenuItem(
-          value: _MessageAction.forward,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.forward, size: 18),
-              SizedBox(width: 12),
-              Text('Forward'),
-            ],
-          ),
-        ),
-        const PopupMenuItem(
-          value: _MessageAction.pin,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.push_pin_outlined, size: 18),
-              SizedBox(width: 12),
-              Text('Pin'),
-            ],
-          ),
-        ),
-        if (client.userID == event.senderId)
-          const PopupMenuItem(
-            value: _MessageAction.edit,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.edit_outlined, size: 18),
-                SizedBox(width: 12),
-                Text('Edit'),
-              ],
-            ),
-          ),
-        if (client.userID == event.senderId)
-          const PopupMenuItem(
-            value: _MessageAction.redact,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.delete_outlined, size: 18),
-                SizedBox(width: 12),
-                Text('Delete'),
-              ],
-            ),
-          ),
-      ],
+      items: menuItems,
     );
     switch (result) {
       case _MessageAction.reply:
@@ -205,7 +227,6 @@ class Message extends StatelessWidget {
       case null:
         break;
     }
-
   }
 
   @override
