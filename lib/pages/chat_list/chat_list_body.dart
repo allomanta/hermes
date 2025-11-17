@@ -1,16 +1,21 @@
+// import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
+// import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_list/chat_list.dart';
 import 'package:hermes/pages/chat_list/chat_list_item.dart';
 import 'package:hermes/pages/chat_list/dummy_chat_list_item.dart';
+// import 'package:hermes/pages/chat_list/search_title.dart';
 import 'package:hermes/pages/chat_list/space_view.dart';
+// import 'package:hermes/pages/chat_list/status_msg_list.dart';
 import 'package:hermes/utils/stream_extension.dart';
 import 'package:hermes/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:hermes/widgets/avatar.dart';
 import '../../config/themes.dart';
+// import '../../widgets/adaptive_dialogs/user_dialog.dart';
 import '../../widgets/matrix.dart';
 import 'chat_list_header.dart';
 
@@ -66,153 +71,153 @@ class ChatListViewBody extends StatelessWidget {
             controller: controller.scrollController,
             slivers: [
               ChatListHeader(controller: controller),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    if (controller.isSearchMode) ...[
-                      SearchTitle(
-                        title: L10n.of(context).publicRooms,
-                        icon: const Icon(Icons.explore_outlined),
-                      ),
-                      PublicRoomsHorizontalList(publicRooms: publicRooms),
-                      SearchTitle(
-                        title: L10n.of(context).publicSpaces,
-                        icon: const Icon(Icons.workspaces_outlined),
-                      ),
-                      PublicRoomsHorizontalList(publicRooms: publicSpaces),
-                      SearchTitle(
-                        title: L10n.of(context).users,
-                        icon: const Icon(Icons.group_outlined),
-                      ),
-                      AnimatedContainer(
-                        clipBehavior: Clip.hardEdge,
-                        decoration: const BoxDecoration(),
-                        height: userSearchResult == null ||
-                                userSearchResult.results.isEmpty
-                            ? 0
-                            : 106,
-                        duration: FluffyThemes.animationDuration,
-                        curve: FluffyThemes.animationCurve,
-                        child: userSearchResult == null
-                            ? null
-                            : ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: userSearchResult.results.length,
-                                itemBuilder: (context, i) => _SearchItem(
-                                  title:
-                                      userSearchResult.results[i].displayName ??
-                                          userSearchResult
-                                              .results[i].userId.localpart ??
-                                          L10n.of(context).unknownDevice,
-                                  avatar: userSearchResult.results[i].avatarUrl,
-                                  onPressed: () => UserDialog.show(
-                                    context: context,
-                                    profile: userSearchResult.results[i],
-                                  ),
-                                ),
-                              ),
-                      ),
-                    ],
-                    if (!controller.isSearchMode &&
-                        AppSettings.showPresences.value)
-                      GestureDetector(
-                        onLongPress: () => controller.dismissStatusList(),
-                        child: StatusMessageList(
-                          onStatusEdit: controller.setStatus,
-                        ),
-                      ),
-                    if (client.rooms.isNotEmpty && !controller.isSearchMode)
-                      SizedBox(
-                        height: 64,
-                        child: ListView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 12.0,
-                          ),
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            if (AppSettings.separateChatTypes.value)
-                              ActiveFilter.messages
-                            else
-                              ActiveFilter.allChats,
-                            ActiveFilter.groups,
-                            ActiveFilter.unread,
-                            if (spaceDelegateCandidates.isNotEmpty &&
-                                !AppSettings.displayNavigationRail.value &&
-                                !FluffyThemes.isColumnMode(context))
-                              ActiveFilter.spaces,
-                          ]
-                              .map(
-                                (filter) => Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4.0,
-                                  ),
-                                  child: FilterChip(
-                                    selected: filter == controller.activeFilter,
-                                    onSelected: (_) =>
-                                        controller.setActiveFilter(filter),
-                                    label:
-                                        Text(filter.toLocalizedString(context)),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                    if (controller.isSearchMode)
-                      SearchTitle(
-                        title: L10n.of(context).chats,
-                        icon: const Icon(Icons.forum_outlined),
-                      ),
-                    if (client.prevBatch != null &&
-                        rooms.isEmpty &&
-                        !controller.isSearchMode) ...[
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              const Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  DummyChatListItem(
-                                    opacity: 0.5,
-                                    animate: false,
-                                  ),
-                                  DummyChatListItem(
-                                    opacity: 0.3,
-                                    animate: false,
-                                  ),
-                                ],
-                              ),
-                              Icon(
-                                CupertinoIcons.chat_bubble_text_fill,
-                                size: 128,
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              client.rooms.isEmpty
-                                  ? L10n.of(context).noChatsFoundHere
-                                  : L10n.of(context).noMoreChatsFound,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+              // SliverList(
+              //   delegate: SliverChildListDelegate(
+              //     [
+              //       if (controller.isSearchMode) ...[
+              //         SearchTitle(
+              //           title: L10n.of(context).publicRooms,
+              //           icon: const Icon(Icons.explore_outlined),
+              //         ),
+              //         PublicRoomsHorizontalList(publicRooms: publicRooms),
+              //         SearchTitle(
+              //           title: L10n.of(context).publicSpaces,
+              //           icon: const Icon(Icons.workspaces_outlined),
+              //         ),
+              //         PublicRoomsHorizontalList(publicRooms: publicSpaces),
+              //         SearchTitle(
+              //           title: L10n.of(context).users,
+              //           icon: const Icon(Icons.group_outlined),
+              //         ),
+              //         AnimatedContainer(
+              //           clipBehavior: Clip.hardEdge,
+              //           decoration: const BoxDecoration(),
+              //           height: userSearchResult == null ||
+              //                   userSearchResult.results.isEmpty
+              //               ? 0
+              //               : 106,
+              //           duration: PantheonThemes.animationDuration,
+              //           curve: PantheonThemes.animationCurve,
+              //           child: userSearchResult == null
+              //               ? null
+              //               : ListView.builder(
+              //                   scrollDirection: Axis.horizontal,
+              //                   itemCount: userSearchResult.results.length,
+              //                   itemBuilder: (context, i) => _SearchItem(
+              //                     title:
+              //                         userSearchResult.results[i].displayName ??
+              //                             userSearchResult
+              //                                 .results[i].userId.localpart ??
+              //                             L10n.of(context).unknownDevice,
+              //                     avatar: userSearchResult.results[i].avatarUrl,
+              //                     onPressed: () => UserDialog.show(
+              //                       context: context,
+              //                       profile: userSearchResult.results[i],
+              //                     ),
+              //                   ),
+              //                 ),
+              //         ),
+              //       ],
+              //       if (!controller.isSearchMode &&
+              //           AppSettings.showPresences.value)
+              //         GestureDetector(
+              //           onLongPress: () => controller.dismissStatusList(),
+              //           child: StatusMessageList(
+              //             onStatusEdit: controller.setStatus,
+              //           ),
+              //         ),
+              //       if (client.rooms.isNotEmpty && !controller.isSearchMode)
+              //         SizedBox(
+              //           height: 64,
+              //           child: ListView(
+              //             padding: const EdgeInsets.symmetric(
+              //               horizontal: 12.0,
+              //               vertical: 12.0,
+              //             ),
+              //             shrinkWrap: true,
+              //             scrollDirection: Axis.horizontal,
+              //             children: [
+              //               if (AppSettings.separateChatTypes.value)
+              //                 ActiveFilter.messages
+              //               else
+              //                 ActiveFilter.allChats,
+              //               ActiveFilter.groups,
+              //               ActiveFilter.unread,
+              //               if (spaceDelegateCandidates.isNotEmpty &&
+              //                   !AppSettings.displayNavigationRail.value &&
+              //                   !PantheonThemes.isColumnMode(context))
+              //                 ActiveFilter.spaces,
+              //             ]
+              //                 .map(
+              //                   (filter) => Padding(
+              //                     padding: const EdgeInsets.symmetric(
+              //                       horizontal: 4.0,
+              //                     ),
+              //                     child: FilterChip(
+              //                       selected: filter == controller.activeFilter,
+              //                       onSelected: (_) =>
+              //                           controller.setActiveFilter(filter),
+              //                       label:
+              //                           Text(filter.toLocalizedString(context)),
+              //                     ),
+              //                   ),
+              //                 )
+              //                 .toList(),
+              //           ),
+              //         ),
+              //       if (controller.isSearchMode)
+              //         SearchTitle(
+              //           title: L10n.of(context).chats,
+              //           icon: const Icon(Icons.forum_outlined),
+              //         ),
+              //       if (client.prevBatch != null &&
+              //           rooms.isEmpty &&
+              //           !controller.isSearchMode) ...[
+              //         Column(
+              //           mainAxisAlignment: MainAxisAlignment.center,
+              //           children: [
+              //             Stack(
+              //               alignment: Alignment.center,
+              //               children: [
+              //                 const Column(
+              //                   mainAxisSize: MainAxisSize.min,
+              //                   children: [
+              //                     DummyChatListItem(
+              //                       opacity: 0.5,
+              //                       animate: false,
+              //                     ),
+              //                     DummyChatListItem(
+              //                       opacity: 0.3,
+              //                       animate: false,
+              //                     ),
+              //                   ],
+              //                 ),
+              //                 Icon(
+              //                   CupertinoIcons.chat_bubble_text_fill,
+              //                   size: 128,
+              //                   color: theme.colorScheme.secondary,
+              //                 ),
+              //               ],
+              //             ),
+              //             Padding(
+              //               padding: const EdgeInsets.all(16.0),
+              //               child: Text(
+              //                 client.rooms.isEmpty
+              //                     ? L10n.of(context).noChatsFoundHere
+              //                     : L10n.of(context).noMoreChatsFound,
+              //                 textAlign: TextAlign.center,
+              //                 style: TextStyle(
+              //                   fontSize: 18,
+              //                   color: theme.colorScheme.secondary,
+              //                 ),
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ],
+              //     ],
+              //   ),
+              // ),
               if (client.prevBatch == null)
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
