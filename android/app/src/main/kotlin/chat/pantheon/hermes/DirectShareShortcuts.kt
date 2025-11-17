@@ -63,6 +63,18 @@ object DirectShareShortcuts : MethodChannel.MethodCallHandler {
 
     private fun publishShortcuts(shortcuts: List<Map<String, Any?>>) {
         if (!::appContext.isInitialized) return
+
+        val existingShareShortcutIds = ShortcutManagerCompat
+            .getDynamicShortcuts(appContext)
+            .filter { shortcut ->
+                val categories = shortcut.categories ?: return@filter false
+                SHARE_TARGET_CATEGORIES.all { categories.contains(it) }
+            }
+            .map { it.id }
+        if (existingShareShortcutIds.isNotEmpty()) {
+            ShortcutManagerCompat.removeDynamicShortcuts(appContext, existingShareShortcutIds)
+        }
+
         val maxShortcuts = ShortcutManagerCompat.getMaxShortcutCountPerActivity(appContext)
         val shortcutInfos = shortcuts
             .take(maxShortcuts)
@@ -106,8 +118,9 @@ object DirectShareShortcuts : MethodChannel.MethodCallHandler {
 
                 builder.build()
             }
-
-        ShortcutManagerCompat.setDynamicShortcuts(appContext, shortcutInfos)
+        shortcutInfos.forEach { shortcutInfo ->
+            ShortcutManagerCompat.pushDynamicShortcut(appContext, shortcutInfo)
+        }
     }
 
     private fun decodeIcon(icon: String?): IconCompat? {

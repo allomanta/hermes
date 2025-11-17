@@ -120,6 +120,17 @@ class AndroidShareShortcuts {
     }
   }
 
+  static Future<void> clear() async {
+    if (!PlatformInfos.isAndroid) return;
+    try {
+      await _channel.invokeMethod('clearShareShortcuts');
+      _avatarCache.clear();
+    } on PlatformException catch (error, stackTrace) {
+      debugPrint('Failed to clear Android share shortcuts: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
   static Future<String?> takePendingShortcutRoomId() async {
     if (!PlatformInfos.isAndroid) return null;
     try {

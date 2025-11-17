@@ -343,6 +343,7 @@ class ChatListController extends State<ChatList>
     String? shortcutRoomId;
     if (PlatformInfos.isAndroid) {
       shortcutRoomId = await AndroidShareShortcuts.takePendingShortcutRoomId();
+      if (!mounted) return;
     }
 
     if (shortcutRoomId != null) {
@@ -484,6 +485,9 @@ class ChatListController extends State<ChatList>
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();
     _directShareShortcutSubscription?.cancel();
+    if (PlatformInfos.isAndroid) {
+      unawaited(AndroidShareShortcuts.clear());
+    }
     scrollController.removeListener(_onScroll);
     super.dispose();
   }

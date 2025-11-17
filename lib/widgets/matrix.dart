@@ -17,6 +17,7 @@ import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/android_share_shortcuts.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/init_with_restore.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -269,6 +270,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         widget.clients.remove(c);
         ClientManager.removeClientNameFromStore(c.clientName, store);
         InitWithRestoreExtension.deleteSessionBackup(name);
+        if (PlatformInfos.isAndroid && widget.clients.isEmpty) {
+          unawaited(AndroidShareShortcuts.clear());
+        }
       }
       if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
         ScaffoldMessenger.of(
