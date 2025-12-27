@@ -236,16 +236,15 @@ class ChatSearchImagesTab extends StatelessWidget {
                         children: [
                           Positioned.fill(child: mediaTile),
                           Positioned(
-                            top: 4,
-                            right: 4,
-                            child: IconButton(
-                              style: IconButton.styleFrom(
-                                backgroundColor:
-                                    theme.colorScheme.surfaceContainerHighest,
-                                foregroundColor:
-                                    theme.colorScheme.onSurfaceVariant,
+                            top: 0,
+                            right: 0,
+                            child: IconButton.filledTonal(
+                              iconSize: 20,
+                              constraints: const BoxConstraints(),
+                              padding: EdgeInsets.zero,
+                              icon: const Icon(
+                                Icons.chevron_right_outlined,
                               ),
-                              icon: const Icon(Icons.chevron_right_outlined),
                               onPressed: () => _openInChat(
                                 context,
                                 room,
