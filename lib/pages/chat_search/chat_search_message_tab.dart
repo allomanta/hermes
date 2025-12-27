@@ -51,6 +51,48 @@ class ChatSearchMessageTab extends StatelessWidget {
           );
         }
         final events = snapshot.data?.$1 ?? [];
+        final nextBatch = snapshot.data?.$2;
+        final canSearchMore = nextBatch != null;
+        final isSearching = snapshot.connectionState != ConnectionState.done;
+        final roomName = room.getLocalizedDisplayname(
+          MatrixLocals(L10n.of(context)),
+        );
+
+        if (events.isEmpty) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isSearching)
+                const CircularProgressIndicator.adaptive(strokeWidth: 2)
+              else
+                const Icon(Icons.search_outlined, size: 64),
+              const SizedBox(height: 8),
+              Text(
+                isSearching
+                    ? L10n.of(context).searchIn(roomName)
+                    : L10n.of(context).nothingFound,
+              ),
+              if (!isSearching && canSearchMore)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(
+                      backgroundColor: theme.colorScheme.secondaryContainer,
+                      foregroundColor: theme.colorScheme.onSecondaryContainer,
+                    ),
+                    onPressed: () => startSearch(
+                      prevBatch: nextBatch,
+                      previousSearchResult: events,
+                    ),
+                    icon: const Icon(
+                      Icons.arrow_downward_outlined,
+                    ),
+                    label: Text(L10n.of(context).searchMore),
+                  ),
+                ),
+            ],
+          );
+        }
 
         return SelectionArea(
           child: ListView.separated(

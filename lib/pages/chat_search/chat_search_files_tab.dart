@@ -29,6 +29,12 @@ class ChatSearchFilesTab extends StatelessWidget {
       builder: (context, snapshot) {
         final theme = Theme.of(context);
         final events = snapshot.data?.$1;
+        final nextBatch = snapshot.data?.$2;
+        final canSearchMore = nextBatch != null;
+        final isSearching = snapshot.connectionState != ConnectionState.done;
+        final roomName = room.getLocalizedDisplayname(
+          MatrixLocals(L10n.of(context)),
+        );
         if (searchStream == null || events == null) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -37,9 +43,7 @@ class ChatSearchFilesTab extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 L10n.of(context).searchIn(
-                  room.getLocalizedDisplayname(
-                    MatrixLocals(L10n.of(context)),
-                  ),
+                  roomName,
                 ),
               ),
             ],
@@ -50,9 +54,34 @@ class ChatSearchFilesTab extends StatelessWidget {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.file_present_outlined, size: 64),
+              if (isSearching)
+                const CircularProgressIndicator.adaptive(strokeWidth: 2)
+              else
+                const Icon(Icons.file_present_outlined, size: 64),
               const SizedBox(height: 8),
-              Text(L10n.of(context).nothingFound),
+              Text(
+                isSearching
+                    ? L10n.of(context).searchIn(roomName)
+                    : L10n.of(context).nothingFound,
+              ),
+              if (!isSearching && canSearchMore)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(
+                      backgroundColor: theme.colorScheme.secondaryContainer,
+                      foregroundColor: theme.colorScheme.onSecondaryContainer,
+                    ),
+                    onPressed: () => startSearch(
+                      prevBatch: nextBatch,
+                      previousSearchResult: events,
+                    ),
+                    icon: const Icon(
+                      Icons.arrow_downward_outlined,
+                    ),
+                    label: Text(L10n.of(context).searchMore),
+                  ),
+                ),
             ],
           );
         }
@@ -61,24 +90,23 @@ class ChatSearchFilesTab extends StatelessWidget {
           child: ListView.builder(
             padding: const EdgeInsets.all(8.0),
             itemCount: events.length + 1,
-            itemBuilder: (context, i) {
-              if (i == events.length) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Padding(
-                    padding: EdgeInsets.all(16.0),
+          itemBuilder: (context, i) {
+            if (i == events.length) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Padding(
+                  padding: EdgeInsets.all(16.0),
                     child: Center(
                       child: CircularProgressIndicator.adaptive(
                         strokeWidth: 2,
                       ),
                     ),
-                  );
-                }
-                final nextBatch = snapshot.data?.$2;
-                if (nextBatch == null) {
-                  return const SizedBox.shrink();
-                }
-                return Center(
-                  child: Padding(
+                );
+              }
+              if (nextBatch == null) {
+                return const SizedBox.shrink();
+              }
+              return Center(
+                child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: TextButton.icon(
                       style: TextButton.styleFrom(

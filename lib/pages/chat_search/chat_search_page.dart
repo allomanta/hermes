@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:hermes/pages/chat_search/chat_search_view.dart';
+import 'package:hermes/utils/matrix_sdk_extensions/timeline_search_extension.dart';
 import 'package:hermes/widgets/matrix.dart';
 
 class ChatSearchPage extends StatefulWidget {
@@ -48,6 +49,7 @@ class ChatSearchController extends State<ChatSearchPage>
     List<Event>? previousSearchResult,
   }) async {
     final timeline = this.timeline ??= await room!.getTimeline();
+    final includeLocal = prevBatch == null && previousSearchResult == null;
 
     if (tabController.index == 0 && searchController.text.isEmpty) {
       return;
@@ -55,11 +57,12 @@ class ChatSearchController extends State<ChatSearchPage>
 
     setState(() {
       searchStream = timeline
-          .startSearch(
+          .startSearchWithPagination(
             searchTerm: searchController.text,
             prevBatch: prevBatch,
             requestHistoryCount: 1000,
             limit: 32,
+            includeLocal: includeLocal,
           )
           .map(
             (result) => (
@@ -89,10 +92,11 @@ class ChatSearchController extends State<ChatSearchPage>
     List<Event>? previousSearchResult,
   }) async {
     final timeline = this.timeline ??= await room!.getTimeline();
+    final includeLocal = prevBatch == null && previousSearchResult == null;
 
     setState(() {
       galleryStream = timeline
-          .startSearch(
+          .startSearchWithPagination(
             searchFunc: (event) => {
               MessageTypes.Image,
               MessageTypes.Video,
@@ -100,6 +104,7 @@ class ChatSearchController extends State<ChatSearchPage>
             prevBatch: prevBatch,
             requestHistoryCount: 1000,
             limit: 32,
+            includeLocal: includeLocal,
           )
           .map(
             (result) => (
@@ -129,10 +134,11 @@ class ChatSearchController extends State<ChatSearchPage>
     List<Event>? previousSearchResult,
   }) async {
     final timeline = this.timeline ??= await room!.getTimeline();
+    final includeLocal = prevBatch == null && previousSearchResult == null;
 
     setState(() {
       fileStream = timeline
-          .startSearch(
+          .startSearchWithPagination(
             searchFunc: (event) =>
                 event.messageType == MessageTypes.File ||
                 (event.messageType == MessageTypes.Audio &&
@@ -140,6 +146,7 @@ class ChatSearchController extends State<ChatSearchPage>
             prevBatch: prevBatch,
             requestHistoryCount: 1000,
             limit: 32,
+            includeLocal: includeLocal,
           )
           .map(
             (result) => (
