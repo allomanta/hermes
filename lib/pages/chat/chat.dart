@@ -132,6 +132,7 @@ class ChatController extends State<ChatPageWithRoom>
   final AutoScrollController scrollController = AutoScrollController();
 
   late final FocusNode inputFocus;
+  ValueNotifier<EventJumpRequest?>? _eventJumpNotifier;
 
   Timer? typingCoolDown;
   Timer? typingTimeout;
@@ -431,6 +432,9 @@ class ChatController extends State<ChatPageWithRoom>
     readMarkerEventId = room.hasNewMessages
         ? lastEventThreadId ?? room.fullyRead
         : '';
+    _eventJumpNotifier = Matrix.of(context).eventJumpRequest;
+    _eventJumpNotifier?.addListener(_handleEventJump);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _handleEventJump());
     WidgetsBinding.instance.addObserver(this);
     _tryLoadTimeline();
   }
@@ -445,6 +449,72 @@ class ChatController extends State<ChatPageWithRoom>
     } catch (e) {
       Logs().d('Unable to check MatrixRTC call support', e);
     }
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatPageWithRoom oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.room.id != widget.room.id) {
+      _tryLoadTimeline();
+      return;
+    }
+    if (oldWidget.eventId == widget.eventId) return;
+
+    final targetEventId = widget.eventId;
+    if (targetEventId == null) {
+      setState(() {
+        timeline = null;
+        _scrolledUp = false;
+        loadTimelineFuture = _getTimeline().onError(
+          ErrorReporter(
+            context,
+            'Unable to load timeline after event update',
+          ).onErrorCallback,
+        );
+      });
+      return;
+    }
+
+    if (timeline == null) {
+      loadTimelineFuture = _getTimeline(eventContextId: targetEventId).onError(
+        ErrorReporter(
+          context,
+          'Unable to load timeline after event update',
+        ).onErrorCallback,
+      );
+      loadTimelineFuture?.then((_) {
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          scrollToEventId(targetEventId);
+        });
+      });
+      return;
+    }
+    scrollToEventId(targetEventId);
+  }
+
+  void _handleEventJump() {
+    final notifier = _eventJumpNotifier;
+    final request = notifier?.value;
+    if (notifier == null || request == null) return;
+    if (request.roomId != roomId) return;
+    notifier.value = null;
+    _jumpToEvent(request.eventId);
+  }
+
+  void _jumpToEvent(String eventId) async {
+    if (timeline == null) {
+      loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(
+        ErrorReporter(
+          context,
+          'Unable to load timeline for event jump',
+        ).onErrorCallback,
+      );
+      await loadTimelineFuture;
+    }
+    if (!mounted) return;
+    scrollToEventId(eventId);
   }
 
   final Set<String> expandedEventIds = {};
@@ -674,6 +744,7 @@ class ChatController extends State<ChatPageWithRoom>
     web.window.removeEventListener('paste', _handleClipboardFilePasteWeb);
     if (currentlyTyping) room.setTyping(false);
     MxcImage.clearCache(widget.room.id);
+    _eventJumpNotifier?.removeListener(_handleEventJump);
     super.dispose();
   }
 
@@ -1327,6 +1398,13 @@ class ChatController extends State<ChatPageWithRoom>
       setState(() {
         scrollToEventIdMarker = eventId;
       });
+    }
+    if (!scrollController.hasClients) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        scrollToEventId(eventId, highlightEvent: highlightEvent);
+      });
+      return;
     }
     await scrollController.scrollToIndex(
       eventIndex + 1,

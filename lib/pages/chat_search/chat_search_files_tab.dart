@@ -6,6 +6,7 @@ import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/date_time_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:hermes/widgets/matrix.dart';
 
 class ChatSearchFilesTab extends StatelessWidget {
   final Room room;
@@ -96,6 +97,14 @@ class ChatSearchFilesTab extends StatelessWidget {
                     ),
                     subtitle: Text('$sizeString | $filetype'),
                     onTap: () => event.saveFile(context),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.chevron_right_outlined),
+                      onPressed: () => Matrix.of(context).openEventInChat(
+                        context,
+                        roomId: room.id,
+                        eventId: event.eventId,
+                      ),
+                    ),
                   ),
                 ),
               ],

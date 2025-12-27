@@ -8,6 +8,7 @@ import 'package:hermes/utils/date_time_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/avatar.dart';
+import 'package:hermes/widgets/matrix.dart';
 
 class ChatSearchMessageTab extends StatelessWidget {
   final String searchQuery;
@@ -99,6 +100,9 @@ class _MessageSearchResultListTile extends StatelessWidget {
     final theme = Theme.of(context);
 
     return ListTile(
+      onTap: () => Matrix.of(
+        context,
+      ).openEventInChat(context, roomId: room.id, eventId: event.eventId),
       title: Row(
         children: [
           Avatar(mxContent: sender.avatarUrl, name: displayname, size: 16),
@@ -133,9 +137,9 @@ class _MessageSearchResultListTile extends StatelessWidget {
       ),
       trailing: IconButton(
         icon: const Icon(Icons.chevron_right_outlined),
-        onPressed: () => context.go(
-          '/${Uri(pathSegments: ['rooms', room.id], queryParameters: {'event': event.eventId})}',
-        ),
+        onPressed: () => Matrix.of(
+          context,
+        ).openEventInChat(context, roomId: room.id, eventId: event.eventId),
       ),
     );
   }

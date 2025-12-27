@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/android_share_shortcuts.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/init_with_restore.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -19,6 +20,7 @@ import 'package:hermes/widgets/hermes_app.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:material_ui/material_ui.dart';
@@ -29,17 +31,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:hermes/l10n/l10n.dart';
-import 'package:hermes/utils/android_share_shortcuts.dart';
-import 'package:hermes/utils/client_manager.dart';
-import 'package:hermes/utils/init_with_restore.dart';
-import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
-import 'package:hermes/utils/platform_infos.dart';
-import 'package:hermes/utils/uia_request_manager.dart';
-import 'package:hermes/utils/voip_plugin.dart';
-import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:hermes/widgets/hermes_app.dart';
-import 'package:hermes/widgets/future_loading_dialog.dart';
 import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/account_bundles.dart';
@@ -69,6 +60,13 @@ class Matrix extends StatefulWidget {
   /// Returns the (nearest) Client instance of your application.
   static MatrixState of(BuildContext context) =>
       Provider.of<MatrixState>(context, listen: false);
+}
+
+class EventJumpRequest {
+  final String roomId;
+  final String eventId;
+
+  const EventJumpRequest({required this.roomId, required this.eventId});
 }
 
 class MatrixState extends State<Matrix> {
@@ -155,6 +153,31 @@ class MatrixState extends State<Matrix> {
 
   AudioPlayer? audioPlayer;
   final ValueNotifier<String?> voiceMessageEventId = ValueNotifier(null);
+  final ValueNotifier<EventJumpRequest?> eventJumpRequest =
+      ValueNotifier<EventJumpRequest?>(null);
+
+  void requestEventJump({required String roomId, required String eventId}) {
+    eventJumpRequest.value = EventJumpRequest(roomId: roomId, eventId: eventId);
+  }
+
+  void openEventInChat(
+    BuildContext context, {
+    required String roomId,
+    required String eventId,
+  }) {
+    if (eventId.isEmpty) return;
+    final router = GoRouter.of(context);
+    if (router.canPop()) {
+      context.pop();
+    } else {
+      context.go(
+        '/${Uri(pathSegments: ['rooms', roomId], queryParameters: {'event': eventId})}',
+      );
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      requestEventJump(roomId: roomId, eventId: eventId);
+    });
+  }
 
   Future<Client> getLoginClient() async {
     if (widget.clients.isNotEmpty && !client.isLogged()) {

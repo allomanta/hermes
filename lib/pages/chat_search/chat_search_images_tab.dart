@@ -7,6 +7,7 @@ import 'package:hermes/config/app_config.dart';
 import 'package:hermes/pages/chat/events/video_player.dart';
 import 'package:hermes/pages/image_viewer/image_viewer.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/mxc_image.dart';
 
 class ChatSearchImagesTab extends StatelessWidget {
@@ -90,31 +91,54 @@ class ChatSearchImagesTab extends StatelessWidget {
               padding: const EdgeInsets.all(padding),
               crossAxisCount: 3,
               children: monthEvents.map((event) {
-                if (event.messageType == MessageTypes.Video) {
-                  return Material(
-                    clipBehavior: Clip.hardEdge,
-                    borderRadius: borderRadius,
-                    child: EventVideoPlayer(event),
-                  );
-                }
-                return InkWell(
-                  onTap: () => showDialog(
-                    context: context,
-                    builder: (_) => ImageViewer(event, outerContext: context),
-                  ),
-                  borderRadius: borderRadius,
-                  child: Material(
-                    clipBehavior: Clip.hardEdge,
-                    borderRadius: borderRadius,
-                    child: MxcImage(
-                      event: event,
-                      width: 128,
-                      height: 128,
-                      fit: BoxFit.cover,
-                      animated: true,
-                      isThumbnail: true,
+                final mediaTile = event.messageType == MessageTypes.Video
+                    ? Material(
+                        clipBehavior: Clip.hardEdge,
+                        borderRadius: borderRadius,
+                        child: EventVideoPlayer(event),
+                      )
+                    : InkWell(
+                        onTap: () => showDialog(
+                          context: context,
+                          builder: (_) =>
+                              ImageViewer(event, outerContext: context),
+                        ),
+                        borderRadius: borderRadius,
+                        child: Material(
+                          clipBehavior: Clip.hardEdge,
+                          borderRadius: borderRadius,
+                          child: MxcImage(
+                            event: event,
+                            width: 128,
+                            height: 128,
+                            fit: BoxFit.cover,
+                            animated: true,
+                            isThumbnail: true,
+                          ),
+                        ),
+                      );
+
+                return Stack(
+                  children: [
+                    Positioned.fill(child: mediaTile),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: IconButton(
+                        style: IconButton.styleFrom(
+                          backgroundColor:
+                              theme.colorScheme.surfaceContainerHighest,
+                          foregroundColor: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        icon: const Icon(Icons.chevron_right_outlined),
+                        onPressed: () => Matrix.of(context).openEventInChat(
+                          context,
+                          roomId: room.id,
+                          eventId: event.eventId,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 );
               }).toList(),
             ),
