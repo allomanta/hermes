@@ -60,6 +60,16 @@ class Matrix extends StatefulWidget {
       Provider.of<MatrixState>(context, listen: false);
 }
 
+class EventJumpRequest {
+  final String roomId;
+  final String eventId;
+
+  const EventJumpRequest({
+    required this.roomId,
+    required this.eventId,
+  });
+}
+
 class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   int _activeClient = -1;
   String? activeBundle;
@@ -150,6 +160,18 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   AudioPlayer? audioPlayer;
   final ValueNotifier<String?> voiceMessageEventId = ValueNotifier(null);
+  final ValueNotifier<EventJumpRequest?> eventJumpRequest =
+      ValueNotifier<EventJumpRequest?>(null);
+
+  void requestEventJump({
+    required String roomId,
+    required String eventId,
+  }) {
+    eventJumpRequest.value = EventJumpRequest(
+      roomId: roomId,
+      eventId: eventId,
+    );
+  }
 
   Future<Client> getLoginClient() async {
     if (widget.clients.isNotEmpty && !client.isLogged()) {

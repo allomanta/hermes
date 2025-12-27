@@ -9,6 +9,7 @@ import 'package:hermes/utils/date_time_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/avatar.dart';
+import 'package:hermes/widgets/matrix.dart';
 
 class ChatSearchMessageTab extends StatelessWidget {
   final String searchQuery;
@@ -26,6 +27,28 @@ class ChatSearchMessageTab extends StatelessWidget {
     required this.startSearch,
     super.key,
   });
+
+  void _openInChat(BuildContext context, Event event) {
+    if (event.eventId.isEmpty) return;
+    final matrix = Matrix.of(context);
+    final router = GoRouter.of(context);
+    if (router.canPop()) {
+      context.pop();
+    } else {
+      context.go(
+        '/${Uri(
+          pathSegments: ['rooms', room.id],
+          queryParameters: {'event': event.eventId},
+        )}',
+      );
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      matrix.requestEventJump(
+        roomId: room.id,
+        eventId: event.eventId,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +170,7 @@ class ChatSearchMessageTab extends StatelessWidget {
                 displayname: displayname,
                 event: event,
                 room: room,
+                onOpenInChat: () => _openInChat(context, event),
               );
             },
           ),
@@ -162,18 +186,21 @@ class _MessageSearchResultListTile extends StatelessWidget {
     required this.displayname,
     required this.event,
     required this.room,
+    required this.onOpenInChat,
   });
 
   final User sender;
   final String displayname;
   final Event event;
   final Room room;
+  final VoidCallback onOpenInChat;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return ListTile(
+      onTap: onOpenInChat,
       title: Row(
         children: [
           Avatar(
@@ -218,12 +245,7 @@ class _MessageSearchResultListTile extends StatelessWidget {
         icon: const Icon(
           Icons.chevron_right_outlined,
         ),
-        onPressed: () => context.go(
-          '/${Uri(
-            pathSegments: ['rooms', room.id],
-            queryParameters: {'event': event.eventId},
-          )}',
-        ),
+        onPressed: onOpenInChat,
       ),
     );
   }

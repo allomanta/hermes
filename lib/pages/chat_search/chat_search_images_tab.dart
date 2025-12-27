@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 import 'package:hermes/l10n/l10n.dart';
@@ -7,6 +8,7 @@ import 'package:hermes/config/app_config.dart';
 import 'package:hermes/pages/chat/events/video_player.dart';
 import 'package:hermes/pages/image_viewer/image_viewer.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/mxc_image.dart';
 
 class ChatSearchImagesTab extends StatelessWidget {
@@ -23,6 +25,28 @@ class ChatSearchImagesTab extends StatelessWidget {
     required this.searchStream,
     super.key,
   });
+
+  void _openInChat(BuildContext context, Room room, Event event) {
+    if (event.eventId.isEmpty) return;
+    final matrix = Matrix.of(context);
+    final router = GoRouter.of(context);
+    if (router.canPop()) {
+      context.pop();
+    } else {
+      context.go(
+        '/${Uri(
+          pathSegments: ['rooms', room.id],
+          queryParameters: {'event': event.eventId},
+        )}',
+      );
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      matrix.requestEventJump(
+        roomId: room.id,
+        eventId: event.eventId,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,34 +203,57 @@ class ChatSearchImagesTab extends StatelessWidget {
                   crossAxisCount: 3,
                   children: monthEvents.map(
                     (event) {
-                      if (event.messageType == MessageTypes.Video) {
-                        return Material(
-                          clipBehavior: Clip.hardEdge,
-                          borderRadius: borderRadius,
-                          child: EventVideoPlayer(event),
-                        );
-                      }
-                      return InkWell(
-                        onTap: () => showDialog(
-                          context: context,
-                          builder: (_) => ImageViewer(
-                            event,
-                            outerContext: context,
+                      final mediaTile = event.messageType == MessageTypes.Video
+                          ? Material(
+                              clipBehavior: Clip.hardEdge,
+                              borderRadius: borderRadius,
+                              child: EventVideoPlayer(event),
+                            )
+                          : InkWell(
+                              onTap: () => showDialog(
+                                context: context,
+                                builder: (_) => ImageViewer(
+                                  event,
+                                  outerContext: context,
+                                ),
+                              ),
+                              borderRadius: borderRadius,
+                              child: Material(
+                                clipBehavior: Clip.hardEdge,
+                                borderRadius: borderRadius,
+                                child: MxcImage(
+                                  event: event,
+                                  width: 128,
+                                  height: 128,
+                                  fit: BoxFit.cover,
+                                  animated: true,
+                                  isThumbnail: true,
+                                ),
+                              ),
+                            );
+
+                      return Stack(
+                        children: [
+                          Positioned.fill(child: mediaTile),
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: IconButton(
+                              style: IconButton.styleFrom(
+                                backgroundColor:
+                                    theme.colorScheme.surfaceContainerHighest,
+                                foregroundColor:
+                                    theme.colorScheme.onSurfaceVariant,
+                              ),
+                              icon: const Icon(Icons.chevron_right_outlined),
+                              onPressed: () => _openInChat(
+                                context,
+                                room,
+                                event,
+                              ),
+                            ),
                           ),
-                        ),
-                        borderRadius: borderRadius,
-                        child: Material(
-                          clipBehavior: Clip.hardEdge,
-                          borderRadius: borderRadius,
-                          child: MxcImage(
-                            event: event,
-                            width: 128,
-                            height: 128,
-                            fit: BoxFit.cover,
-                            animated: true,
-                            isThumbnail: true,
-                          ),
-                        ),
+                        ],
                       );
                     },
                   ).toList(),

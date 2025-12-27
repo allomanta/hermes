@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/date_time_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:hermes/widgets/matrix.dart';
 
 class ChatSearchFilesTab extends StatelessWidget {
   final Room room;
@@ -21,6 +23,28 @@ class ChatSearchFilesTab extends StatelessWidget {
     required this.searchStream,
     super.key,
   });
+
+  void _openInChat(BuildContext context, Room room, Event event) {
+    if (event.eventId.isEmpty) return;
+    final matrix = Matrix.of(context);
+    final router = GoRouter.of(context);
+    if (router.canPop()) {
+      context.pop();
+    } else {
+      context.go(
+        '/${Uri(
+          pathSegments: ['rooms', room.id],
+          queryParameters: {'event': event.eventId},
+        )}',
+      );
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      matrix.requestEventJump(
+        roomId: room.id,
+        eventId: event.eventId,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -188,6 +212,10 @@ class ChatSearchFilesTab extends StatelessWidget {
                         ),
                         subtitle: Text('$sizeString | $filetype'),
                         onTap: () => event.saveFile(context),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.chevron_right_outlined),
+                          onPressed: () => _openInChat(context, room, event),
+                        ),
                       ),
                     ),
                   ],
