@@ -193,10 +193,41 @@ class ChatDetailsController extends State<ChatDetails> {
       ],
     );
     if (choice == null) return;
-    await backfillRoomHistory(includeMedia: choice == BackfillMode.withMedia);
+    final maxEvents = await _promptBackfillLimit();
+    if (maxEvents == null) return;
+    await backfillRoomHistory(
+      includeMedia: choice == BackfillMode.withMedia,
+      maxEvents: maxEvents,
+    );
   }
 
-  Future<void> backfillRoomHistory({bool includeMedia = false}) async {
+  Future<int?> _promptBackfillLimit() async {
+    final input = await showTextInputDialog(
+      context: context,
+      title: 'Backfill limit',
+      message: 'Enter max events to fetch. Leave empty for all available.',
+      initialText: '2000',
+      keyboardType: TextInputType.number,
+      validator: (value) {
+        final trimmed = value.trim();
+        if (trimmed.isEmpty) return null;
+        final parsed = int.tryParse(trimmed);
+        if (parsed == null || parsed <= 0) {
+          return 'Enter a positive number or leave empty.';
+        }
+        return null;
+      },
+    );
+    if (input == null) return null;
+    final trimmed = input.trim();
+    if (trimmed.isEmpty) return 0;
+    return int.tryParse(trimmed) ?? 2000;
+  }
+
+  Future<void> backfillRoomHistory({
+    bool includeMedia = false,
+    int maxEvents = 2000,
+  }) async {
     final room = Matrix.of(context).client.getRoomById(roomId!);
     if (room == null) return;
     final confirm = await showOkCancelAlertDialog(
@@ -216,7 +247,7 @@ class ChatDetailsController extends State<ChatDetails> {
         room,
         setProgress: setProgress,
         perRequest: 200,
-        maxEvents: 2000,
+        maxEvents: maxEvents,
         includeMedia: includeMedia,
       ),
       title: 'Backfilling chat…',
