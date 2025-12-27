@@ -166,14 +166,9 @@ class MatrixState extends State<Matrix> {
     required String eventId,
   }) {
     if (eventId.isEmpty) return;
-    final router = GoRouter.of(context);
-    if (router.canPop()) {
-      context.pop();
-    } else {
-      context.go(
-        '/${Uri(pathSegments: ['rooms', roomId], queryParameters: {'event': eventId})}',
-      );
-    }
+    context.push(
+      '/${Uri(pathSegments: ['rooms', roomId], queryParameters: {'event': eventId})}',
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       requestEventJump(roomId: roomId, eventId: eventId);
     });
