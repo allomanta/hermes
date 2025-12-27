@@ -31,17 +31,12 @@ class ChatSearchMessageTab extends StatelessWidget {
   void _openInChat(BuildContext context, Event event) {
     if (event.eventId.isEmpty) return;
     final matrix = Matrix.of(context);
-    final router = GoRouter.of(context);
-    if (router.canPop()) {
-      context.pop();
-    } else {
-      context.go(
-        '/${Uri(
-          pathSegments: ['rooms', room.id],
-          queryParameters: {'event': event.eventId},
-        )}',
-      );
-    }
+    context.push(
+      '/${Uri(
+        pathSegments: ['rooms', room.id],
+        queryParameters: {'event': event.eventId},
+      )}',
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       matrix.requestEventJump(
         roomId: room.id,
