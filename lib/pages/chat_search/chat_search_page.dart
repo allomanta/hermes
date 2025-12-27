@@ -63,6 +63,7 @@ class ChatSearchController extends State<ChatSearchPage>
             requestHistoryCount: 1000,
             limit: 32,
             includeLocal: includeLocal,
+            persistHistory: true,
           )
           .map(
             (result) => (
@@ -105,6 +106,7 @@ class ChatSearchController extends State<ChatSearchPage>
             requestHistoryCount: 1000,
             limit: 32,
             includeLocal: includeLocal,
+            persistHistory: true,
           )
           .map(
             (result) => (
@@ -147,6 +149,7 @@ class ChatSearchController extends State<ChatSearchPage>
             requestHistoryCount: 1000,
             limit: 32,
             includeLocal: includeLocal,
+            persistHistory: true,
           )
           .map(
             (result) => (

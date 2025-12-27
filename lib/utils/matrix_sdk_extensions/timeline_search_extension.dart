@@ -13,6 +13,7 @@ extension TimelineSearchExtension on Timeline {
     int? limit,
     bool Function(Event)? searchFunc,
     bool includeLocal = true,
+    bool persistHistory = false,
   }) async* {
     assert(searchTerm != null || searchFunc != null);
     searchFunc ??= (event) =>
@@ -20,12 +21,30 @@ extension TimelineSearchExtension on Timeline {
 
     final found = <Event>[];
     var emitted = false;
+    final encryption = room.client.encryption;
+
+    Future<Event> prepareEvent(Event event) async {
+      if (event.type == EventTypes.Encrypted && encryption != null) {
+        event = await encryption.decryptRoomEvent(
+          event,
+          store: persistHistory,
+          updateType: EventUpdateType.history,
+        );
+        if (event.type == EventTypes.Encrypted &&
+            event.messageType == MessageTypes.BadEncrypted &&
+            event.content['can_request_session'] == true) {
+          await event.requestKey();
+        }
+      }
+      return event;
+    }
 
     if (includeLocal) {
       // Search in-memory events first.
       for (final event in events) {
-        if (searchFunc(event)) {
-          found.add(event);
+        final candidate = await prepareEvent(event);
+        if (searchFunc(candidate)) {
+          found.add(candidate);
           yield (List<Event>.from(found), null);
           emitted = true;
         }
@@ -42,8 +61,9 @@ extension TimelineSearchExtension on Timeline {
         if (eventsFromStore.isEmpty) break;
         start += eventsFromStore.length;
         for (final event in eventsFromStore) {
-          if (searchFunc(event)) {
-            found.add(event);
+          final candidate = await prepareEvent(event);
+          if (searchFunc(candidate)) {
+            found.add(candidate);
             yield (List<Event>.from(found), null);
             emitted = true;
           }
@@ -59,7 +79,6 @@ extension TimelineSearchExtension on Timeline {
       return;
     }
 
-    final encryption = room.client.encryption;
     for (var i = 0; i < maxHistoryRequests; i++) {
       if (nextBatch == null) break;
       if (limit != null && found.length >= limit) break;
@@ -71,6 +90,48 @@ extension TimelineSearchExtension on Timeline {
           limit: requestHistoryCount,
           filter: jsonEncode(StateFilter(lazyLoadMembers: true).toJson()),
         );
+        if (persistHistory && resp.chunk.isNotEmpty && resp.end != null) {
+          await room.client.database.transaction(() async {
+            room.prev_batch = resp.end;
+            await room.client.database.setRoomPrevBatch(
+              resp.end,
+              room.id,
+              room.client,
+            );
+            await room.client.handleSync(
+              SyncUpdate(
+                nextBatch: '',
+                rooms: RoomsUpdate(
+                  join: room.membership == Membership.join
+                      ? {
+                          room.id: JoinedRoomUpdate(
+                            state: resp.state,
+                            timeline: TimelineUpdate(
+                              limited: false,
+                              events: resp.chunk,
+                              prevBatch: resp.end,
+                            ),
+                          ),
+                        }
+                      : null,
+                  leave: room.membership != Membership.join
+                      ? {
+                          room.id: LeftRoomUpdate(
+                            state: resp.state,
+                            timeline: TimelineUpdate(
+                              limited: false,
+                              events: resp.chunk,
+                              prevBatch: resp.end,
+                            ),
+                          ),
+                        }
+                      : null,
+                ),
+              ),
+              direction: Direction.b,
+            );
+          });
+        }
         var limitReached = false;
         for (final matrixEvent in resp.chunk) {
           var event = Event.fromMatrixEvent(matrixEvent, room);
