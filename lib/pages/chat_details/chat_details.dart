@@ -11,14 +11,18 @@ import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_details/chat_details_view.dart';
 import 'package:hermes/pages/settings/settings.dart';
 import 'package:hermes/utils/file_selector.dart';
+import 'package:hermes/utils/backfill_service.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_modal_action_popup.dart';
+import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/matrix.dart';
 
 enum AliasActions { copy, delete, setCanonical }
+
+enum BackfillMode { textOnly, withMedia }
 
 class ChatDetails extends StatefulWidget {
   final String roomId;
@@ -168,6 +172,66 @@ class ChatDetailsController extends State<ChatDetails> {
   }
 
   static const fixedWidth = 360.0;
+
+  Future<void> showBackfillOptions() async {
+    final choice = await showModalActionPopup<BackfillMode>(
+      context: context,
+      title: 'Backfill this chat',
+      cancelLabel: L10n.of(context).cancel,
+      actions: [
+        AdaptiveModalAction(
+          value: BackfillMode.textOnly,
+          label: 'Text only',
+          isDefaultAction: true,
+          icon: const Icon(Icons.chat_outlined),
+        ),
+        AdaptiveModalAction(
+          value: BackfillMode.withMedia,
+          label: 'Text + media',
+          icon: const Icon(Icons.perm_media_outlined),
+        ),
+      ],
+    );
+    if (choice == null) return;
+    await backfillRoomHistory(includeMedia: choice == BackfillMode.withMedia);
+  }
+
+  Future<void> backfillRoomHistory({bool includeMedia = false}) async {
+    final room = Matrix.of(context).client.getRoomById(roomId!);
+    if (room == null) return;
+    final confirm = await showOkCancelAlertDialog(
+      context: context,
+      title: 'Backfill this chat?',
+      message: includeMedia
+          ? 'This may take a while and increase local storage usage. Media is cached up to the local size limit. Continue?'
+          : 'This may take a while and increase local storage usage. Continue?',
+      okLabel: L10n.of(context).ok,
+      cancelLabel: L10n.of(context).cancel,
+    );
+    if (confirm != OkCancelResult.ok) return;
+
+    await showFutureLoadingDialog(
+      context: context,
+      futureWithProgress: (setProgress) => BackfillService.backfillRoom(
+        room,
+        setProgress: setProgress,
+        perRequest: 200,
+        maxEvents: 2000,
+        includeMedia: includeMedia,
+      ),
+      title: 'Backfilling chat…',
+    );
+
+    if (!context.mounted) return;
+    final theme = Theme.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Backfill complete'),
+        backgroundColor: theme.colorScheme.secondaryContainer,
+        showCloseIcon: true,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) => ChatDetailsView(this);

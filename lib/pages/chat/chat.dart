@@ -278,6 +278,11 @@ class ChatController extends State<ChatPageWithRoom>
       setState(() => _scrolledUp = false);
       setReadMarker();
     }
+    if (timeline?.allowNewEvent != false &&
+        (scrollController.position.pixels == 0 ||
+            scrollController.position.pixels == 64)) {
+      requestFuture();
+    }
   }
 
   void _loadDraft() {
@@ -464,7 +469,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   Future<void> _tryLoadTimeline() async {
     final initialEventId = widget.eventId;
-    loadTimelineFuture = _getTimeline();
+    loadTimelineFuture = _getTimeline(eventContextId: initialEventId);
     try {
       await loadTimelineFuture;
       // We launched the chat with a given initial event ID:

@@ -292,6 +292,19 @@ class ChatDetailsView extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                         ],
+                        Divider(color: theme.dividerColor),
+                        ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: theme.colorScheme.surfaceContainer,
+                            foregroundColor: iconColor,
+                            child: const Icon(Icons.download_outlined),
+                          ),
+                          title: const Text('Backfill this chat'),
+                          subtitle: const Text(
+                            'Fetch older messages for this room. Choose whether to download media.',
+                          ),
+                          onTap: controller.showBackfillOptions,
+                        ),
                         if (!room.isDirectChat) ...[
                           Divider(color: theme.dividerColor),
                           ListTile(
