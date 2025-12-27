@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ import 'package:hermes/utils/string_color.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/member_actions_popup_menu_button.dart';
+import 'package:hermes/utils/platform_infos.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:hermes/utils/reply_swipe.dart';
@@ -106,105 +108,111 @@ class Message extends StatelessWidget {
     final size = overlay.size;
     final client = Matrix.of(context).client;
     final ownMessage = client.userID == event.senderId;
+    final l10n = L10n.of(context);
+    final theme = Theme.of(context);
 
-    final menuItems = <PopupMenuEntry<_MessageAction>>[
-      const PopupMenuItem(
-        value: _MessageAction.reply,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.reply_outlined, size: 18),
-            SizedBox(width: 12),
-            Text('Reply'),
-          ],
-        ),
+    final menuActions = <_ContextMenuAction>[
+      _ContextMenuAction(
+        action: _MessageAction.reply,
+        icon: Icons.reply_outlined,
+        label: l10n.reply,
       ),
-      const PopupMenuItem(
-        value: _MessageAction.copy,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.copy_outlined, size: 18),
-            SizedBox(width: 12),
-            Text('Copy'),
-          ],
-        ),
+      _ContextMenuAction(
+        action: _MessageAction.copy,
+        icon: Icons.copy_outlined,
+        label: l10n.copy,
       ),
-      const PopupMenuItem(
-        value: _MessageAction.forward,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.forward, size: 18),
-            SizedBox(width: 12),
-            Text('Forward'),
-          ],
-        ),
+      _ContextMenuAction(
+        action: _MessageAction.forward,
+        icon: Icons.forward,
+        label: l10n.forward,
       ),
-      const PopupMenuItem(
-        value: _MessageAction.pin,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.push_pin_outlined, size: 18),
-            SizedBox(width: 12),
-            Text('Pin'),
-          ],
-        ),
+      _ContextMenuAction(
+        action: _MessageAction.pin,
+        icon: Icons.push_pin_outlined,
+        label: l10n.pin,
       ),
       if (ownMessage)
-        const PopupMenuItem(
-          value: _MessageAction.edit,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.edit_outlined, size: 18),
-              SizedBox(width: 12),
-              Text('Edit'),
-            ],
-          ),
+        _ContextMenuAction(
+          action: _MessageAction.edit,
+          icon: Icons.edit_outlined,
+          label: l10n.edit,
         ),
       if (ownMessage)
-        const PopupMenuItem(
-          value: _MessageAction.redact,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.delete_outlined, size: 18),
-              SizedBox(width: 12),
-              Text('Delete'),
-            ],
-          ),
+        _ContextMenuAction(
+          action: _MessageAction.redact,
+          icon: Icons.delete_outlined,
+          label: l10n.delete,
+          isDestructive: true,
         ),
     ];
 
-    const menuScreenPadding = 8.0; // Matches Flutter's internal padding.
-    final menuHeight = menuItems.fold<double>(
-      menuScreenPadding * 2,
-      (prev, entry) => prev + entry.height,
-    );
-    final keyboardHeight =
-        MediaQuery.maybeOf(context)?.viewInsets.bottom ?? 0.0;
-    final keyboardTop = size.height - keyboardHeight - menuScreenPadding;
-    var menuTop = local.dy;
+    final view = View.of(context);
+    final keyboardHeight = view.viewInsets.bottom / view.devicePixelRatio;
 
-    if (keyboardHeight > 0 &&
-        (menuTop + menuHeight) > math.max(menuScreenPadding, keyboardTop)) {
-      menuTop = math.max(menuScreenPadding, keyboardTop - menuHeight);
+    _MessageAction? result;
+    if (PlatformInfos.isAndroid && keyboardHeight > 0) {
+      result = await _showContextMenuOverlay(
+        context: context,
+        overlay: overlay,
+        localPosition: local,
+        keyboardHeight: keyboardHeight,
+        actions: menuActions,
+      );
+    } else {
+      final menuItems = menuActions
+          .map(
+            (action) => PopupMenuItem<_MessageAction>(
+              value: action.action,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    action.icon,
+                    size: 18,
+                    color: action.isDestructive
+                        ? theme.colorScheme.error
+                        : theme.iconTheme.color,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    action.label,
+                    style: action.isDestructive
+                        ? TextStyle(color: theme.colorScheme.error)
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          )
+          .toList();
+
+      const menuScreenPadding = 8.0; // Matches Flutter's internal padding.
+      final menuHeight = menuItems.fold<double>(
+        menuScreenPadding * 2,
+        (prev, entry) => prev + entry.height,
+      );
+      final keyboardTop = size.height - keyboardHeight - menuScreenPadding;
+      var menuTop = local.dy;
+
+      if (keyboardHeight > 0 &&
+          (menuTop + menuHeight) > math.max(menuScreenPadding, keyboardTop)) {
+        menuTop = math.max(menuScreenPadding, keyboardTop - menuHeight);
+      }
+
+      result = await showMenu<_MessageAction>(
+        context: context,
+        useRootNavigator: true,
+        position: RelativeRect.fromLTRB(
+          local.dx,
+          menuTop,
+          size.width - local.dx,
+          size.height - menuTop,
+        ),
+        requestFocus: false,
+        items: menuItems,
+      );
     }
-
-    final result = await showMenu<_MessageAction>(
-      context: context,
-      useRootNavigator: true,
-      position: RelativeRect.fromLTRB(
-        local.dx,
-        menuTop,
-        size.width - local.dx,
-        size.height - menuTop,
-      ),
-      requestFocus: false,
-      items: menuItems,
-    );
     switch (result) {
       case _MessageAction.reply:
         onReply();
@@ -227,6 +235,37 @@ class Message extends StatelessWidget {
       case null:
         break;
     }
+  }
+
+  Future<_MessageAction?> _showContextMenuOverlay({
+    required BuildContext context,
+    required RenderBox overlay,
+    required Offset localPosition,
+    required double keyboardHeight,
+    required List<_ContextMenuAction> actions,
+  }) {
+    final completer = Completer<_MessageAction?>();
+    late final OverlayEntry entry;
+
+    void dismiss([_MessageAction? action]) {
+      if (completer.isCompleted) return;
+      completer.complete(action);
+      entry.remove();
+    }
+
+    entry = OverlayEntry(
+      builder: (context) => _ContextMenuOverlay(
+        position: localPosition,
+        overlaySize: overlay.size,
+        keyboardHeight: keyboardHeight,
+        actions: actions,
+        onSelected: dismiss,
+        onDismiss: () => dismiss(null),
+      ),
+    );
+
+    Overlay.of(context, rootOverlay: true).insert(entry);
+    return completer.future;
   }
 
   @override
@@ -1065,6 +1104,145 @@ class Message extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ContextMenuAction {
+  final _MessageAction action;
+  final IconData icon;
+  final String label;
+  final bool isDestructive;
+
+  const _ContextMenuAction({
+    required this.action,
+    required this.icon,
+    required this.label,
+    this.isDestructive = false,
+  });
+}
+
+class _ContextMenuOverlay extends StatelessWidget {
+  final Offset position;
+  final Size overlaySize;
+  final double keyboardHeight;
+  final List<_ContextMenuAction> actions;
+  final ValueChanged<_MessageAction> onSelected;
+  final VoidCallback onDismiss;
+
+  const _ContextMenuOverlay({
+    required this.position,
+    required this.overlaySize,
+    required this.keyboardHeight,
+    required this.actions,
+    required this.onSelected,
+    required this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final maxHeight = math.max(0.0, overlaySize.height - keyboardHeight - 16);
+
+    return Material(
+      type: MaterialType.transparency,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onDismiss,
+              onSecondaryTap: onDismiss,
+            ),
+          ),
+          CustomSingleChildLayout(
+            delegate: _ContextMenuLayoutDelegate(
+              position: position,
+              keyboardHeight: keyboardHeight,
+            ),
+            child: Material(
+              elevation: 8,
+              borderRadius: BorderRadius.circular(12),
+              color: theme.colorScheme.surface,
+              clipBehavior: Clip.hardEdge,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: 200,
+                  maxWidth: 280,
+                  maxHeight: maxHeight,
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  children: [
+                    for (final action in actions)
+                      ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity.compact,
+                        leading: Icon(
+                          action.icon,
+                          color: action.isDestructive
+                              ? theme.colorScheme.error
+                              : null,
+                        ),
+                        title: Text(
+                          action.label,
+                          maxLines: 1,
+                          style: action.isDestructive
+                              ? TextStyle(color: theme.colorScheme.error)
+                              : null,
+                        ),
+                        onTap: () => onSelected(action.action),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
+  final Offset position;
+  final double keyboardHeight;
+
+  _ContextMenuLayoutDelegate({
+    required this.position,
+    required this.keyboardHeight,
+  });
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return BoxConstraints.loose(constraints.biggest);
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    const padding = 8.0;
+    final keyboardTop = size.height - keyboardHeight - padding;
+    var dx = position.dx;
+    var dy = position.dy;
+
+    if (dx + childSize.width > size.width - padding) {
+      dx = size.width - padding - childSize.width;
+    }
+    if (dx < padding) {
+      dx = padding;
+    }
+    if (dy + childSize.height > keyboardTop) {
+      dy = keyboardTop - childSize.height;
+    }
+    if (dy < padding) {
+      dy = padding;
+    }
+    return Offset(dx, dy);
+  }
+
+  @override
+  bool shouldRelayout(covariant _ContextMenuLayoutDelegate oldDelegate) =>
+      position != oldDelegate.position ||
+      keyboardHeight != oldDelegate.keyboardHeight;
 }
 
 class BubbleBackground extends StatelessWidget {
