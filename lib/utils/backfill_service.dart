@@ -31,7 +31,8 @@ class BackfillService {
       );
 
       var fetched = 0;
-      while (timeline.canRequestHistory && fetched < maxEvents) {
+      while (timeline.canRequestHistory &&
+          (maxEvents <= 0 || fetched < maxEvents)) {
         final before = timeline.events.length;
         await timeline.requestHistory(historyCount: perRequest);
         final after = timeline.events.length;
@@ -44,9 +45,7 @@ class BackfillService {
         }
 
         fetched += diff;
-        if (maxEvents > 0) {
-          setProgress?.call(fetched / maxEvents);
-        }
+        setProgress?.call(maxEvents > 0 ? fetched / maxEvents : null);
         await Future<void>.delayed(const Duration(milliseconds: 10));
       }
 
@@ -96,7 +95,8 @@ class BackfillService {
 
         var fetched = 0;
         // Paginate older chunks until no more history or we hit our cap.
-        while (timeline.canRequestHistory && fetched < maxPerRoom) {
+        while (timeline.canRequestHistory &&
+            (maxPerRoom <= 0 || fetched < maxPerRoom)) {
           final before = timeline.events.length;
           await timeline.requestHistory(historyCount: perRequest);
           final after = timeline.events.length;
