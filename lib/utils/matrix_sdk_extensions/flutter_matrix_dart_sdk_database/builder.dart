@@ -62,16 +62,29 @@ Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
 
   final cipher = await getDatabaseCipher();
 
+  final path = await _getDatabasePath(clientName);
+
   Directory? fileStorageLocation;
   try {
-    fileStorageLocation = await getTemporaryDirectory();
-  } on MissingPlatformDirectoryException catch (_) {
-    Logs().w(
-      'No temporary directory for file cache available on this platform.',
+    final databaseDir = Directory(dirname(path));
+    fileStorageLocation = Directory(
+      join(databaseDir.path, 'media', clientName),
     );
+    await fileStorageLocation.create(recursive: true);
+  } catch (e, s) {
+    Logs().w(
+      'Unable to create persistent media storage directory.',
+      e,
+      s,
+    );
+    try {
+      fileStorageLocation = await getTemporaryDirectory();
+    } on MissingPlatformDirectoryException catch (_) {
+      Logs().w(
+        'No temporary directory for file cache available on this platform.',
+      );
+    }
   }
-
-  final path = await _getDatabasePath(clientName);
 
   // fix dlopen for old Android
   await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
@@ -107,12 +120,13 @@ Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
     ),
   );
 
+  // TODO: add a way to prune?
   return await MatrixSdkDatabase.init(
     clientName,
     database: database,
-    maxFileSize: 1000 * 1000 * 10,
+    maxFileSize: 1000 * 1000 * 4096,
     fileStorageLocation: fileStorageLocation?.uri,
-    deleteFilesAfterDuration: const Duration(days: 30),
+    deleteFilesAfterDuration: null,
   );
 }
 
