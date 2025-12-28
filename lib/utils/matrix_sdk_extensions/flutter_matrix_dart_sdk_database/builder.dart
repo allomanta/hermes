@@ -47,26 +47,13 @@ Future<DatabaseApi> flutterMatrixSdkDatabaseBuilder(String clientName) async {
   }
 }
 
-Future<Directory?> getFileStorageLocation() async {
+Future<Directory?> getFileStorageLocation(String clientName) async {
   try {
-    late final Directory temporaryDirectory;
-    if (PlatformInfos.isIOS) {
-      final containerPath = await PathProviderFoundation().getContainerPath(
-        appGroupIdentifier: 'group.im.hermes.app',
-      );
-      temporaryDirectory = Directory(containerPath!);
-    } else if (PlatformInfos.isLinux) {
-      temporaryDirectory = await getApplicationCacheDirectory();
-    } else {
-      temporaryDirectory = await getTemporaryDirectory();
-    }
     return await Directory(
-      join(temporaryDirectory.path, 'hermes_download_cache'),
+      join(await _getDatabaseDirectory(), 'media', clientName),
     ).create(recursive: true);
-  } on MissingPlatformDirectoryException catch (_) {
-    Logs().w(
-      'No temporary directory for file cache available on this platform.',
-    );
+  } catch (e, s) {
+    Logs().w('Unable to create persistent media storage directory.', e, s);
   }
   return null;
 }
@@ -79,7 +66,7 @@ Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
 
   final cipher = await getDatabaseCipher();
 
-  final fileStorageLocation = await getFileStorageLocation();
+  final fileStorageLocation = await getFileStorageLocation(clientName);
 
   final path = await _getDatabasePath(clientName);
 
@@ -90,9 +77,9 @@ Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
     return await MatrixSdkDatabase.init(
       clientName,
       database: await sqfl_cipher.openDatabase(path, password: cipher),
-      maxFileSize: 1000 * 1000 * 10,
+      maxFileSize: 1000 * 1000 * 4096,
       fileStorageLocation: fileStorageLocation?.uri,
-      deleteFilesAfterDuration: const Duration(days: 30),
+      deleteFilesAfterDuration: null,
     );
   }
 
@@ -120,12 +107,13 @@ Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
     ),
   );
 
+  // TODO: add a way to prune?
   return await MatrixSdkDatabase.init(
     clientName,
     database: database,
-    maxFileSize: 1000 * 1000 * 10,
+    maxFileSize: 1000 * 1000 * 4096,
     fileStorageLocation: fileStorageLocation?.uri,
-    deleteFilesAfterDuration: const Duration(days: 30),
+    deleteFilesAfterDuration: null,
   );
 }
 
