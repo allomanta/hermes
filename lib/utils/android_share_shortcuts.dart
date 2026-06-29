@@ -87,8 +87,9 @@ class AndroidShareShortcuts {
     }
 
     final signature = jsonEncode(shortcuts);
-    final removedShortcutIds =
-        _lastPublishedShortcutIds.difference(shortcutIds).toList();
+    final removedShortcutIds = _lastPublishedShortcutIds
+        .difference(shortcutIds)
+        .toList();
     final hasChanges =
         signature != _lastPublishedSignature || removedShortcutIds.isNotEmpty;
     if (!hasChanges) {
