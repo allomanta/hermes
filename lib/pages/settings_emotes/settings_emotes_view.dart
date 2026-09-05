@@ -5,8 +5,14 @@
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'package:hermes/widgets/mxc_image.dart';
+import 'package:hermes/widgets/mxc_image_viewer.dart';
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../widgets/matrix.dart';
 import 'settings_emotes.dart';
 

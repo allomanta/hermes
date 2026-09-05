@@ -6,6 +6,9 @@
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/member_actions_popup_menu_button.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../widgets/avatar.dart';
 
 class ParticipantListItem extends StatelessWidget {

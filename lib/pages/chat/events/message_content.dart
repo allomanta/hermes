@@ -5,8 +5,6 @@
 
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-
 import 'package:matrix/matrix.dart';
 
 import 'package:hermes/config/setting_keys.dart';
@@ -28,6 +26,8 @@ import 'html_message.dart';
 import 'image_bubble.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
+import 'package:hermes/pages/image_viewer/image_viewer.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MessageContent extends StatelessWidget {
   final Event event;

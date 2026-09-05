@@ -9,6 +9,9 @@ import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/utils/show_scaffold_dialog.dart';
 import 'package:hermes/widgets/share_scaffold_dialog.dart';
 import '../../utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class ImageViewer extends StatefulWidget {
   final Event event;

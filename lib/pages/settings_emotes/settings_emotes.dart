@@ -5,20 +5,21 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
-import 'package:collection/collection.dart';
-import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' hide Client;
-import 'package:matrix/matrix.dart';
-
+import 'package:archive/archive.dart'
+    if (dart.library.io) 'package:archive/archive_io.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/file_selector.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' hide Client;
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../widgets/matrix.dart';
 import 'import_archive_dialog.dart';
 import 'settings_emotes_view.dart';

@@ -1,5 +1,4 @@
 // import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
@@ -18,6 +17,11 @@ import '../../config/themes.dart';
 // import '../../widgets/adaptive_dialogs/user_dialog.dart';
 import '../../widgets/matrix.dart';
 import 'chat_list_header.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:hermes/config/setting_keys.dart';
+import 'package:hermes/pages/chat_list/search_title.dart';
+import 'package:material_ui/material_ui.dart';
+import '../../widgets/adaptive_dialogs/user_dialog.dart';
 
 class ChatListViewBody extends StatelessWidget {
   final ChatListController controller;

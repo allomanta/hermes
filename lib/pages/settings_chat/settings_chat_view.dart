@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'package:go_router/go_router.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/setting_keys.dart';
@@ -12,6 +10,9 @@ import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/utils/backfill_service.dart';
 import 'settings_chat.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:hermes/utils/adaptive_bottom_sheet.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SettingsChatView extends StatelessWidget {
   final SettingsChatController controller;

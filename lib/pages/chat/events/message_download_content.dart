@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'package:flutter_linkify/flutter_linkify.dart';
 
 import 'package:matrix/matrix.dart';
@@ -8,6 +6,8 @@ import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/file_description.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:hermes/utils/url_launcher.dart';
+import 'package:hermes/pages/chat/events/file_send_status_indicator.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MessageDownloadContent extends StatelessWidget {
   final Event event;

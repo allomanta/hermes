@@ -3,16 +3,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-
-import 'package:hermes/config/app_config.dart';
-import 'package:hermes/config/themes.dart';
+import 'package:async/async.dart';
 import 'package:hermes/l10n/l10n.dart';
-import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart' hide Result;
+import 'package:url_launcher/url_launcher_string.dart';
+
 import '../../utils/pantheon_share.dart';
 import 'chat_list.dart';
 
@@ -181,9 +180,8 @@ class ClientChooserButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(99),
         color: Colors.transparent,
         child: PopupMenuButton<Object>(
-          popUpAnimationStyle: PantheonThemes.isColumnMode(context)
-              ? AnimationStyle.noAnimation
-              : null, // https://github.com/flutter/flutter/issues/167180
+          key: Key('accounts_and_settings_buttons'),
+          tooltip: L10n.of(context).accountsAndSettings,
           onSelected: (o) => _clientSelected(o, context),
           itemBuilder: _bundleMenuItems,
           icon: Avatar(

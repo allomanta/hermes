@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:collection/collection.dart';
@@ -32,6 +31,7 @@ import 'message_content.dart';
 import 'message_reactions.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
+import 'dart:ui' as ui;
 
 enum _MessageAction { reply, copy, forward, pin, edit, redact }
 

@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/device_settings/device_settings.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'user_device_list_item.dart';
+import 'package:material_ui/material_ui.dart';
 
 class DevicesSettingsView extends StatelessWidget {
   final DevicesSettingsController controller;

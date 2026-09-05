@@ -5,16 +5,14 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
-
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat/chat.dart';
 import 'package:hermes/pages/chat/chat_app_bar_list_tile.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class PinnedEvents extends StatelessWidget {
   final ChatController controller;

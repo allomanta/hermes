@@ -1,21 +1,9 @@
-/*
- *   Famedly
- *   Copyright (C) 2020, 2021 Famedly GmbH
- *   Copyright (C) 2021 Hermes
- *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as
- *   published by the Free Software Foundation, either version 3 of the
- *   License, or (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *   GNU Affero General Public License for more details.
- *
- *   You should have received a copy of the GNU Affero General Public License
- *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+// Copyright (C) 2020, 2021 Famedly GmbH
+// Copyright (C) 2021 Fluffychat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'dart:async';
 import 'dart:convert';
@@ -23,30 +11,23 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
+//<GOOGLE_SERVICES>import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/main.dart';
+import 'package:hermes/utils/notification_background_handler.dart';
+import 'package:hermes/utils/push_helper.dart';
+import 'package:hermes/widgets/hermes_app.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_new_badger/flutter_new_badger.dart';
 import 'package:http/http.dart' as http;
+import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 import 'package:unifiedpush_ui/unifiedpush_ui.dart';
-import 'package:hermes/utils/notification_background_handler.dart';
-import 'package:hermes/l10n/l10n.dart';
-import 'package:hermes/utils/push_helper.dart';
-import 'package:hermes/widgets/hermes_app.dart';
-import 'package:hermes/main.dart';
+
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import '../widgets/matrix.dart';
 import 'platform_infos.dart';
-
-import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
-
-class NoTokenException implements Exception {
-  String get cause => 'Cannot get firebase token';
-}
 
 class BackgroundPush {
   static BackgroundPush? _instance;
@@ -63,7 +44,6 @@ class BackgroundPush {
   String? get fcmToken => _fcmToken;
   void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
-
   Timer? _macosPollingTimer;
 
   static const Set<String> _legacyPushGatewayUrls = {
@@ -85,7 +65,7 @@ class BackgroundPush {
   final pendingTests = <String, Completer<void>>{};
   bool firebaseEnabled = false;
 
-  final firebase = FcmSharedIsolate();
+  //<GOOGLE_SERVICES>final firebase = FcmSharedIsolate();
 
   DateTime? lastReceivedPush;
 
@@ -98,7 +78,7 @@ class BackgroundPush {
         try {
           await notificationTap(
             NotificationResponseJson.fromJsonString(message),
-            client: client,
+            clients: clients,
             router: HermesApp.router,
             l10n: l10n,
           );
@@ -117,7 +97,7 @@ class BackgroundPush {
           try {
             await notificationTap(
               NotificationResponseJson.fromJsonString(message),
-              client: client,
+              clients: clients,
               router: HermesApp.router,
               l10n: l10n,
             );
@@ -139,7 +119,7 @@ class BackgroundPush {
         ),
         onDidReceiveNotificationResponse: (response) => notificationTap(
           response,
-          client: client,
+          clients: clients,
           router: HermesApp.router,
           l10n: l10n,
         ),
@@ -147,23 +127,23 @@ class BackgroundPush {
       );
       Logs().v('Flutter Local Notifications initialized');
       if (PlatformInfos.isMacOS) {
-        _flutterLocalNotificationsPlugin
+        await _flutterLocalNotificationsPlugin
             .resolvePlatformSpecificImplementation<
               MacOSFlutterLocalNotificationsPlugin
             >()
             ?.requestPermissions(alert: true, badge: true, sound: true);
       }
-      firebase.setListeners(
-        onMessage: (message) => pushHelper(
-          PushNotification.fromJson(
-            Map<String, dynamic>.from(message['data'] ?? message),
-          ),
-          client: client,
-          l10n: l10n,
-          activeRoomId: matrix?.activeRoomId,
-          flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-        ),
-      );
+      //<GOOGLE_SERVICES>firebase.setListeners(
+      //<GOOGLE_SERVICES>  onMessage: (message) => pushHelper(
+      //<GOOGLE_SERVICES>    PushNotification.fromJson(
+      //<GOOGLE_SERVICES>       message.tryGetMap<String, Object>('data') ?? message,
+      //<GOOGLE_SERVICES>    ),
+      //<GOOGLE_SERVICES>    clients: clients,
+      //<GOOGLE_SERVICES>    l10n: l10n,
+      //<GOOGLE_SERVICES>    activeRoomId: matrix?.activeRoomId,
+      //<GOOGLE_SERVICES>    flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+      //<GOOGLE_SERVICES>  ),
+      //<GOOGLE_SERVICES>);
       if (Platform.isAndroid) {
         await UnifiedPush.initialize(
           onNewEndpoint: _newUpEndpoint,
@@ -205,7 +185,7 @@ class BackgroundPush {
     String? token,
   }) async {
     if (PlatformInfos.isIOS) {
-      await firebase.requestPermission();
+      //<GOOGLE_SERVICES>await firebase.requestPermission();
     }
     if (PlatformInfos.isAndroid && !isIntegrationTest) {
       _flutterLocalNotificationsPlugin
@@ -214,32 +194,8 @@ class BackgroundPush {
           >()
           ?.requestNotificationsPermission();
     }
-    if (PlatformInfos.isMacOS) {
-      final macPlugin = _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            MacOSFlutterLocalNotificationsPlugin
-          >();
-      if (macPlugin == null) {
-        Logs().w('[Notifications] macOS plugin not available');
-      } else {
-        final macPermissionResult = await macPlugin.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-        Logs().v(
-          '[Notifications] macOS requestPermissions result: '
-          '${macPermissionResult ?? "unknown"}',
-        );
-        final launchDetails = await macPlugin.getNotificationAppLaunchDetails();
-        Logs().v(
-          '[Notifications] macOS launch details: '
-          '${launchDetails ?? "none"}',
-        );
-      }
-    }
-    final clientName = PlatformInfos.clientName;
-    oldTokens ??= <String>{};
+    final appDisplayName = PlatformInfos.appDisplayName;
+
     final pushers =
         await (client.getPushers().catchError((e) {
           Logs().w('[Push] Unable to request pushers', e);
@@ -372,35 +328,12 @@ class BackgroundPush {
       if (response != null) {
         notificationTap(
           response,
-          client: client,
+          clients: clients,
           router: HermesApp.router,
           l10n: l10n,
         );
       }
     });
-  }
-
-  void _maybeStartMacPolling() {
-    if (!PlatformInfos.isMacOS) {
-      return;
-    }
-    if (_macosPollingTimer == null) {
-      Logs().v('[Push] Starting macOS poll timer');
-      _macosPollingTimer = Timer.periodic(
-        const Duration(minutes: 1),
-        (_) => _pollMacNotifications(),
-      );
-    }
-    unawaited(_pollMacNotifications());
-  }
-
-  Future<void> _pollMacNotifications() async {
-    if (!PlatformInfos.isMacOS ||
-        matrix == null ||
-        client.onLoginStateChanged.value != LoginState.loggedIn) {
-      return;
-    }
-    await client.oneShotSync(timeout: const Duration(seconds: 20));
   }
 
   Future<void> _noFcmWarning() async {
@@ -423,6 +356,24 @@ class BackgroundPush {
     });
   }
 
+  void _maybeStartMacPolling() {
+    if (!PlatformInfos.isMacOS || _macosPollingTimer != null) return;
+    Logs().v('[Push] Starting macOS poll timer');
+    _macosPollingTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => _pollMacNotifications(),
+    );
+    unawaited(_pollMacNotifications());
+  }
+
+  Future<void> _pollMacNotifications() async {
+    if (!PlatformInfos.isMacOS || matrix == null) return;
+    for (final client in clients) {
+      if (client.onLoginStateChanged.value != LoginState.loggedIn) continue;
+      await client.oneShotSync(timeout: const Duration(seconds: 20));
+    }
+  }
+
   Future<void> setupFirebase(Client client) async {
     Logs().v('Setup firebase');
     if (!firebaseEnabled) {
@@ -430,21 +381,31 @@ class BackgroundPush {
       return;
     }
     if (_fcmToken?.isEmpty ?? true) {
-      try {
-        _fcmToken = await firebase.getToken();
-        if (_fcmToken == null) throw ('PushToken is null');
-      } catch (e, s) {
-        Logs().w('[Push] cannot get token', e, e is String ? null : s);
+      if (PlatformInfos.isIOS) {
+        //<GOOGLE_SERVICES>await firebase.requestPermission();
+      }
+      const max = 5;
+      for (var i = 0; i < max; i++) {
+        try {
+          await Future.delayed(const Duration(seconds: 1));
+          //<GOOGLE_SERVICES>_fcmToken = await firebase.getToken();
+          if (_fcmToken != null) break;
+        } catch (e, s) {
+          Logs().w(
+            '[Push] cannot get token - try ($i/$max)',
+            e,
+            e is String ? null : s,
+          );
+        }
+      }
+      if (_fcmToken == null) {
         await _noFcmWarning();
         return;
       }
     }
     final gatewayUrl = await _resolveFirebaseGatewayUrl();
-    if (gatewayUrl?.isEmpty ?? true) {
-      Logs().w('[Push] Missing push gateway URL');
-      return;
-    }
-    await setupPusher(gatewayUrl: gatewayUrl, token: _fcmToken);
+    if (gatewayUrl?.isEmpty ?? true) return;
+    await setupPusher(client: client, gatewayUrl: gatewayUrl, token: _fcmToken);
   }
 
   Future<String?> _resolveFirebaseGatewayUrl() async {
@@ -456,16 +417,6 @@ class BackgroundPush {
       return updatedUrl;
     }
     return currentUrl;
-  }
-
-  Future<void> setupUp() async {
-    await UnifiedPushUi(
-      context: matrix!.context,
-      instances: ["default"],
-      unifiedPushFunctions: UPFunctions(),
-      showNoDistribDialog: false,
-      onNoDistribDialogDismissed: () {}, // TODO: Implement me
-    ).registerAppWithDialog();
   }
 
   Future<void> _newUpEndpoint(PushEndpoint newPushEndpoint, String i) async {
@@ -497,17 +448,14 @@ class BackgroundPush {
       );
     }
     Logs().i('[Push] UnifiedPush using endpoint $endpoint');
-    final oldTokens = <String?>{};
-    try {
-      final fcmToken = await firebase.getToken();
-      oldTokens.add(fcmToken);
-    } catch (_) {}
-    await setupPusher(
-      gatewayUrl: endpoint,
-      token: newEndpoint,
-      oldTokens: oldTokens,
-      useDeviceSpecificAppId: true,
-    );
+
+    for (final client in clients) {
+      await setupPusher(
+        client: client,
+        gatewayUrl: endpoint,
+        token: newEndpoint,
+      );
+    }
     await AppSettings.unifiedPushEndpoint.setItem(newEndpoint);
     await AppSettings.unifiedPushRegistered.setItem(true);
   }

@@ -3,13 +3,21 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter_highlighter/flutter_highlighter.dart';
-import 'package:flutter_highlighter/themes/shades-of-purple.dart';
-import 'package:matrix/matrix.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:hermes/l10n/l10n.dart';
+import 'dart:convert';
+
 import 'package:hermes/config/app_config.dart';
+import 'package:hermes/config/setting_keys.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:hermes/widgets/hermes_app.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+import 'package:universal_html/universal_html.dart' as html;
+import 'package:url_launcher/url_launcher.dart';
 
 class ErrorReporter {
   final BuildContext? context;

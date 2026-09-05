@@ -1,16 +1,23 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart';
-import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/config/themes.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/beautify_string_extension.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:hermes/widgets/app_lock.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/settings_switch_list_tile.dart';
+import 'package:go_router/go_router.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import 'settings_security.dart';
 
 class SettingsSecurityView extends StatelessWidget {
@@ -127,6 +134,7 @@ class SettingsSecurityView extends StatelessWidget {
                       ),
                     ],
                   ],
+
                   Divider(color: theme.dividerColor),
                   ListTile(
                     title: Text(

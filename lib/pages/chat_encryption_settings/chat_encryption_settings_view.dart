@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
@@ -10,6 +9,8 @@ import 'package:hermes/config/app_config.dart';
 import 'package:hermes/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:hermes/utils/beautify_string_extension.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
+import 'package:hermes/utils/date_time_extension.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ChatEncryptionSettingsView extends StatelessWidget {
   final ChatEncryptionSettingsController controller;

@@ -6,9 +6,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:matrix/matrix.dart';
-
+import 'package:file_picker/file_picker.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/file_selector.dart';
 import 'package:hermes/utils/platform_infos.dart';
@@ -16,6 +14,12 @@ import 'package:hermes/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/encryption.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../widgets/matrix.dart';
 import 'settings_view.dart';
 

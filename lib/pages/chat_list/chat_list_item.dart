@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'package:matrix/matrix.dart';
 import 'package:hermes/pages/chat_list/unread_bubble.dart';
 import 'package:hermes/l10n/l10n.dart';
@@ -12,6 +10,10 @@ import 'package:hermes/widgets/hover_builder.dart';
 import '../../config/themes.dart';
 import '../../utils/date_time_extension.dart';
 import '../../widgets/avatar.dart';
+import 'package:hermes/pages/chat_list/active_call_indicator.dart';
+import 'package:hermes/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:hermes/widgets/typing_animation.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ChatListItem extends StatelessWidget {
   final Room room;
@@ -86,10 +88,16 @@ class ChatListItem extends StatelessWidget {
                           top: 0,
                           left: 0,
                           child: Avatar(
-                            border: BorderSide(
-                              width: 2,
-                              color:
-                                  backgroundColor ?? theme.colorScheme.surface,
+                            shapeBorder: RoundedSuperellipseBorder(
+                              side: BorderSide(
+                                width: 2,
+                                color:
+                                    backgroundColor ??
+                                    theme.colorScheme.surface,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppConfig.spaceBorderRadius * 0.75,
+                              ),
                             ),
                             borderRadius: BorderRadius.circular(
                               AppConfig.borderRadius / 4,
@@ -104,18 +112,28 @@ class ChatListItem extends StatelessWidget {
                         bottom: 0,
                         right: 0,
                         child: Avatar(
-                          border: space == null
+                          shapeBorder: space == null
                               ? room.isSpace
-                                    ? BorderSide(
-                                        width: 1,
-                                        color: theme.dividerColor,
+                                    ? RoundedSuperellipseBorder(
+                                        side: BorderSide(
+                                          width: 1,
+                                          color: theme.dividerColor,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          AppConfig.spaceBorderRadius,
+                                        ),
                                       )
                                     : null
-                              : BorderSide(
-                                  width: 2,
-                                  color:
-                                      backgroundColor ??
-                                      theme.colorScheme.surface,
+                              : RoundedRectangleBorder(
+                                  side: BorderSide(
+                                    width: 2,
+                                    color:
+                                        backgroundColor ??
+                                        theme.colorScheme.surface,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    Avatar.defaultSize,
+                                  ),
                                 ),
                           borderRadius: room.isSpace
                               ? BorderRadius.circular(
@@ -144,7 +162,7 @@ class ChatListItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         softWrap: false,
                         style: TextStyle(
-                          fontWeight: unread || room.hasNewMessages
+                          fontWeight: room.hasNewMessages
                               ? FontWeight.w500
                               : null,
                         ),
@@ -313,7 +331,7 @@ class ChatListItem extends StatelessWidget {
                                 maxLines: room.notificationCount >= 1 ? 2 : 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: unread || room.hasNewMessages
+                                  color: room.hasNewMessages
                                       ? theme.colorScheme.onSurface
                                       : theme.colorScheme.outline,
                                   decoration: room.lastEvent?.redacted == true

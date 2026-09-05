@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/setting_keys.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SettingsSwitchListTile extends StatefulWidget {
   final AppSettings<bool?> setting;

@@ -11,6 +11,16 @@ import 'package:hermes/pages/chat/typing_indicators.dart';
 import 'package:hermes/utils/account_config.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:collection/collection.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:hermes/config/setting_keys.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat/encryption_info.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix_api_lite/model/event_types.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+import '../../config/app_config.dart';
+import '../../utils/date_time_extension.dart';
 
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
@@ -149,6 +159,7 @@ class ChatEventList extends StatelessWidget {
                 controller: controller.scrollController,
                 child: Message(
                   event,
+                  bigEmojis: controller.bigEmojis,
                   animateIn: animateIn,
                   onReply: () => controller.replyAction(replyTo: event),
                   onForward: () => controller.forwardEventAction(event),

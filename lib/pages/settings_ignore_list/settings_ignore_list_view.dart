@@ -6,6 +6,8 @@
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
+import 'package:material_ui/material_ui.dart';
+
 import '../../widgets/matrix.dart';
 import 'settings_ignore_list.dart';
 

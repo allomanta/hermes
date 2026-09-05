@@ -5,11 +5,9 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
-
 import 'package:hermes/widgets/matrix.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class PresenceBuilder extends StatefulWidget {
   final Widget Function(BuildContext context, CachedPresence? presence) builder;

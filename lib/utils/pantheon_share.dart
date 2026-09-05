@@ -5,6 +5,10 @@
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:share_plus/share_plus.dart';
+
 import '../widgets/matrix.dart';
 
 abstract class PantheonShare {
@@ -38,10 +42,11 @@ abstract class PantheonShare {
     final l10n = L10n.of(context);
     final client = Matrix.of(context).client;
     final ownProfile = await client.fetchOwnProfile();
+    if (!context.mounted) return;
     await PantheonShare.share(
-      L10n.of(context).inviteText(
+      l10n.inviteText(
         ownProfile.displayName ?? client.userID!,
-        'https://matrix.to/#/${client.userID}?client=im.hermes',
+        'https://matrix.to/#/${client.userID}?client=im.fluffychat',
       ),
       context,
     );

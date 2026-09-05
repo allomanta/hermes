@@ -1,13 +1,20 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:emojis/emoji.dart';
-import 'package:matrix/matrix.dart';
-import 'package:slugify/slugify.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat/trust_user_key_dialog.dart';
 import 'package:hermes/utils/markdown_context_builder.dart';
 import 'package:hermes/widgets/mxc_image.dart';
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+import 'package:slugify/slugify.dart';
+
 import '../../widgets/avatar.dart';
 import '../../widgets/matrix.dart';
 import 'command_hints.dart';

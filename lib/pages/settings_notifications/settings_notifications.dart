@@ -5,8 +5,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-
 import 'package:matrix/matrix.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
@@ -18,6 +16,7 @@ import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import '../../widgets/matrix.dart';
 import 'settings_notifications_view.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SettingsNotifications extends StatefulWidget {
   const SettingsNotifications({super.key});

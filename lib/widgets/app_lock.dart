@@ -4,6 +4,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/widgets/lock_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 
 class AppLockWidget extends StatefulWidget {
   const AppLockWidget({

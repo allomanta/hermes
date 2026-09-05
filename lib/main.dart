@@ -8,15 +8,21 @@ import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:hermes/config/app_config.dart';
+import 'package:hermes/utils/client_manager.dart';
+import 'package:hermes/utils/error_reporter.dart';
+import 'package:hermes/utils/notification_background_handler.dart';
+import 'package:hermes/utils/platform_infos.dart';
+import 'package:hermes/utils/start_push_foreground_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
+import 'package:just_audio_media_kit/just_audio_media_kit.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_html/universal_html.dart' as web;
 
-import 'package:hermes/utils/client_manager.dart';
-import 'package:hermes/utils/platform_infos.dart';
-import 'package:hermes/config/app_config.dart';
-import 'package:hermes/utils/notification_background_handler.dart';
 import 'config/setting_keys.dart';
 import 'utils/background_push.dart';
 import 'widgets/hermes_app.dart';
@@ -115,6 +121,11 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
       pin = await const FlutterSecureStorage().read(
         key: 'chat.pantheon.app_lock',
       );
+      useBiometrics =
+          (await const FlutterSecureStorage().read(
+            key: 'chat.fluffy.use_biometrics',
+          )) ==
+          'true';
     } catch (e, s) {
       Logs().d('Unable to read PIN from Secure storage', e, s);
     }
@@ -129,7 +140,13 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 
-  runApp(HermesApp(clients: clients, pincode: pin, store: store));
+  runApp(
+    HermesApp(
+      clients: clients,
+      appLockSettings: (pincode: pin, useBiometrics: useBiometrics),
+      store: store,
+    ),
+  );
 }
 
 /// Watches the lifecycle changes to start the application when it

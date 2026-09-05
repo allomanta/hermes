@@ -16,6 +16,7 @@ import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/matrix.dart';
 import '../widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'platform_infos.dart';
+import 'package:material_ui/material_ui.dart';
 
 class UrlLauncher {
   /// The url to open.

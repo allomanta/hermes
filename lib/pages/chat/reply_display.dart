@@ -5,6 +5,9 @@
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../config/themes.dart';
 import 'chat.dart';
 import 'events/reply_content.dart';
@@ -17,12 +20,9 @@ class ReplyDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return AnimatedContainer(
+    return AnimatedSize(
       duration: PantheonThemes.animationDuration,
       curve: PantheonThemes.animationCurve,
-      height: controller.editEvent != null || controller.replyEvent != null
-          ? 56
-          : 0,
       clipBehavior: Clip.hardEdge,
       child: controller.editEvent != null || controller.replyEvent != null
           ? Material(

@@ -72,9 +72,10 @@ class EventJumpRequest {
 class MatrixState extends State<Matrix> {
   int _activeClient = -1;
   String? activeBundle;
-  String? _activeSpaceId;
-  String? get activeSpaceId => _activeSpaceId;
-  set activeSpaceId(id) => _activeSpaceId = id;
+  String? activeSpaceId;
+  bool webHasFocus = true;
+  StreamSubscription<html.Event>? onFocusSub;
+  StreamSubscription<html.Event>? onBlurSub;
 
   SharedPreferences get store => widget.store;
 
@@ -153,8 +154,7 @@ class MatrixState extends State<Matrix> {
 
   AudioPlayer? audioPlayer;
   final ValueNotifier<String?> voiceMessageEventId = ValueNotifier(null);
-  final ValueNotifier<EventJumpRequest?> eventJumpRequest =
-      ValueNotifier<EventJumpRequest?>(null);
+  final ValueNotifier<EventJumpRequest?> eventJumpRequest = ValueNotifier(null);
 
   void requestEventJump({required String roomId, required String eventId}) {
     eventJumpRequest.value = EventJumpRequest(roomId: roomId, eventId: eventId);
@@ -195,8 +195,9 @@ class MatrixState extends State<Matrix> {
                   store,
                 );
                 _registerSubs(_loginClientCandidate!.clientName);
+                setActiveClient(_loginClientCandidate);
                 _loginClientCandidate = null;
-                HermesApp.router.go('/rooms');
+                HermesApp.router.go('/backup');
               });
     if (widget.clients.isEmpty) widget.clients.add(candidate);
     return candidate;
@@ -236,6 +237,10 @@ class MatrixState extends State<Matrix> {
   void initState() {
     super.initState();
     _listener = AppLifecycleListener(onStateChange: didChangeAppLifecycleState);
+    if (kIsWeb) {
+      onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);
+      onBlurSub = html.window.onBlur.listen((_) => webHasFocus = false);
+    }
     initMatrix();
   }
 
@@ -283,44 +288,52 @@ class MatrixState extends State<Matrix> {
                 context,
           );
         });
-    onLoginStateChanged[name] ??= c.onLoginStateChanged.stream.listen((state) {
-      final loggedInWithMultipleClients = widget.clients.length > 1;
-      if (state == LoginState.loggedOut) {
-        _cancelSubs(c.clientName);
-        widget.clients.remove(c);
-        ClientManager.removeClientNameFromStore(c.clientName, store);
-        InitWithRestoreExtension.deleteSessionBackup(name);
-        if (PlatformInfos.isAndroid && widget.clients.isEmpty) {
+    onLogoutSub[name] ??= c.onLoginStateChanged.stream
+        .where((state) => state == LoginState.loggedOut)
+        .listen((_) {
           unawaited(AndroidShareShortcuts.clear());
-        }
-      }
-      if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
-        ScaffoldMessenger.of(
-          HermesApp.router.routerDelegate.navigatorKey.currentContext ??
-              context,
-        ).showSnackBar(
-          SnackBar(content: Text(L10n.of(context).oneClientLoggedOut)),
-        );
+          final loggedInWithMultipleClients = widget.clients.length > 1;
 
-        if (state != LoginState.loggedIn) {
-          HermesApp.router.go('/rooms');
-        }
-      } else {
-        HermesApp.router.go(state == LoginState.loggedIn ? '/rooms' : '/home');
-      }
-    });
+          _cancelSubs(c.clientName);
+          widget.clients.remove(c);
+          ClientManager.removeClientNameFromStore(c.clientName, store);
+          InitWithRestoreExtension.deleteSessionBackup(name);
+
+          if (loggedInWithMultipleClients) {
+            final snackbarContext =
+                HermesApp.router.routerDelegate.navigatorKey.currentContext ??
+                context;
+
+            if (!snackbarContext.mounted) return;
+            final l10n = L10n.of(snackbarContext);
+            ScaffoldMessenger.of(
+              snackbarContext,
+            ).showSnackBar(SnackBar(content: Text(l10n.oneClientLoggedOut)));
+            return;
+          }
+          HermesApp.router.go('/');
+        });
     onUiaRequest[name] ??= c.onUiaRequest.stream.listen(uiaRequestHandler);
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
+      FlutterLocalNotificationsPlugin().initialize(
+        settings: InitializationSettings(
+          linux: LinuxInitializationSettings(
+            defaultActionName: HermesNotificationActions.open.name,
+          ),
+        ),
+        onDidReceiveNotificationResponse: (response) => notificationTap(
+          response,
+          clients: widget.clients,
+          router: HermesApp.router,
+          l10n: null,
+        ),
+      );
       c.onSync.stream.first.then((s) {
         html.Notification.requestPermission();
         onNotification[name] ??= c.onNotification.stream.listen(
           showLocalNotification,
         );
       });
-    } else if (PlatformInfos.isLinux || PlatformInfos.isMacOS) {
-      onNotification[name] ??= c.onNotification.stream.listen(
-        showLocalNotification,
-      );
     }
   }
 
@@ -340,12 +353,7 @@ class MatrixState extends State<Matrix> {
       _registerSubs(c.clientName);
     }
 
-    if (kIsWeb) {
-      onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);
-      onBlurSub = html.window.onBlur.listen((_) => webHasFocus = false);
-    }
-
-    if (PlatformInfos.isMobile || PlatformInfos.isMacOS) {
+    if (PlatformInfos.isMobile) {
       backgroundPush = BackgroundPush(
         this,
         onFcmError: (errorMsg, {Uri? link}) async {
@@ -354,9 +362,7 @@ class MatrixState extends State<Matrix> {
               this.context;
           if (!context.mounted) return;
           final result = await showOkCancelAlertDialog(
-            context:
-                HermesApp.router.routerDelegate.navigatorKey.currentContext ??
-                context,
+            context: context,
             title: L10n.of(context).pushNotificationsNotAvailable,
             message: errorMsg,
             okLabel: link == null
@@ -397,6 +403,8 @@ class MatrixState extends State<Matrix> {
   @override
   void dispose() {
     _listener?.dispose();
+    onFocusSub?.cancel();
+    onBlurSub?.cancel();
 
     for (final sub in onRoomKeyRequestSub.values) {
       sub.cancel();
@@ -420,6 +428,7 @@ class MatrixState extends State<Matrix> {
     onUiaRequest.clear();
 
     voiceMessageEventId.dispose();
+    eventJumpRequest.dispose();
 
     super.dispose();
   }
@@ -451,7 +460,7 @@ class MatrixState extends State<Matrix> {
     final exportBytes = Uint8List.fromList(const Utf8Codec().encode(export));
 
     final exportFileName =
-        'hermes-export-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.pantheonbackup';
+        'fluffychat-export-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.fluffybackup';
 
     final file = MatrixFile(bytes: exportBytes, name: exportFileName);
     if (!context.mounted) return;

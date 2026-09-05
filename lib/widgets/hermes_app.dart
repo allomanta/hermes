@@ -1,13 +1,22 @@
-import 'package:hermes/config/setting_keys.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/routes.dart';
+import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/app_lock.dart';
+import 'package:hermes/widgets/layouts/call_overlay.dart';
 import 'package:hermes/widgets/theme_builder.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../utils/custom_scroll_behaviour.dart';
 import 'matrix.dart';
 

@@ -9,12 +9,6 @@ import 'package:hermes/utils/size_string.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:universal_html/html.dart' as html;
-
-import 'package:hermes/l10n/l10n.dart';
-import 'package:hermes/utils/platform_infos.dart';
-import 'package:hermes/utils/size_string.dart';
-import 'package:hermes/widgets/future_loading_dialog.dart';
 
 extension MatrixFileExtension on MatrixFile {
   Future<void> save(BuildContext context) async {

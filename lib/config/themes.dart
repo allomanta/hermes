@@ -3,8 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/setting_keys.dart';
-import 'app_config.dart';
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 
 abstract class PantheonThemes {
   static const double columnWidth = 380.0;
@@ -49,6 +51,9 @@ abstract class PantheonThemes {
       dynamicSchemeVariant: DynamicSchemeVariant.rainbow,
     );
     final isColumnMode = PantheonThemes.isColumnMode(context);
+    final dividerColor = brightness == Brightness.dark
+        ? colorScheme.surfaceContainerHighest
+        : colorScheme.surfaceContainer;
     return ThemeData(
       visualDensity: VisualDensity.standard,
       useMaterial3: true,

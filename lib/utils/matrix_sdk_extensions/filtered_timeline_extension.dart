@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/setting_keys.dart';
+import 'package:matrix/matrix.dart';
 
 extension VisibleInGuiExtension on List<Event> {
   List<Event> filterByVisibleInGui({

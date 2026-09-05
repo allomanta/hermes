@@ -4,10 +4,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:async/async.dart' as async;
-import 'package:matrix/matrix.dart';
-
 import 'package:hermes/utils/size_string.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:flutter/foundation.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import 'matrix_file_extension.dart';
 
 extension LocalizedBody on Event {

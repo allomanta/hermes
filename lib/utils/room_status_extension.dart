@@ -4,6 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
+import 'package:flutter/widgets.dart';
+import 'package:matrix/matrix.dart';
+
 import '../config/app_config.dart';
 
 extension RoomStatusExtension on Room {

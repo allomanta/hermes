@@ -8,6 +8,9 @@ import 'package:hermes/pages/image_viewer/video_player.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/hover_builder.dart';
 import 'package:hermes/widgets/mxc_image.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import 'image_viewer.dart';
 
 class ImageViewerView extends StatelessWidget {

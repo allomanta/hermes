@@ -1,13 +1,17 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:matrix/matrix.dart';
-import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/config/app_config.dart';
-import 'package:hermes/pages/image_viewer/image_viewer.dart';
+import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/utils/file_description.dart';
 import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/mxc_image.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../../widgets/blur_hash.dart';
 
 class ImageBubble extends StatelessWidget {

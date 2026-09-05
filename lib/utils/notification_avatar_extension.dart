@@ -39,7 +39,7 @@ extension NotificationAvatarExtension on Client {
   Future<String?> getIosNotificationAvatar(Uri? roomAvatar) async {
     if (roomAvatar == null) return null;
 
-    final directory = await getFileStorageLocation();
+    final directory = await getFileStorageLocation(clientName);
     if (directory == null) return null;
 
     final host = roomAvatar.host.replaceAll('.', '_');

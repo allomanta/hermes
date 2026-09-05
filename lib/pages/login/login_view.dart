@@ -5,7 +5,8 @@
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/layouts/login_scaffold.dart';
-import 'package:hermes/widgets/matrix.dart';
+import 'package:material_ui/material_ui.dart';
+
 import 'login.dart';
 
 class LoginView extends StatelessWidget {

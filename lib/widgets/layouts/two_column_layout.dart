@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/themes.dart';
+import 'package:material_ui/material_ui.dart';
 
 class TwoColumnLayout extends StatelessWidget {
   final Widget mainView;
@@ -27,7 +28,9 @@ class TwoColumnLayout extends StatelessWidget {
             Container(
               clipBehavior: Clip.antiAlias,
               decoration: const BoxDecoration(),
-              width: PantheonThemes.columnWidth + PantheonThemes.navRailWidth,
+              width:
+                  PantheonThemes.columnWidth +
+                  (hasNavigationRail ? PantheonThemes.navRailWidth : 0),
               child: mainView,
             ),
             Container(width: 1.0, color: theme.dividerColor),

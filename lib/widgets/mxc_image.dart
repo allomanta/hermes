@@ -8,14 +8,14 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
-
+import 'package:archive/archive.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/utils/client_download_content_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:lottie/lottie.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class MxcImage extends StatefulWidget {
   final Uri? uri;
@@ -158,37 +158,65 @@ class _MxcImageState extends State<MxcImage> {
     final hasData = data != null && data.isNotEmpty;
     final ungzippedLottieData = data == null ? null : _ungzipLottie(data);
 
-    return AnimatedSwitcher(
+    Widget errorFallback(
+      BuildContext context,
+      Object error,
+      StackTrace? stackTrace,
+    ) {
+      Logs().d('Unable to render mxc image', error, stackTrace);
+      return SizedBox(
+        width: widget.width,
+        height: widget.height,
+        child: Material(
+          color: Theme.of(context).colorScheme.surfaceContainer,
+          child: Icon(
+            Icons.broken_image_outlined,
+            size: min(widget.height ?? 64, 64),
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+      );
+    }
+
+    final imageChild = data == null
+        ? _MxcImagePlaceholder(
+            width: widget.width,
+            height: widget.height,
+            placeholder: widget.placeholder,
+          )
+        : (ungzippedLottieData != null
+              ? Lottie.memory(
+                  ungzippedLottieData,
+                  width: widget.width,
+                  height: widget.height,
+                  fit: widget.fit,
+                  errorBuilder: errorFallback,
+                )
+              : Image.memory(
+                  data,
+                  width: widget.width,
+                  height: widget.height,
+                  fit: widget.fit,
+                  filterQuality: widget.isThumbnail
+                      ? FilterQuality.low
+                      : FilterQuality.medium,
+                  errorBuilder: errorFallback,
+                ));
+
+    return AnimatedCrossFade(
       duration: PantheonThemes.animationDuration,
-      child: hasData
-          ? ClipRRect(
-              borderRadius: widget.borderRadius,
-              child: Image.memory(
-                data,
-                width: widget.width,
-                height: widget.height,
-                fit: widget.fit,
-                filterQuality: widget.isThumbnail
-                    ? FilterQuality.low
-                    : FilterQuality.medium,
-                errorBuilder: (context, e, s) {
-                  Logs().d('Unable to render mxc image', e, s);
-                  return SizedBox(
-                    width: widget.width,
-                    height: widget.height,
-                    child: Material(
-                      color: Theme.of(context).colorScheme.surfaceContainer,
-                      child: Icon(
-                        Icons.broken_image_outlined,
-                        size: min(widget.height ?? 64, 64),
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            )
-          : placeholder(context),
+      firstChild: ClipRRect(
+        borderRadius: widget.borderRadius,
+        child: imageChild,
+      ),
+      secondChild: _MxcImagePlaceholder(
+        width: widget.width,
+        height: widget.height,
+        placeholder: widget.placeholder,
+      ),
+      crossFadeState: hasData
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
     );
   }
 }

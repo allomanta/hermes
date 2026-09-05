@@ -5,19 +5,19 @@
 
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:matrix/matrix.dart';
-import 'package:hermes/config/setting_keys.dart';
-import 'package:hermes/widgets/mxc_image.dart';
-import '../../image_viewer/image_viewer.dart';
 import 'package:hermes/config/app_config.dart';
+import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/utils/file_description.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/blur_hash.dart';
+import 'package:hermes/widgets/mxc_image.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
+import '../../image_viewer/image_viewer.dart';
 
 class EventVideoPlayer extends StatelessWidget {
   final Event event;

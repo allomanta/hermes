@@ -7,6 +7,8 @@ import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/settings_3pid/settings_3pid.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class Settings3PidView extends StatelessWidget {
   final Settings3PidController controller;

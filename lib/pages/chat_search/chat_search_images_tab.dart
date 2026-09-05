@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 import 'package:hermes/l10n/l10n.dart';
@@ -9,6 +7,8 @@ import 'package:hermes/pages/image_viewer/image_viewer.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/mxc_image.dart';
+import 'package:hermes/pages/chat_search/search_footer.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ChatSearchImagesTab extends StatelessWidget {
   final Room room;

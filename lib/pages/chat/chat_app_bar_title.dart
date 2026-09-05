@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:hermes/l10n/l10n.dart';
@@ -10,6 +8,8 @@ import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/sync_status_localization.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/presence_builder.dart';
+import 'package:hermes/utils/verified_room_extension.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ChatAppBarTitle extends StatelessWidget {
   final ChatController controller;

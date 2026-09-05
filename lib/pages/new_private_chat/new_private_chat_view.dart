@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
@@ -14,6 +12,7 @@ import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'package:hermes/widgets/matrix.dart';
 import '../../widgets/qr_code_viewer.dart';
+import 'package:material_ui/material_ui.dart';
 
 class NewPrivateChatView extends StatelessWidget {
   final NewPrivateChatController controller;

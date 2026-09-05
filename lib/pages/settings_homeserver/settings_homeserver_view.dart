@@ -5,8 +5,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -17,6 +15,7 @@ import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import '../../widgets/matrix.dart';
 import 'settings_homeserver.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SettingsHomeserverView extends StatelessWidget {
   final SettingsHomeserverController controller;

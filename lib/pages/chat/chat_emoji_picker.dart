@@ -9,6 +9,8 @@ import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/chat/sticker_picker_dialog.dart';
 import 'chat.dart';
+import 'package:hermes/pages/chat/trust_user_key_dialog.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ChatEmojiPicker extends StatelessWidget {
   final ChatController controller;

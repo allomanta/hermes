@@ -7,18 +7,20 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:matrix/matrix.dart';
-import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
-import 'package:path_provider/path_provider.dart';
-
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/utils/error_reporter.dart';
 import 'package:hermes/utils/file_description.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/utils/url_launcher.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+import 'package:ogg_caf_converter/ogg_caf_converter.dart';
+import 'package:path_provider/path_provider.dart';
+
 import '../../../utils/matrix_sdk_extensions/event_extension.dart';
 import '../../../widgets/hermes_app.dart';
 import '../../../widgets/matrix.dart';

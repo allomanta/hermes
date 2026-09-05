@@ -5,7 +5,9 @@
 
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat/chat_input_row.dart';
 import 'package:hermes/pages/chat/recording_view_model.dart';
+import 'package:material_ui/material_ui.dart';
 
 class RecordingInputRow extends StatelessWidget {
   final RecordingViewModelState state;

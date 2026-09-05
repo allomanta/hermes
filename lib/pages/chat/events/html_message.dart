@@ -4,17 +4,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart';
-import 'package:flutter_highlighter/flutter_highlighter.dart';
-import 'package:flutter_highlighter/themes/shades-of-purple.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as parser;
-import 'package:matrix/matrix.dart';
-
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:hermes/config/setting_keys.dart';
+import 'package:hermes/config/themes.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/code_highlight_theme.dart';
 import 'package:hermes/utils/event_checkbox_extension.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/mxc_image.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:highlight/highlight.dart' show highlight;
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart' as parser;
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../../utils/url_launcher.dart';
 
 class HtmlMessage extends StatelessWidget {
@@ -86,8 +91,6 @@ class HtmlMessage extends StatelessWidget {
     'rt',
     'html',
     'body',
-    // Workaround for https://github.com/allomanta/hermes/issues/507
-    'tg-forward',
   };
 
   static const Set<String> ignoredHtmlTags = {'mx-reply'};

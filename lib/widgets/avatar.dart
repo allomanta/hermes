@@ -6,6 +6,8 @@
 import 'package:hermes/utils/string_color.dart';
 import 'package:hermes/widgets/mxc_image.dart';
 import 'package:hermes/widgets/presence_builder.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class Avatar extends StatelessWidget {
   final Uri? mxContent;

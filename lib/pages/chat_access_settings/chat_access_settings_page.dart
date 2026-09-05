@@ -8,6 +8,8 @@ import 'package:hermes/pages/chat_access_settings/chat_access_settings_controlle
 import 'package:hermes/utils/pantheon_share.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
+import 'package:material_ui/material_ui.dart' hide Visibility;
+import 'package:matrix/matrix.dart';
 
 class ChatAccessSettingsPageView extends StatelessWidget {
   final ChatAccessSettingsController controller;

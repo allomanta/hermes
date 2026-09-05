@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-
 import 'package:matrix/matrix.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
+import 'package:hermes/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
+import 'package:material_ui/material_ui.dart';
 
 class PermissionsListTile extends StatelessWidget {
   final String permissionKey;

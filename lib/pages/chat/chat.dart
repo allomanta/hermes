@@ -1471,30 +1471,10 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void editEventAction(Event event) {
-    final client = currentRoomBundle.firstWhere(
-      (cl) => event.senderId == cl!.userID,
-      orElse: () => null,
-    );
-    if (client == null) {
-      return;
-    }
-    setSendingClient(client);
-    setState(() {
-      pendingText = sendController.text;
-      editEvent = event;
-      sendController.text = editEvent!
-          .getDisplayEvent(timeline!)
-          .calcLocalizedBodyFallback(
-            MatrixLocals(L10n.of(context)),
-            withSenderNamePrefix: false,
-            hideReply: true,
-          );
-    });
-    inputFocus.requestFocus();
-  }
+  void _startEditingEvent(Event event, {bool clearSelection = false}) {
+    final timeline = this.timeline;
+    if (timeline == null) return;
 
-  void editSelectedEventAction() {
     final client = currentRoomBundle.firstWhere(
       (c) => c?.userID == event.senderId,
       orElse: () => null,
@@ -1515,6 +1495,30 @@ class ChatController extends State<ChatPageWithRoom>
       if (clearSelection) selectedEvents.clear();
     });
     inputFocus.requestFocus();
+  }
+
+  void editEventAction(Event event) => _startEditingEvent(event);
+
+  void editSelectedEventAction() {
+    _startEditingEvent(selectedEvents.first, clearSelection: true);
+  }
+
+  void _editLastSentMessage() {
+    final timeline = this.timeline;
+    if (timeline == null) return;
+
+    final events = timeline.events.filterByVisibleInGui(
+      threadId: activeThreadId,
+    );
+    final lastOwnMessage = events.firstWhereOrNull(
+      (event) =>
+          event.type == EventTypes.Message &&
+          event.messageType == MessageTypes.Text &&
+          event.status.isSent &&
+          !event.redacted &&
+          currentRoomBundle.any((client) => client?.userID == event.senderId),
+    );
+    if (lastOwnMessage != null) _startEditingEvent(lastOwnMessage);
   }
 
   void handleExitEvent() {

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hermes/l10n/l10n.dart';
 
 import 'package:hermes/config/themes.dart';
@@ -8,6 +7,7 @@ import 'package:hermes/pages/chat_search/chat_search_message_tab.dart';
 import 'package:hermes/pages/chat_search/chat_search_page.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ChatSearchView extends StatelessWidget {
   final ChatSearchController controller;

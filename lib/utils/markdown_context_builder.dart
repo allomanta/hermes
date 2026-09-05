@@ -5,6 +5,7 @@
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MarkdownContextBuilder extends StatelessWidget {
   final EditableTextState editableTextState;

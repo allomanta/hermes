@@ -2809,5 +2809,15 @@
         "placeholders": {
             "user": {"type": "String"}
         }
-    }
+    },
+    "quoteText": "Quote text",
+    "spoilerText": "Spoiler text",
+    "enableFullScreenSwipe": "Enable full-screen back swipe",
+    "enableFullScreenSwipeDescription": "Allows swiping anywhere on the screen to go back",
+    "swipeDuration": "Swipe duration",
+    "swipeDurationDescription": "Controls how long the transition animates",
+    "swipeDistance": "Required swipe distance",
+    "swipeDistanceDescription": "Percentage of the screen that must be swiped before popping",
+    "swipeVelocity": "Required swipe velocity",
+    "swipeVelocityDescription": "Minimum fling speed needed when the drag is short"
 }

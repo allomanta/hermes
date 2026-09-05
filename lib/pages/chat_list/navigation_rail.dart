@@ -1,15 +1,20 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart';
-import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/themes.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_list/navi_rail_item.dart';
+import 'package:hermes/pages/chat_list/start_chat_fab.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/stream_extension.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class SpacesNavigationRail extends StatelessWidget {
   final String? activeSpaceId;
@@ -26,9 +31,8 @@ class SpacesNavigationRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
-    final isSettings = GoRouter.of(
-      context,
-    ).routeInformationProvider.value.uri.path.startsWith('/rooms/settings');
+    final coloredMode = !PantheonThemes.isColumnMode(context);
+    final theme = Theme.of(context);
     return Material(
       color: coloredMode ? theme.colorScheme.surfaceContainer : null,
       child: SafeArea(
@@ -38,86 +42,83 @@ class SpacesNavigationRail extends StatelessWidget {
               .where((s) => s.hasRoomUpdate)
               .rateLimit(const Duration(seconds: 1)),
           builder: (context, _) {
-            final allSpaces = client.rooms.where((room) => room.isSpace);
-            final rootSpaces = allSpaces
-                .where(
-                  (space) => !allSpaces.any(
-                    (parentSpace) => parentSpace.spaceChildren.any(
-                      (child) => child.roomId == space.id,
-                    ),
-                  ),
-                )
+            final allSpaces = client.rooms
+                .where((room) => room.isSpace)
                 .toList();
 
             return SizedBox(
-              width: PantheonThemes.navRailWidth,
+              width: PantheonThemes.isColumnMode(context)
+                  ? PantheonThemes.navRailWidth
+                  : PantheonThemes.navRailWidth - 8,
               child: Column(
                 children: [
                   Expanded(
-                    child: ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(
-                        context,
-                      ).copyWith(scrollbars: false),
-                      child: ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        itemCount: rootSpaces.length + 2,
-                        itemBuilder: (context, i) {
-                          if (i == 0) {
-                            return NaviRailItem(
-                              isSelected: activeSpaceId == null && !isSettings,
-                              onTap: onGoToChats,
-                              icon: const Padding(
-                                padding: EdgeInsets.all(10.0),
-                                child: Icon(Icons.forum_outlined),
-                              ),
-                              selectedIcon: const Padding(
-                                padding: EdgeInsets.all(10.0),
-                                child: Icon(Icons.forum),
-                              ),
-                              toolTip: L10n.of(context).chats,
-                              unreadBadgeFilter: (room) => true,
-                            );
-                          }
-                          i--;
-                          if (i == rootSpaces.length) {
-                            return NaviRailItem(
-                              isSelected: false,
-                              onTap: () => context.go('/rooms/newspace'),
-                              icon: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Icon(Icons.add),
-                              ),
-                              toolTip: L10n.of(context).createNewSpace,
-                            );
-                          }
-                          final space = rootSpaces[i];
-                          final displayname = rootSpaces[i]
-                              .getLocalizedDisplayname(
-                                MatrixLocals(L10n.of(context)),
-                              );
-                          final spaceChildrenIds = space.spaceChildren
-                              .map((c) => c.roomId)
-                              .toSet();
+                    child: ListView.builder(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      scrollDirection: Axis.vertical,
+                      itemCount: allSpaces.length + 2,
+                      itemBuilder: (context, i) {
+                        if (i == 0) {
                           return NaviRailItem(
-                            toolTip: displayname,
-                            isSelected: activeSpaceId == space.id,
-                            onTap: () => onGoToSpaceId(rootSpaces[i].id),
-                            unreadBadgeFilter: (room) =>
-                                spaceChildrenIds.contains(room.id),
-                            icon: Avatar(
-                              mxContent: rootSpaces[i].avatar,
-                              name: displayname,
-                              border: BorderSide(
+                            isSelected: activeSpaceId == null,
+                            onTap: onGoToChats,
+                            icon: const Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Icon(Icons.forum_outlined),
+                            ),
+                            selectedIcon: const Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Icon(Icons.forum),
+                            ),
+                            toolTip: L10n.of(context).chats,
+                            unreadBadgeFilter: (room) => true,
+                          );
+                        }
+                        i--;
+                        if (i == allSpaces.length) {
+                          return NaviRailItem(
+                            isSelected: false,
+                            onTap: () => context.go('/rooms/newspace'),
+                            icon: const Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Icon(Icons.add),
+                            ),
+                            toolTip: L10n.of(context).createNewSpace,
+                          );
+                        }
+                        final space = allSpaces[i];
+                        final displayname = allSpaces[i]
+                            .getLocalizedDisplayname(
+                              MatrixLocals(L10n.of(context)),
+                            );
+                        final spaceChildrenIds = space.spaceChildren
+                            .map((c) => c.roomId)
+                            .toSet();
+                        return NaviRailItem(
+                          toolTip: displayname,
+                          isSelected: activeSpaceId == space.id,
+                          onTap: () => onGoToSpaceId(allSpaces[i].id),
+                          unreadBadgeFilter: (room) =>
+                              spaceChildrenIds.contains(room.id),
+                          icon: Avatar(
+                            mxContent: allSpaces[i].avatar,
+                            name: displayname,
+                            //size: 36,
+                            shapeBorder: RoundedSuperellipseBorder(
+                              side: BorderSide(
                                 width: 1,
                                 color: Theme.of(context).dividerColor,
                               ),
                               borderRadius: BorderRadius.circular(
-                                AppConfig.borderRadius / 2,
+                                AppConfig.spaceBorderRadius,
                               ),
                             ),
-                          );
-                        },
-                      ),
+                            borderRadius: BorderRadius.circular(
+                              AppConfig.spaceBorderRadius,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   if (PantheonThemes.isColumnMode(context))

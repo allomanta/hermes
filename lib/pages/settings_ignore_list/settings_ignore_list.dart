@@ -5,6 +5,9 @@
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../widgets/matrix.dart';
 import 'settings_ignore_list_view.dart';
 

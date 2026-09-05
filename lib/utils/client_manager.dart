@@ -18,12 +18,7 @@ import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
-import 'package:hermes/l10n/l10n.dart';
-import 'package:hermes/config/setting_keys.dart';
-import 'package:hermes/utils/custom_http_client.dart';
-import 'package:hermes/utils/custom_image_resizer.dart';
-import 'package:hermes/utils/init_with_restore.dart';
-import 'package:hermes/utils/platform_infos.dart';
+
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 import 'matrix_sdk_extensions/on_soft_logout.dart';
 
@@ -169,7 +164,6 @@ abstract class ClientManager {
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('notifications_icon'),
         iOS: DarwinInitializationSettings(),
-        macOS: DarwinInitializationSettings(),
       ),
     );
 
@@ -185,7 +179,6 @@ abstract class ClientManager {
           priority: Priority.max,
         ),
         iOS: DarwinNotificationDetails(sound: 'notification.caf'),
-        macOS: DarwinNotificationDetails(),
       ),
     );
   }

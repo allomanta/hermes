@@ -5,6 +5,8 @@
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 extension SyncStatusLocalization on SyncStatusUpdate {
   String calcLocalizedString(BuildContext context) {

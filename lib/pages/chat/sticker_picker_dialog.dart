@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:matrix/matrix.dart';
@@ -8,6 +7,7 @@ import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/mxc_image.dart';
 import '../../widgets/avatar.dart';
+import 'package:material_ui/material_ui.dart';
 
 class _CloseStickerPickerIntent extends Intent {
   const _CloseStickerPickerIntent();

@@ -26,15 +26,19 @@ abstract class AppConfig {
       'https://github.com/allomanta/hermes/wiki/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =
       'https://github.com/allomanta/hermes/wiki/How-to-use-end-to-end-encryption-in-Hermes';
+  static const String howDoIGetStickersTutorial =
+      'https://github.com/allomanta/hermes/wiki';
   static const String startChatTutorial =
       'https://github.com/allomanta/hermes/wiki/How-to-Find-Users-in-Hermes';
   static const String appId = 'im.hermes.Hermes';
   static const String appOpenUrlScheme = 'im.hermes';
+  static const String appSsoUrlScheme = 'im.hermes.auth';
   static const String sourceCodeUrl = 'https://github.com/allomanta/hermes';
   static const String supportUrl = 'https://github.com/allomanta/hermes/issues';
   static const String changelogUrl =
       'https://github.com/allomanta/hermes/blob/main/CHANGELOG.md';
   static const String donationUrl = 'https://ko-fi.com/krille';
+  static const String helpUrl = supportUrl;
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
   static final Uri newIssueUrl = Uri(
     scheme: 'https',
@@ -58,6 +62,10 @@ abstract class AppConfig {
     scheme: 'https',
     host: 'github.com',
     path: '/allomanta/hermes/blob/main/PRIVACY.md',
+  );
+  static final Uri crashReportEndpoint = Uri(
+    scheme: 'https',
+    host: 'crash.fluffy.chat',
   );
 
   static const String mainIsolatePortName = 'main_isolate';

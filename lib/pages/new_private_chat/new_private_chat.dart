@@ -6,8 +6,6 @@
 import 'dart:async';
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:matrix/matrix.dart';
-
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/new_private_chat/new_private_chat_view.dart';
 import 'package:hermes/pages/new_private_chat/qr_scanner_modal.dart';
@@ -16,6 +14,10 @@ import 'package:hermes/utils/pantheon_share.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../widgets/adaptive_dialogs/user_dialog.dart';
 
 class NewPrivateChat extends StatefulWidget {

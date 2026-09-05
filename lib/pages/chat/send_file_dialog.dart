@@ -9,17 +9,23 @@ import 'dart:ui' as ui;
 import 'package:async/async.dart' show Result;
 import 'package:crop_image/crop_image.dart';
 import 'package:cross_file/cross_file.dart';
-import 'package:matrix/matrix.dart';
-import 'package:mime/mime.dart';
-import 'package:hermes/l10n/l10n.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:hermes/config/app_config.dart';
-import 'package:hermes/utils/localized_exception_extension.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat/image_edit_geometry.dart';
+import 'package:hermes/pages/chat/trust_user_key_dialog.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:hermes/utils/other_party_can_receive.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:hermes/utils/show_scaffold_dialog.dart';
 import 'package:hermes/utils/size_string.dart';
+import 'package:hermes/utils/start_push_foreground_service.dart';
 import 'package:hermes/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:hermes/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart' hide Result;
+import 'package:mime/mime.dart';
+
 import '../../utils/resize_video.dart';
 
 class SendFileDialog extends StatefulWidget {

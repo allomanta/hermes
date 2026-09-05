@@ -12,7 +12,6 @@ import 'package:http/http.dart' as http;
 import 'package:managed_configurations/managed_configurations.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hermes/utils/platform_infos.dart';
 
 // abstract class SettingKeys {
 //   static const String renderHtml = 'chat.pantheon.renderHtml';
@@ -114,7 +113,38 @@ enum AppSettings<T> {
   defaultHomeserver<String>('chat.pantheon.default_homeserver', 'matrix.org'),
   // colorSchemeSeed stored as ARGB int
   colorSchemeSeedInt<int>('chat.pantheon.color_scheme_seed', 0xFF5625BA),
-  enableSoftLogout<bool>('chat.pantheon.enable_soft_logout', false);
+  emojiSuggestionLocale<String>('emoji_suggestion_locale', ''),
+  enableSoftLogout<bool>('chat.pantheon.enable_soft_logout', false),
+  enableMatrixNativeOIDC<bool>('chat.pantheon.enable_matrix_native_oidc', true),
+  presetHomeserver<String>('chat.pantheon.preset_homeserver', ''),
+  welcomeText<String>('chat.pantheon.welcome_text', ''),
+  website<String>('chat.pantheon.website_url', 'https://hermes.im'),
+  logoUrl<String>(
+    'chat.pantheon.logo_url',
+    'https://hermes.im/assets/favicon.png',
+  ),
+  privacyPolicy<String>(
+    'chat.pantheon.privacy_policy_url',
+    'https://hermes.im/privacy',
+  ),
+  tos<String>('chat.pantheon.tos_url', 'https://hermes.im/tos'),
+  sendTimelineEventTimeout<int>(
+    'chat.pantheon.send_timeline_event_timeout',
+    15,
+  ),
+  webNotificationSound<bool>('chat.pantheon.web_notification_sound', true),
+  chatFilter<String>('chat.pantheon.chat_filter', 'allChats'),
+  hideRoomsInSpaces<bool>('chat.pantheon.hideRoomsInSpaces', false),
+  showThumbnailsInTimeline<bool>(
+    'chat.pantheon.showThumbnailsInTimeline',
+    true,
+  ),
+  doubleTapToReact<bool>('chat.pantheon.double_tap_to_react', false),
+  doubleTapReaction<String>('chat.pantheon.double_tap_reaction', '❤️'),
+  benchmarksInLogs<bool>('chat.pantheon.benchmarks_in_logs', false),
+  autoSendErrorReports<bool?>('chat.pantheon.auto_send_error_reports', null),
+  knownErrorHashes<List<String>>('chat.pantheon.known_crash_hashes', []),
+  customLiveKitInstance<String>('chat.pantheon.custom_live_kit_instance', '');
 
   final String key;
   final T _defaultValue;

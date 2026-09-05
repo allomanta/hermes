@@ -7,25 +7,23 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart' as sdk;
-import 'package:matrix/matrix.dart';
-import 'package:hermes/pages/chat_list/unread_bubble.dart';
-import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:hermes/utils/string_color.dart';
-import 'package:hermes/widgets/hover_builder.dart';
-import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
-import 'package:hermes/config/themes.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat_list/active_call_indicator.dart';
+import 'package:hermes/pages/chat_list/unread_bubble.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
+import 'package:hermes/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:hermes/utils/stream_extension.dart';
-import 'package:hermes/widgets/adaptive_dialogs/public_room_dialog.dart';
-import 'package:hermes/widgets/adaptive_dialogs/show_modal_action_popup.dart';
+import 'package:hermes/utils/string_color.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:hermes/widgets/hover_builder.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart' as sdk;
+import 'package:matrix/matrix.dart';
 
 enum SpaceChildAction {
   mute,
@@ -377,114 +375,6 @@ class _SpaceViewState extends State<SpaceView> {
     const avatarSize = Avatar.defaultSize / 1.5;
     final isAdmin = room?.canChangeStateEvent(EventTypes.SpaceChild) == true;
     return Scaffold(
-      appBar: AppBar(
-        leading: PantheonThemes.isColumnMode(context)
-            ? null
-            : Center(child: CloseButton(onPressed: widget.onBack)),
-        automaticallyImplyLeading: false,
-        titleSpacing: PantheonThemes.isColumnMode(context) ? null : 0,
-        title: ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Avatar(
-            size: avatarSize,
-            mxContent: room?.avatar,
-            name: displayname,
-            border: BorderSide(width: 1, color: theme.dividerColor),
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-          ),
-          title: Text(
-            displayname,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        actions: [
-          if (isAdmin)
-            PopupMenuButton<AddRoomType>(
-              icon: const Icon(Icons.add_outlined),
-              onSelected: _addChatOrSubspace,
-              tooltip: L10n.of(context).addChatOrSubSpace,
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: AddRoomType.chat,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.group_add_outlined),
-                      const SizedBox(width: 12),
-                      Text(L10n.of(context).newGroup),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: AddRoomType.subspace,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.workspaces_outlined),
-                      const SizedBox(width: 12),
-                      Text(L10n.of(context).newSubSpace),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          PopupMenuButton<SpaceActions>(
-            useRootNavigator: true,
-            onSelected: _onSpaceAction,
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: SpaceActions.settings,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.settings_outlined),
-                    const SizedBox(width: 12),
-                    Text(L10n.of(context).settings),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: SpaceActions.invite,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.person_add_outlined),
-                    const SizedBox(width: 12),
-                    Text(L10n.of(context).invite),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: SpaceActions.members,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.group_outlined),
-                    const SizedBox(width: 12),
-                    Text(
-                      L10n.of(context).countParticipants(
-                        room?.summary.mJoinedMemberCount ?? 1,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: SpaceActions.leave,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.delete_outlined),
-                    const SizedBox(width: 12),
-                    Text(L10n.of(context).leave),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
       body: room == null
           ? const Center(child: Icon(Icons.search_outlined, size: 80))
           : StreamBuilder(

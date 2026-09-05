@@ -3,12 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:hermes/config/app_config.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/utils/account_config.dart';
 import 'package:hermes/utils/file_selector.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/theme_builder.dart';
+import 'package:material_ui/material_ui.dart';
+
 import '../../widgets/matrix.dart';
 import 'settings_style_view.dart';
 

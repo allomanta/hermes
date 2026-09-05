@@ -5,12 +5,10 @@
 
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
-
 import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class CuteContent extends StatefulWidget {
   final Event event;
