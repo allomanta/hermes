@@ -84,14 +84,13 @@ jobs:
       - uses: ./.github/actions/free_up_space
       - uses: dtolnay/rust-toolchain@stable
       - run: flutter pub get
-      - name: Prepare Android Release Build
+      - name: Prepare Android signing
         env:
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
-        run: ./scripts/prepare-android-release.sh
+        run: ./scripts/prepare-android-signing.sh
       - run: flutter build apk --release --target-platform android-arm,android-arm64
       - name: Upload to release
         uses: actions/upload-release-asset@v1
@@ -133,6 +132,7 @@ jobs:
           asset_content_type: application/gzip
 
   deploy_playstore:
+    if: ${{ vars.ENABLE_PLAYSTORE_DEPLOY == 'true' }}
     runs-on: ubuntu-latest
     concurrency:
       group: deploy_playstore

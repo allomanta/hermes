@@ -36,6 +36,7 @@ jobs:
           destination_dir: nightly
 
   deploy_playstore_internal:
+    if: ${{ vars.ENABLE_PLAYSTORE_DEPLOY == 'true' }}
     runs-on: ubuntu-latest
     concurrency:
       group: deploy_playstore
