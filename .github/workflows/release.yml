@@ -4,40 +4,15 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: release-builds
+  cancel-in-progress: false
 
 jobs:
-  version_check:
-    runs-on: ubuntu-latest
-    outputs:
-      changed: ${{ steps.version.outputs.changed }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Determine version change
-        id: version
-        run: |
-          set -eo pipefail
-          current=$(grep '^version:' pubspec.yaml | awk '{print $2}' | head -n1)
-          if git rev-parse HEAD^ >/dev/null 2>&1; then
-            previous=$(git show HEAD^:pubspec.yaml | grep '^version:' | awk '{print $2}' | head -n1)
-          else
-            previous=""
-          fi
-          echo "Current version: $current"
-          echo "Previous version: $previous"
-          if [ "$current" != "$previous" ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
   build-and-release:
-    needs: version_check
-    if: needs.version_check.outputs.changed == 'true'
-    runs-on: macos-14
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
@@ -51,6 +26,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - uses: ./.github/actions/free_up_space
 
       - name: Restore Android signing config
         run: ./scripts/prepare-android-signing.sh
@@ -127,9 +104,10 @@ jobs:
           echo "RELEASE_NAME=Hermes ${VERSION_NAME} (${BUILD_NUMBER})" >> $GITHUB_ENV
           echo "VERSION_FULL=${VERSION_LINE}" >> $GITHUB_ENV
 
-      - name: Build Android APK (Play Services)
+      - name: Build Android APK (Firebase via Hedwig)
         run: |
           flutter build apk --release \
+            --target-platform android-arm,android-arm64 \
             --build-name $FLUTTER_VERSION_NAME \
             --build-number $FLUTTER_BUILD_NUMBER
 
@@ -139,6 +117,12 @@ jobs:
           OUTPUT_APK="build/app/outputs/flutter-apk/Hermes-android-gms-${FLUTTER_VERSION_NAME}-${FLUTTER_BUILD_NUMBER}.apk"
           mv "$APK_PATH" "$OUTPUT_APK"
           echo "ANDROID_APK=$OUTPUT_APK" >> $GITHUB_ENV
+
+      - name: Upload Android APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hermes-android-gms-${{ env.FLUTTER_VERSION_NAME }}-${{ env.FLUTTER_BUILD_NUMBER }}
+          path: ${{ env.ANDROID_APK }}
 
       # - name: Build macOS app
       #   id: build_macos

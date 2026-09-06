@@ -209,13 +209,7 @@ class BackgroundPush {
         })) ??
         [];
 
-    // we need the deviceAppId to remove potential legacy pusher
-    var deviceAppId = '${AppConfig.pushNotificationsAppId}.${client.deviceID}';
-    // appId may only be up to 64 chars as per spec
-    if (deviceAppId.length > 64) {
-      deviceAppId = deviceAppId.substring(0, 64);
-    }
-    final thisAppId = deviceAppId;
+    const thisAppId = AppConfig.pushNotificationsAppId;
     if (gatewayUrl == null || token == null) {
       Logs().w('[Push] Missing required push credentials');
       return;
@@ -245,7 +239,10 @@ class BackgroundPush {
 
     final legacyPushers = pushers.where(
       (pusher) =>
-          pusher.appId == thisAppId || // To migrate older app-id format:
+          pusher.appId == thisAppId ||
+          (pusher.appId.startsWith('$thisAppId.') &&
+              pusher.pushkey == token) ||
+          // To migrate older FluffyChat app IDs:
           ((pusher.appId == 'chat.fluffy.fluffychat.data_message' ||
                   pusher.appId == 'chat.fluffy.fluffychat') &&
               pusher.pushkey == token),
