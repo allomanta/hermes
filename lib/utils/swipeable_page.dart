@@ -47,7 +47,6 @@ class SwipePopPage<T> extends Page<T> {
   @override
   Route<T> createRoute(BuildContext context) {
     return SwipePopPageRoute<T>(
-      builder: (_) => child,
       duration: duration,
       curve: curve,
       reverseCurve: reverseCurve,
@@ -63,7 +62,6 @@ class SwipePopPage<T> extends Page<T> {
 class SwipePopPageRoute<T> extends PageRoute<T> {
   /// Configures a swipe-enabled route with the provided animation options.
   SwipePopPageRoute({
-    required this.builder,
     required this.duration,
     required this.curve,
     required this.reverseCurve,
@@ -73,7 +71,6 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
     super.settings,
   }) : assert(minimumDragFraction >= 0 && minimumDragFraction <= 1);
 
-  final WidgetBuilder builder;
   final Duration duration;
   final Curve curve;
   final Curve reverseCurve;
@@ -119,7 +116,7 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-  ) => builder(context);
+  ) => (settings as SwipePopPage<T>).child;
 
   /// Wrap the page with gesture handling and Cupertino-style animations.
   @override
