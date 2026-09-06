@@ -47,8 +47,6 @@ jobs:
             echo "❌ Found commented-out Dart code ending with semicolon."
             exit 1
           fi
-      - name: Add Firebase Messaging
-        run: ./scripts/add-firebase-messaging.sh
       - run: flutter analyze
       - run: flutter test
 
@@ -71,7 +69,6 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
-      - run: ./scripts/add-firebase-messaging.sh
       - run: flutter build apk --debug --target-platform android-x64
       - name: Upload Debug APK
         uses: actions/upload-artifact@v7
@@ -132,7 +129,6 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_26.3.app
       - run: brew install sqlcipher
       - uses: dtolnay/rust-toolchain@stable
-      - run: ./scripts/add-firebase-messaging.sh
       - run: flutter pub get
       - run: flutter build ios --no-codesign
 

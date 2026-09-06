@@ -81,8 +81,6 @@ jobs:
         with:
           flutter-version-file: .tool_versions.yaml
           cache: true
-      - name: Add Firebase Messaging
-        run: ./scripts/add-firebase-messaging.sh
       - uses: ./.github/actions/free_up_space
       - uses: dtolnay/rust-toolchain@stable
       - run: flutter pub get
@@ -152,8 +150,6 @@ jobs:
       - name: Install Fastlane
         working-directory: android
         run: gem install fastlane -NV
-      - name: Add Firebase Messaging
-        run: ./scripts/add-firebase-messaging.sh
       - run: flutter pub get
       - name: Prepare Android Release Build
         env:
