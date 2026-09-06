@@ -31,6 +31,9 @@ class SpacesNavigationRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
+    final isSettings = GoRouter.of(
+      context,
+    ).routeInformationProvider.value.uri.path.startsWith('/rooms/settings');
     final coloredMode = !PantheonThemes.isColumnMode(context);
     final theme = Theme.of(context);
     return Material(
@@ -45,6 +48,15 @@ class SpacesNavigationRail extends StatelessWidget {
             final allSpaces = client.rooms
                 .where((room) => room.isSpace)
                 .toList();
+            final rootSpaces = allSpaces
+                .where(
+                  (space) => !allSpaces.any(
+                    (parentSpace) => parentSpace.spaceChildren.any(
+                      (child) => child.roomId == space.id,
+                    ),
+                  ),
+                )
+                .toList();
 
             return SizedBox(
               width: PantheonThemes.isColumnMode(context)
@@ -56,11 +68,11 @@ class SpacesNavigationRail extends StatelessWidget {
                     child: ListView.builder(
                       padding: EdgeInsets.symmetric(vertical: 4),
                       scrollDirection: Axis.vertical,
-                      itemCount: allSpaces.length + 2,
+                      itemCount: rootSpaces.length + 2,
                       itemBuilder: (context, i) {
                         if (i == 0) {
                           return NaviRailItem(
-                            isSelected: activeSpaceId == null,
+                            isSelected: activeSpaceId == null && !isSettings,
                             onTap: onGoToChats,
                             icon: const Padding(
                               padding: EdgeInsets.all(12.0),
@@ -75,7 +87,7 @@ class SpacesNavigationRail extends StatelessWidget {
                           );
                         }
                         i--;
-                        if (i == allSpaces.length) {
+                        if (i == rootSpaces.length) {
                           return NaviRailItem(
                             isSelected: false,
                             onTap: () => context.go('/rooms/newspace'),
@@ -86,8 +98,8 @@ class SpacesNavigationRail extends StatelessWidget {
                             toolTip: L10n.of(context).createNewSpace,
                           );
                         }
-                        final space = allSpaces[i];
-                        final displayname = allSpaces[i]
+                        final space = rootSpaces[i];
+                        final displayname = rootSpaces[i]
                             .getLocalizedDisplayname(
                               MatrixLocals(L10n.of(context)),
                             );
@@ -97,11 +109,11 @@ class SpacesNavigationRail extends StatelessWidget {
                         return NaviRailItem(
                           toolTip: displayname,
                           isSelected: activeSpaceId == space.id,
-                          onTap: () => onGoToSpaceId(allSpaces[i].id),
+                          onTap: () => onGoToSpaceId(rootSpaces[i].id),
                           unreadBadgeFilter: (room) =>
                               spaceChildrenIds.contains(room.id),
                           icon: Avatar(
-                            mxContent: allSpaces[i].avatar,
+                            mxContent: rootSpaces[i].avatar,
                             name: displayname,
                             //size: 36,
                             shapeBorder: RoundedSuperellipseBorder(
@@ -126,6 +138,19 @@ class SpacesNavigationRail extends StatelessWidget {
                       padding: const EdgeInsets.all(12.0),
                       child: StartChatFab(),
                     ),
+                  NaviRailItem(
+                    isSelected: isSettings,
+                    onTap: () => context.go('/rooms/settings'),
+                    icon: const Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: Icon(Icons.settings_outlined),
+                    ),
+                    selectedIcon: const Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: Icon(Icons.settings),
+                    ),
+                    toolTip: L10n.of(context).settings,
+                  ),
                 ],
               ),
             );
