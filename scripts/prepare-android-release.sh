@@ -5,15 +5,17 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-cd android
-echo $FDROID_KEY | base64 --decode --ignore-garbage > key.jks
-echo "storePassword=${FDROID_KEY_PASS}" >> key.properties
-echo "keyPassword=${FDROID_KEY_PASS}" >> key.properties
-echo "keyAlias=key" >> key.properties
-echo "storeFile=../key.jks" >> key.properties
-echo $PLAYSTORE_DEPLOY_KEY >> keys.json
-ls | grep key
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+"${SCRIPT_DIR}/prepare-android-signing.sh"
+
+: "${PLAYSTORE_DEPLOY_KEY:?PLAYSTORE_DEPLOY_KEY is required}"
+
+cd "${PROJECT_DIR}/android"
+printf '%s' "${PLAYSTORE_DEPLOY_KEY}" > keys.json
 bundle install
 bundle update fastlane
 bundle exec fastlane set_build_code_internal
-cd ..

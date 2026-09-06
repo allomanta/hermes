@@ -53,20 +53,7 @@ jobs:
           fetch-depth: 0
 
       - name: Restore Android signing config
-        if: ${{ env.ANDROID_KEYSTORE_B64 != '' }}
-        run: |
-          mkdir -p android
-          echo "$ANDROID_KEYSTORE_B64" | base64 -d > android/hermes-release-keystore.jks
-          if [ -z "$ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ANDROID_KEY_PASSWORD" ] || [ -z "$ANDROID_KEY_ALIAS" ]; then
-            echo "Android signing secrets are incomplete" >&2
-            exit 1
-          fi
-          {
-            echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
-            echo "keyPassword=$ANDROID_KEY_PASSWORD"
-            echo "keyAlias=$ANDROID_KEY_ALIAS"
-            echo "storeFile=$GITHUB_WORKSPACE/android/hermes-release-keystore.jks"
-          } > android/key.properties
+        run: ./scripts/prepare-android-signing.sh
 
       - name: Cache Flutter packages
         uses: actions/cache@v4
