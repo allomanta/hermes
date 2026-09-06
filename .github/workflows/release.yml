@@ -100,8 +100,8 @@ jobs:
 
           BUILD_NUMBER=$((LAST_TAG_BUILD + 1))
 
-          echo "FLUTTER_VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
-          echo "FLUTTER_BUILD_NUMBER=${BUILD_NUMBER}" >> $GITHUB_ENV
+          echo "HERMES_VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
+          echo "HERMES_BUILD_NUMBER=${BUILD_NUMBER}" >> $GITHUB_ENV
           echo "RELEASE_TAG=v${VERSION_NAME}-${BUILD_NUMBER}" >> $GITHUB_ENV
           echo "RELEASE_NAME=Hermes ${VERSION_NAME} (${BUILD_NUMBER})" >> $GITHUB_ENV
           echo "VERSION_FULL=${VERSION_LINE}" >> $GITHUB_ENV
@@ -110,20 +110,20 @@ jobs:
         run: |
           flutter build apk --release \
             --target-platform android-arm,android-arm64 \
-            --build-name $FLUTTER_VERSION_NAME \
-            --build-number $FLUTTER_BUILD_NUMBER
+            --build-name $HERMES_VERSION_NAME \
+            --build-number $HERMES_BUILD_NUMBER
 
       - name: Prepare Android artifact
         run: |
           APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
-          OUTPUT_APK="build/app/outputs/flutter-apk/Hermes-android-gms-${FLUTTER_VERSION_NAME}-${FLUTTER_BUILD_NUMBER}.apk"
+          OUTPUT_APK="build/app/outputs/flutter-apk/Hermes-android-gms-${HERMES_VERSION_NAME}-${HERMES_BUILD_NUMBER}.apk"
           mv "$APK_PATH" "$OUTPUT_APK"
           echo "ANDROID_APK=$OUTPUT_APK" >> $GITHUB_ENV
 
       - name: Upload Android APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Hermes-android-gms-${{ env.FLUTTER_VERSION_NAME }}-${{ env.FLUTTER_BUILD_NUMBER }}
+          name: Hermes-android-gms-${{ env.HERMES_VERSION_NAME }}-${{ env.HERMES_BUILD_NUMBER }}
           path: ${{ env.ANDROID_APK }}
 
       # - name: Build macOS app
@@ -131,14 +131,14 @@ jobs:
       #   continue-on-error: true
       #   run: |
       #     flutter build macos --release \
-      #       --build-name $FLUTTER_VERSION_NAME \
-      #       --build-number $FLUTTER_BUILD_NUMBER
+      #       --build-name $HERMES_VERSION_NAME \
+      #       --build-number $HERMES_BUILD_NUMBER
 
       # - name: Archive macOS app bundle
       #   if: steps.build_macos.outcome == 'success'
       #   run: |
       #     OUTPUT_DIR="build/macos/Build/Products/Release"
-      #     ARCHIVE_NAME="Hermes-macos-${FLUTTER_VERSION_NAME}-${FLUTTER_BUILD_NUMBER}.zip"
+      #     ARCHIVE_NAME="Hermes-macos-${HERMES_VERSION_NAME}-${HERMES_BUILD_NUMBER}.zip"
       #     cd "$OUTPUT_DIR"
       #     zip -r "$ARCHIVE_NAME" Hermes.app
       #     echo "MACOS_ARCHIVE=$OUTPUT_DIR/$ARCHIVE_NAME" >> $GITHUB_ENV
@@ -164,5 +164,5 @@ jobs:
             Automated release triggered by push to `main`.
 
             * Flutter version: `${{ env.VERSION_FULL }}`
-            * Android build number: `${{ env.FLUTTER_BUILD_NUMBER }}`
+            * Android build number: `${{ env.HERMES_BUILD_NUMBER }}`
           files: ${{ env.UPLOAD_FILES }}
