@@ -74,12 +74,17 @@ extension DateTimeExtension on DateTime {
 
   DateTime get dateOnly => DateTime(year, month, day);
 
-  String localizedDate(BuildContext context) {
+  String localizedDate(BuildContext context, {bool alwaysShowYear = false}) {
     final date = dateOnly;
     final now = DateTime.now().dateOnly;
 
-    final sameYear = now.year == date.year;
+    if (alwaysShowYear) {
+      return DateFormat.yMMMMd(
+        Localizations.localeOf(context).languageCode,
+      ).format(date);
+    }
 
+    final sameYear = now.year == date.year;
     final sameDay = now == date;
 
     final sameWeek =

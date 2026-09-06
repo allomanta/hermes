@@ -295,6 +295,9 @@ class Message extends StatelessWidget {
     final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
 
     var color = theme.colorScheme.surfaceContainerHigh;
+    final displayDate =
+        nextEvent == null ||
+        !event.originServerTs.sameDay(nextEvent!.originServerTs);
     final nextEventSameSender =
         nextEvent != null &&
         {EventTypes.Message, EventTypes.Sticker}.contains(nextEvent!.type) &&
@@ -437,6 +440,35 @@ class Message extends StatelessWidget {
             mainAxisSize: .min,
             crossAxisAlignment: ownMessage ? .end : .start,
             children: <Widget>[
+              if (displayDate)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Center(
+                    child: Material(
+                      borderRadius: BorderRadius.circular(
+                        AppConfig.borderRadius * 2,
+                      ),
+                      color: theme.colorScheme.surface.withAlpha(128),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 2.0,
+                        ),
+                        child: Text(
+                          event.originServerTs.localizedDate(
+                            context,
+                            alwaysShowYear: true,
+                          ),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -779,7 +811,8 @@ class Message extends StatelessWidget {
                               mainAxisAlignment: ownMessage ? .end : .start,
                               children: [
                                 const SizedBox(width: 8),
-                                if (event.status.isSent)
+                                if (event.status.isSent &&
+                                    (!previousEventSameSender || selected))
                                   Text(
                                     ' ${selected ? event.originServerTs.localizedDetailedTime(context) : event.originServerTs.localizedTimeOfDay(context)}',
                                     style: TextStyle(

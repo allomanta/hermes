@@ -340,6 +340,7 @@ class ChatController extends State<ChatPageWithRoom>
     if (evt is KeyDownEvent &&
         evt.logicalKey == LogicalKeyboardKey.arrowUp &&
         !PlatformInfos.isMobile &&
+        !HardwareKeyboard.instance.isAltPressed &&
         editEvent == null &&
         replyEvent == null &&
         sendController.text.isEmpty) {
@@ -398,6 +399,9 @@ class ChatController extends State<ChatPageWithRoom>
   void initState() {
     inputFocus = FocusNode(onKeyEvent: _customEnterKeyHandling);
 
+    if (PlatformInfos.isDesktop) {
+      HardwareKeyboard.instance.addHandler(onKeyEvent);
+    }
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
 
@@ -731,6 +735,9 @@ class ChatController extends State<ChatPageWithRoom>
 
   @override
   void dispose() {
+    if (PlatformInfos.isDesktop) {
+      HardwareKeyboard.instance.removeHandler(onKeyEvent);
+    }
     timeline?.cancelSubscriptions();
     timeline = null;
     _storeInputTimeoutTimer?.cancel();
@@ -1532,35 +1539,45 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void onKeyEvent(KeyEvent event) {
+  bool onKeyEvent(KeyEvent event) {
+    if (!PlatformInfos.isDesktop ||
+        event is! KeyDownEvent ||
+        !HardwareKeyboard.instance.isAltPressed ||
+        ModalRoute.of(context)?.isCurrent != true) {
+      return false;
+    }
     switch (event.logicalKey) {
-      // case LogicalKeyboardKey.escape:
-      //   if (event is KeyDownEvent) {
-      //     handleExitEvent();
-      //   }
-      //   return;
       case LogicalKeyboardKey.arrowDown:
       case LogicalKeyboardKey.keyJ:
-        if (event is KeyDownEvent && HardwareKeyboard.instance.isAltPressed) {
-          goToNextRoomAction(false);
-        }
-        break;
+        unawaited(goToNextRoomAction(false));
+        return true;
       case LogicalKeyboardKey.arrowUp:
       case LogicalKeyboardKey.keyK:
-        // print("DEBUG: ${event.logicalKey}");
-        if (event is KeyDownEvent && HardwareKeyboard.instance.isAltPressed) {
-          goToNextRoomAction(true);
-        }
-        break;
+        unawaited(goToNextRoomAction(true));
+        return true;
     }
+    return false;
   }
 
-  void goToNextRoomAction(bool reverse) async {
+  Future<void> goToNextRoomAction(bool reverse) async {
     List<Room> rooms;
     final spaceId = Matrix.of(context).activeSpaceId;
 
     if (spaceId == null) {
-      rooms = sendingClient.rooms;
+      final allRooms = sendingClient.rooms;
+      final spaces = allRooms.where((room) => room.isSpace);
+      rooms = allRooms
+          .where((room) => !room.isSpace)
+          .where(
+            (room) =>
+                !AppSettings.hideRoomsInSpaces.value ||
+                !spaces.any(
+                  (space) => space.spaceChildren.any(
+                    (child) => child.roomId == room.id,
+                  ),
+                ),
+          )
+          .toList();
     } else {
       final hierarchy = await room.client.getSpaceHierarchy(
         spaceId,
@@ -1570,27 +1587,22 @@ class ChatController extends State<ChatPageWithRoom>
       rooms = hierarchy.rooms
           .map((c) => room.client.getRoomById(c.roomId))
           .nonNulls
+          .where((room) => !room.isSpace)
           .toList();
     }
-    var nextIndex = rooms.indexWhere((r) => r.id == room.id);
+    if (rooms.isEmpty) return;
 
-    if (reverse) {
-      nextIndex--;
-    } else {
-      nextIndex++;
-    }
-
-    nextIndex %= rooms.length;
-
-    final nextID = rooms[nextIndex].id;
-
-    final result = await showFutureLoadingDialog(
-      context: context,
-      future: () => room.client.joinRoomById(nextID),
+    final currentIndex = rooms.indexWhere(
+      (candidate) => candidate.id == room.id,
     );
-    if (result.error != null) return;
+    final nextIndex = currentIndex == -1
+        ? reverse
+              ? rooms.length - 1
+              : 0
+        : (currentIndex + (reverse ? -1 : 1)) % rooms.length;
+
     if (!mounted) return;
-    context.go('/rooms/$nextID');
+    context.go('/rooms/${rooms[nextIndex].id}');
   }
 
   void goToNewRoomAction() async {
