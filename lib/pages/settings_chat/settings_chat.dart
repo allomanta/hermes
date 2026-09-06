@@ -21,6 +21,8 @@ class SettingsChatController extends State<SettingsChat> {
   late double swipeMinimumDragFraction;
   late double swipeVelocityThreshold;
 
+  void updateState() => setState(() {});
+
   @override
   void initState() {
     super.initState();
