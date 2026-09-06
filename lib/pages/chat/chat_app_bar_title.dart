@@ -93,7 +93,8 @@ class ChatAppBarTitle extends StatelessWidget {
                                 ? PresenceBuilder(
                                     userId: room.directChatMatrixID,
                                     builder: (context, presence) {
-                                      final statusMessage = presence?.statusMsg;
+                                      final statusMessage = presence?.statusMsg
+                                          ?.trim();
 
                                       final lastActiveTimestamp =
                                           presence?.lastActiveTimestamp;
@@ -108,11 +109,12 @@ class ChatAppBarTitle extends StatelessWidget {
                                           ),
                                         ?statusMessage,
                                       ];
+                                      final text = texts.join(' ◦ ');
+                                      if (text.isEmpty) {
+                                        return const SizedBox.shrink();
+                                      }
 
-                                      return Text(
-                                        texts.join(' ◦ '),
-                                        style: style,
-                                      );
+                                      return Text(text, style: style);
                                     },
                                   )
                                 : Row(

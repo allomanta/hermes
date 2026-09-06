@@ -1440,6 +1440,7 @@ class ChatController extends State<ChatPageWithRoom>
     if (emoji == null) return;
     final text = sendController.text;
     final selection = sendController.selection;
+    final start = selection.baseOffset == -1 ? 0 : selection.baseOffset;
     final newText = sendController.text.isEmpty
         ? emoji.emoji
         : text.replaceRange(selection.start, selection.end, emoji.emoji);
@@ -1447,7 +1448,7 @@ class ChatController extends State<ChatPageWithRoom>
       text: newText,
       selection: TextSelection.collapsed(
         // don't forget an UTF-8 combined emoji might have a length > 1
-        offset: selection.baseOffset + emoji.emoji.length,
+        offset: start + emoji.emoji.length,
       ),
     );
   }

@@ -44,10 +44,6 @@ PODS:
     - FlutterMacOS
     - WebRTC-SDK (= 144.7559.09)
   - FlutterMacOS (1.0.0)
-  - FMDB/Core (2.7.12)
-  - FMDB/SQLCipher (2.7.12):
-    - FMDB/Core
-    - SQLCipher (~> 4.6)
   - geolocator_apple (1.2.0):
     - Flutter
     - FlutterMacOS
@@ -91,15 +87,6 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - sqflite_sqlcipher (0.0.1):
-    - FlutterMacOS
-    - FMDB/SQLCipher (~> 2.7.5)
-    - SQLCipher (= 4.10.0)
-  - SQLCipher (4.10.0):
-    - SQLCipher/standard (= 4.10.0)
-  - SQLCipher/common (4.10.0)
-  - SQLCipher/standard (4.10.0):
-    - SQLCipher/common
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
   - video_player_avfoundation (0.0.1):
@@ -144,7 +131,6 @@ DEPENDENCIES:
   - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
   - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - sqflite_sqlcipher (from `Flutter/ephemeral/.symlinks/plugins/sqflite_sqlcipher/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
   - video_player_avfoundation (from `Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin`)
   - wakelock_plus (from `Flutter/ephemeral/.symlinks/plugins/wakelock_plus/macos`)
@@ -156,10 +142,8 @@ SPEC REPOS:
     - Firebase
     - FirebaseCore
     - FirebaseCoreInternal
-    - FMDB
     - GoogleUtilities
     - PromisesObjC
-    - SQLCipher
     - WebRTC-SDK
 
 EXTERNAL SOURCES:
@@ -223,8 +207,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/share_plus/macos
   shared_preferences_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
-  sqflite_sqlcipher:
-    :path: Flutter/ephemeral/.symlinks/plugins/sqflite_sqlcipher/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
   video_player_avfoundation:
@@ -257,7 +239,6 @@ SPEC CHECKSUMS:
   flutter_web_auth_2: 7fe624ff12ddcb4c19e5dbcd56c9e9ea4899d967
   flutter_webrtc: 7dd2a2ad0e9c96dad0ae96c42d9a7786d96d8be6
   FlutterMacOS: c232990155153907050900a2e175c7773903ba4e
-  FMDB: 728731dd336af3936ce00f91d9d8495f5718a0e6
   geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
@@ -273,8 +254,6 @@ SPEC CHECKSUMS:
   screen_retriever_macos: c5508cc3c66ff0d4db650480cf0ab691e220d933
   share_plus: 510bf0af1a42cd602274b4629920c9649c52f4cc
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
-  sqflite_sqlcipher: a4c2f17db76d2f86dfe044937d3a851d8880cbb9
-  SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
   url_launcher_macos: f87a979182d112f911de6820aefddaf56ee9fbfd
   video_player_avfoundation: 3453f792138786248960ca029747fcd9f318ef52
   wakelock_plus: 917609be14d812ddd9e9528876538b2263aaa03b

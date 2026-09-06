@@ -2819,5 +2819,11 @@
     "swipeDistance": "Required swipe distance",
     "swipeDistanceDescription": "Percentage of the screen that must be swiped before popping",
     "swipeVelocity": "Required swipe velocity",
-    "swipeVelocityDescription": "Minimum fling speed needed when the drag is short"
+    "swipeVelocityDescription": "Minimum fling speed needed when the drag is short",
+    "serverRespondedWithError": "The server has replied with an error message: {error}",
+    "@serverRespondedWithError": {
+        "placeholders": {
+            "error": {"type": "String"}
+        }
+    }
 }

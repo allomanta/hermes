@@ -15,12 +15,14 @@ class _CloseStickerPickerIntent extends Intent {
 
 class StickerPickerDialog extends StatefulWidget {
   final Room room;
+  final ImagePackUsage usage;
   final void Function(ImagePackImageContent) onSelected;
   final VoidCallback? onEscape;
 
   const StickerPickerDialog({
     required this.onSelected,
     required this.room,
+    this.usage = ImagePackUsage.sticker,
     this.onEscape,
     super.key,
   });
@@ -62,7 +64,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final stickerPacks = widget.room.getImagePacks(ImagePackUsage.sticker);
+    final stickerPacks = widget.room.getImagePacks(widget.usage);
     final packSlugs = stickerPacks.keys.toList();
 
     // ignore: prefer_function_declarations_over_variables
