@@ -255,6 +255,20 @@ class ChatInputRow extends StatelessWidget {
                       onPressed: controller.emojiPickerAction,
                     ),
                   ),
+                  if (!controller.showEmojiPicker)
+                    Container(
+                      height: height,
+                      width: 48,
+                      alignment: Alignment.center,
+                      child: IconButton(
+                        tooltip: L10n.of(context).stickers,
+                        color: theme.colorScheme.onPrimaryContainer,
+                        icon: const Icon(
+                          Icons.settings_system_daydream_outlined,
+                        ),
+                        onPressed: controller.stickerPickerAction,
+                      ),
+                    ),
                   if (Matrix.of(context).isMultiAccount &&
                       Matrix.of(context).hasComplexBundles &&
                       Matrix.of(context).currentBundle!.length > 1)
