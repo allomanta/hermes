@@ -1,13 +1,23 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter_highlighter/flutter_highlighter.dart';
-import 'package:flutter_highlighter/themes/shades-of-purple.dart';
-import 'package:matrix/matrix.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:hermes/l10n/l10n.dart';
+import 'dart:convert';
+
 import 'package:hermes/config/app_config.dart';
+import 'package:hermes/config/setting_keys.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:hermes/widgets/hermes_app.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+import 'package:universal_html/universal_html.dart' as html;
+import 'package:url_launcher/url_launcher.dart';
 
 class ErrorReporter {
   final BuildContext? context;
@@ -16,33 +26,60 @@ class ErrorReporter {
   const ErrorReporter(this.context, [this.message]);
 
   static const Set<String> ingoredTypes = {
-    "IOException",
-    "ClientException",
-    "SocketException",
-    "TlsException",
-    "HandshakeException",
+    'IOException',
+    'ClientException',
+    'SocketException',
+    'TlsException',
+    'HandshakeException',
   };
 
-  void onErrorCallback(Object error, [StackTrace? stackTrace]) {
-    if (ingoredTypes.contains(error.runtimeType.toString())) return;
-    Logs().e(message ?? 'Error caught', error, stackTrace);
-    final text = '$error\n${stackTrace ?? ''}';
-    return _onErrorCallback(text);
+  static void onFlutterError(Object error, [StackTrace? stackTrace]) {
+    if (AppSettings.autoSendErrorReports.value != true) {
+      debugPrint('Exception caught but auto send crash reports is disabled.');
+      debugPrint(error.toString());
+      debugPrintStack(stackTrace: stackTrace);
+      return;
+    }
+    final hash = (stackTrace ?? error).hashCode.toString();
+    if (AppSettings.knownErrorHashes.value.contains(hash)) return;
+    AppSettings.knownErrorHashes.setItem([
+      ...AppSettings.knownErrorHashes.value,
+      hash,
+    ]);
+    ErrorReporter(null, 'Flutter error').onErrorCallback(error, stackTrace);
   }
 
-  void _onErrorCallback(String text) async {
-    await showAdaptiveDialog(
-      context: context!,
+  Future<void> onErrorCallback(Object error, [StackTrace? stackTrace]) async {
+    if (ingoredTypes.contains(error.runtimeType.toString())) return;
+    Logs().e(message ?? 'Error caught', error, stackTrace);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _onErrorCallback(error, stackTrace),
+    );
+  }
+
+  Future<void> _onErrorCallback(Object error, [StackTrace? stackTrace]) async {
+    final context =
+        this.context ??
+        HermesApp.router.routerDelegate.navigatorKey.currentContext;
+    final text = '$error\n${stackTrace ?? ''}';
+
+    if (context == null || !context.mounted) {
+      debugPrint(
+        'Exception caught but we have no mounted BuildContext to display a dialog to the user!\n$text',
+      );
+      return;
+    }
+    showAdaptiveDialog(
+      context: context,
       builder: (context) => AlertDialog.adaptive(
         title: Text(L10n.of(context).reportErrorDescription),
         content: SizedBox(
           height: 256,
           width: 256,
           child: SingleChildScrollView(
-            child: HighlightView(
+            child: Text(
               text,
-              language: 'sh',
-              theme: shadesOfPurpleTheme,
+              style: const TextStyle(fontSize: 14, fontFamily: 'RobotoMono'),
             ),
           ),
         ),
@@ -52,22 +89,76 @@ class ErrorReporter {
             child: Text(L10n.of(context).close),
           ),
           AdaptiveDialogAction(
-            onPressed: () => Clipboard.setData(
-              ClipboardData(text: text),
-            ),
+            onPressed: () => Clipboard.setData(ClipboardData(text: text)),
             child: Text(L10n.of(context).copy),
           ),
           AdaptiveDialogAction(
-            onPressed: () => launchUrl(
-              AppConfig.newIssueUrl.resolveUri(
-                Uri(queryParameters: {'template': 'bug_report.yaml'}),
-              ),
-              mode: LaunchMode.externalApplication,
-            ),
+            onPressed: () async {
+              final existingIssueUrl = stackTrace == null
+                  ? null
+                  : await _searchIssue(
+                      (error.toString() + stackTrace.toString()).hashCode
+                          .toString(),
+                    );
+              if (existingIssueUrl != null) {
+                launchUrl(existingIssueUrl);
+                return;
+              }
+              launchUrl(
+                AppConfig.newIssueUrl.resolveUri(
+                  Uri(
+                    queryParameters: {
+                      'template': 'bug_report.yml',
+                      'title':
+                          '[Error ${stackTrace.hashCode}] ${message ?? error}',
+                      'bug-description': error.toString(),
+                      'stacktrace': stackTrace?.toString(),
+                      'app-version': await PlatformInfos.getVersion(),
+                      'platform-info': kIsWeb
+                          ? html.window.navigator.userAgent
+                          : switch (defaultTargetPlatform) {
+                              TargetPlatform.android => 'Android',
+                              TargetPlatform.fuchsia => 'Other',
+                              TargetPlatform.iOS => 'iOS',
+                              TargetPlatform.linux => 'Linux',
+                              TargetPlatform.macOS => 'macOS (Self-compiled)',
+                              TargetPlatform.windows =>
+                                'Windows (Self-compiled)',
+                            },
+                    },
+                  ),
+                ),
+                mode: LaunchMode.externalApplication,
+              );
+            },
             child: Text(L10n.of(context).report),
           ),
         ],
       ),
     );
+  }
+
+  Future<Uri?> _searchIssue(String hash) async {
+    final result = await http.get(
+      Uri(
+        scheme: 'https',
+        host: 'api.github.com',
+        path: '/search/issues',
+        query: 'q=repo:krille-chan/fluffychat+is:issue+$hash',
+      ),
+    );
+    try {
+      final jsonResult =
+          jsonDecode(utf8.decode(result.bodyBytes)) as Map<String, Object?>;
+      final uriString = jsonResult
+          .tryGetList<Map<String, Object?>>('items')
+          ?.firstOrNull
+          ?.tryGet<String>('html_url');
+      if (uriString == null) return null;
+      return Uri.tryParse(uriString);
+    } catch (e, s) {
+      Logs().w('Unable to search for existing issues on GitHub', e, s);
+      return null;
+    }
   }
 }

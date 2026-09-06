@@ -1,12 +1,16 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-
 import 'package:async/async.dart';
-
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix_api_lite/utils/logs.dart';
 
 /// Displays a loading dialog which reacts to the given [future]. The dialog
 /// will be dismissed and the value will be returned when the future completes.
@@ -42,6 +46,15 @@ Future<Result<T>> showFutureLoadingDialog<T>({
     }
   }
 
+  if (!context.mounted) {
+    Logs().e(
+      'Unable to show loading dialog!',
+      Exception('The BuildContext is not mounted!'),
+      StackTrace.current,
+    );
+    return Result.capture(futureExec);
+  }
+
   final result = await showAdaptiveDialog<Result<T>>(
     context: context,
     barrierDismissible: barrierDismissible,
@@ -54,10 +67,7 @@ Future<Result<T>> showFutureLoadingDialog<T>({
     ),
   );
   return result ??
-      Result.error(
-        Exception('FutureDialog canceled'),
-        StackTrace.current,
-      );
+      Result.error(Exception('FutureDialog canceled'), StackTrace.current);
 }
 
 class LoadingDialog<T> extends StatefulWidget {
@@ -88,7 +98,11 @@ class LoadingDialogState<T> extends State<LoadingDialog> {
   void initState() {
     super.initState();
     widget.future.then(
-      (result) => Navigator.of(context).pop<Result<T>>(Result.value(result)),
+      (result) {
+        if (!mounted) return;
+        if (!Navigator.of(context).canPop()) return;
+        Navigator.of(context).pop<Result<T>>(Result.value(result));
+      },
       onError: (e, s) => setState(() {
         exception = e;
         stackTrace = s;
@@ -114,15 +128,13 @@ class LoadingDialogState<T> extends State<LoadingDialog> {
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 256),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: .center,
           children: [
             if (exception == null) ...[
               StreamBuilder(
                 stream: widget.onProgressStream,
                 builder: (context, snapshot) =>
-                    CircularProgressIndicator.adaptive(
-                  value: snapshot.data,
-                ),
+                    CircularProgressIndicator.adaptive(value: snapshot.data),
               ),
               const SizedBox(width: 20),
             ],
@@ -141,12 +153,9 @@ class LoadingDialogState<T> extends State<LoadingDialog> {
           ? null
           : [
               AdaptiveDialogAction(
-                onPressed: () => Navigator.of(context).pop<Result<T>>(
-                  Result.error(
-                    exception,
-                    stackTrace,
-                  ),
-                ),
+                onPressed: () => Navigator.of(
+                  context,
+                ).pop<Result<T>>(Result.error(exception, stackTrace)),
                 child: Text(widget.backLabel ?? L10n.of(context).close),
               ),
             ],

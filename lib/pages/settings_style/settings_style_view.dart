@@ -1,12 +1,14 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
-
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:matrix/matrix.dart';
-import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/config/themes.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat/events/state_message.dart';
 import 'package:hermes/utils/account_config.dart';
 import 'package:hermes/utils/color_value.dart';
@@ -14,8 +16,10 @@ import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/mxc_image.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../config/app_config.dart';
-import '../../widgets/settings_switch_list_tile.dart';
 import 'settings_style.dart';
 
 class SettingsStyleView extends StatelessWidget {
@@ -38,7 +42,7 @@ class SettingsStyleView extends StatelessWidget {
       backgroundColor: theme.colorScheme.surface,
       body: MaxWidthBody(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: .stretch,
           children: [
             Padding(
               padding: const EdgeInsets.all(12.0),
@@ -65,9 +69,7 @@ class SettingsStyleView extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(
-              color: theme.dividerColor,
-            ),
+            Divider(color: theme.dividerColor),
             ListTile(
               title: Text(
                 L10n.of(context).setColorTheme,
@@ -81,15 +83,15 @@ class SettingsStyleView extends StatelessWidget {
               builder: (light, dark) {
                 final systemColor =
                     Theme.of(context).brightness == Brightness.light
-                        ? light?.primary
-                        : dark?.primary;
-                final colors =
-                    List<Color?>.from(SettingsStyleController.customColors);
+                    ? light?.primary
+                    : dark?.primary;
+                final colors = [null, AppConfig.chatColor, ...Colors.primaries];
                 if (systemColor == null) {
                   colors.remove(null);
                 }
                 return GridView.builder(
                   shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 64,
                   ),
@@ -108,8 +110,9 @@ class SettingsStyleView extends StatelessWidget {
                           child: Material(
                             color: color ?? systemColor,
                             elevation: 6,
-                            borderRadius:
-                                BorderRadius.circular(colorPickerSize),
+                            borderRadius: BorderRadius.circular(
+                              colorPickerSize,
+                            ),
                             child: SizedBox(
                               width: colorPickerSize,
                               height: colorPickerSize,
@@ -118,9 +121,9 @@ class SettingsStyleView extends StatelessWidget {
                                       child: Icon(
                                         Icons.check,
                                         size: 16,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary,
                                       ),
                                     )
                                   : null,
@@ -133,9 +136,7 @@ class SettingsStyleView extends StatelessWidget {
                 );
               },
             ),
-            Divider(
-              color: theme.dividerColor,
-            ),
+            Divider(color: theme.dividerColor),
             ListTile(
               title: Text(
                 L10n.of(context).messagesStyle,
@@ -159,98 +160,73 @@ class SettingsStyleView extends StatelessWidget {
                 final accountConfig = client.applicationAccountConfig;
 
                 return Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: .min,
                   children: [
-                    AnimatedContainer(
-                      duration: PantheonThemes.animationDuration,
-                      curve: PantheonThemes.animationCurve,
-                      decoration: const BoxDecoration(),
-                      clipBehavior: Clip.hardEdge,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          if (accountConfig.wallpaperUrl != null)
-                            Opacity(
-                              opacity: controller.wallpaperOpacity,
-                              child: ImageFiltered(
-                                imageFilter: ImageFilter.blur(
-                                  sigmaX: controller.wallpaperBlur,
-                                  sigmaY: controller.wallpaperBlur,
-                                ),
-                                child: MxcImage(
-                                  key: ValueKey(accountConfig.wallpaperUrl),
-                                  uri: accountConfig.wallpaperUrl,
-                                  fit: BoxFit.cover,
-                                  isThumbnail: true,
-                                  width: PantheonThemes.columnWidth * 2,
-                                  height: 212,
-                                ),
-                              ),
-                            ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const SizedBox(height: 16),
-                              StateMessage(
-                                Event(
-                                  eventId: 'style_dummy',
-                                  room:
-                                      Room(id: '!style_dummy', client: client),
-                                  content: {'membership': 'join'},
-                                  type: EventTypes.RoomMember,
-                                  senderId: client.userID!,
-                                  originServerTs: DateTime.now(),
-                                  stateKey: client.userID!,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  left: 12 + 12 + Avatar.defaultSize,
-                                  right: 12,
-                                  top: accountConfig.wallpaperUrl == null
-                                      ? 0
-                                      : 12,
-                                  bottom: 12,
-                                ),
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: theme.bubbleColor,
-                                    borderRadius: BorderRadius.circular(
-                                      AppConfig.borderRadius,
-                                    ),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(
+                        textScaler: TextScaler.linear(
+                          AppSettings.fontSizeFactor.value,
+                        ),
+                      ),
+                      child: AnimatedContainer(
+                        duration: PantheonThemes.animationDuration,
+                        curve: PantheonThemes.animationCurve,
+                        decoration: const BoxDecoration(),
+                        clipBehavior: Clip.hardEdge,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            if (accountConfig.wallpaperUrl != null)
+                              Opacity(
+                                opacity: controller.wallpaperOpacity,
+                                child: ImageFiltered(
+                                  imageFilter: ImageFilter.blur(
+                                    sigmaX: controller.wallpaperBlur,
+                                    sigmaY: controller.wallpaperBlur,
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ),
-                                    child: Text(
-                                      'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor',
-                                      style: TextStyle(
-                                        color: theme.onBubbleColor,
-                                        fontSize: AppConfig.messageFontSize *
-                                            AppSettings.fontSizeFactor.value,
-                                      ),
-                                    ),
+                                  child: MxcImage(
+                                    key: ValueKey(accountConfig.wallpaperUrl),
+                                    uri: accountConfig.wallpaperUrl,
+                                    fit: BoxFit.cover,
+                                    isThumbnail: true,
+                                    width: PantheonThemes.columnWidth * 2,
+                                    height: 212,
                                   ),
                                 ),
                               ),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Padding(
+                            Column(
+                              mainAxisSize: .min,
+                              children: [
+                                const SizedBox(height: 16),
+                                StateMessage(
+                                  Event(
+                                    eventId: 'style_dummy',
+                                    room: Room(
+                                      id: '!style_dummy',
+                                      client: client,
+                                    ),
+                                    content: {'membership': 'join'},
+                                    type: EventTypes.RoomMember,
+                                    senderId: client.userID!,
+                                    originServerTs: DateTime.now(),
+                                    stateKey: client.userID,
+                                  ),
+                                ),
+                                Padding(
                                   padding: EdgeInsets.only(
+                                    left: 12 + 12 + Avatar.defaultSize,
                                     right: 12,
-                                    left: 12,
                                     top: accountConfig.wallpaperUrl == null
                                         ? 0
                                         : 12,
                                     bottom: 12,
                                   ),
-                                  child: Material(
-                                    color:
-                                        theme.colorScheme.surfaceContainerHigh,
-                                    borderRadius: BorderRadius.circular(
-                                      AppConfig.borderRadius,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: theme.bubbleColor,
+                                      borderRadius: BorderRadius.circular(
+                                        AppConfig.borderRadius,
+                                      ),
                                     ),
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
@@ -258,25 +234,56 @@ class SettingsStyleView extends StatelessWidget {
                                         vertical: 8,
                                       ),
                                       child: Text(
-                                        'Lorem ipsum dolor sit amet',
+                                        'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor',
                                         style: TextStyle(
-                                          color: theme.colorScheme.onSurface,
-                                          fontSize: AppConfig.messageFontSize *
-                                              AppSettings.fontSizeFactor.value,
+                                          color: theme.onBubbleColor,
+                                          fontSize: AppConfig.messageFontSize,
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      right: 12,
+                                      left: 12,
+                                      top: accountConfig.wallpaperUrl == null
+                                          ? 0
+                                          : 12,
+                                      bottom: 12,
+                                    ),
+                                    child: Material(
+                                      color: theme
+                                          .colorScheme
+                                          .surfaceContainerHigh,
+                                      borderRadius: BorderRadius.circular(
+                                        AppConfig.borderRadius,
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 8,
+                                        ),
+                                        child: Text(
+                                          'Lorem ipsum dolor sit amet',
+                                          style: TextStyle(
+                                            color: theme.colorScheme.onSurface,
+                                            fontSize: AppConfig.messageFontSize,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    Divider(
-                      color: theme.dividerColor,
-                    ),
+                    Divider(color: theme.dividerColor),
                     ListTile(
                       title: TextButton.icon(
                         style: TextButton.styleFrom(
@@ -324,9 +331,7 @@ class SettingsStyleView extends StatelessWidget {
             ),
             ListTile(
               title: Text(L10n.of(context).fontSize),
-              trailing: Text(
-                '× ${AppSettings.fontSizeFactor.value}',
-              ),
+              trailing: Text('× ${AppSettings.fontSizeFactor.value}'),
             ),
             Slider.adaptive(
               min: 0.5,
@@ -335,30 +340,6 @@ class SettingsStyleView extends StatelessWidget {
               value: AppSettings.fontSizeFactor.value,
               semanticFormatterCallback: (d) => d.toString(),
               onChanged: controller.changeFontSizeFactor,
-            ),
-            Divider(
-              color: theme.dividerColor,
-            ),
-            ListTile(
-              title: Text(
-                L10n.of(context).overview,
-                style: TextStyle(
-                  color: theme.colorScheme.secondary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SettingsSwitchListTile.adaptive(
-              title: L10n.of(context).presencesToggle,
-              setting: AppSettings.showPresences,
-            ),
-            SettingsSwitchListTile.adaptive(
-              title: L10n.of(context).separateChatTypes,
-              setting: AppSettings.separateChatTypes,
-            ),
-            SettingsSwitchListTile.adaptive(
-              title: L10n.of(context).displayNavigationRail,
-              setting: AppSettings.displayNavigationRail,
             ),
           ],
         ),

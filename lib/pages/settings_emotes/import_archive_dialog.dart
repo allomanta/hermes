@@ -1,17 +1,20 @@
-import 'dart:async';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'dart:async';
 
 import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
-import 'package:matrix/matrix.dart';
-
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/settings_emotes/settings_emotes.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class ImportEmoteArchiveDialog extends StatefulWidget {
   final EmotesSettingsController controller;
@@ -46,11 +49,7 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
     return AlertDialog(
       title: Text(L10n.of(context).importEmojis),
       content: _loading
-          ? Center(
-              child: CircularProgressIndicator(
-                value: _progress,
-              ),
-            )
+          ? Center(child: CircularProgressIndicator(value: _progress))
           : SingleChildScrollView(
               child: Wrap(
                 alignment: WrapAlignment.spaceEvenly,
@@ -79,8 +78,8 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
           onPressed: _loading
               ? null
               : _importMap.isNotEmpty
-                  ? _addEmotePack
-                  : null,
+              ? _addEmotePack
+              : null,
           child: Text(L10n.of(context).importNow),
         ),
       ],
@@ -91,16 +90,13 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
     _importMap = Map.fromEntries(
       widget.archive.files
           .where((e) => e.isFile)
-          .map(
-            (e) => MapEntry(e, e.name.emoteNameFromPath),
-          )
-          .sorted(
-            (a, b) => a.value.compareTo(b.value),
-          ),
+          .map((e) => MapEntry(e, e.name.emoteNameFromPath))
+          .sorted((a, b) => a.value.compareTo(b.value)),
     );
   }
 
   Future<void> _addEmotePack() async {
+    final matrix = Matrix.of(context);
     setState(() {
       _loading = true;
       _progress = 0;
@@ -148,10 +144,7 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
       final imageCode = entry.value;
 
       try {
-        var mxcFile = MatrixImageFile(
-          bytes: file.content,
-          name: file.name,
-        );
+        var mxcFile = MatrixImageFile(bytes: file.content, name: file.name);
 
         final thumbnail = (await mxcFile.generateThumbnail(
           nativeImplementations: ClientManager.nativeImplementations,
@@ -161,15 +154,13 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
         } else {
           mxcFile = thumbnail;
         }
-        final uri = await Matrix.of(context).client.uploadContent(
-              mxcFile.bytes,
-              filename: mxcFile.name,
-              contentType: mxcFile.mimeType,
-            );
+        final uri = await matrix.client.uploadContent(
+          mxcFile.bytes,
+          filename: mxcFile.name,
+          contentType: mxcFile.mimeType,
+        );
 
-        final info = <String, dynamic>{
-          ...mxcFile.info,
-        };
+        final info = <String, dynamic>{...mxcFile.info};
 
         // normalize width / height to 256, required for stickers
         if (info['w'] is int && info['h'] is int) {
@@ -184,15 +175,16 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
         }
         widget.controller.pack!.images[imageCode] =
             ImagePackImageContent.fromJson(<String, dynamic>{
-          'url': uri.toString(),
-          'info': info,
-        });
+              'url': uri.toString(),
+              'info': info,
+            });
         successfulUploads.add(file.name);
       } catch (e) {
         Logs().d('Could not upload emote $imageCode');
       }
     }
 
+    if (!mounted) return;
     await widget.controller.save(context);
     _importMap.removeWhere(
       (key, value) => successfulUploads.contains(key.name),
@@ -204,8 +196,9 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
     // in case we have unhandled / duplicated emotes left, don't pop
     if (mounted) setState(() {});
     if (_importMap.isEmpty) {
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => Navigator.of(context).pop());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => Navigator.of(context).pop(),
+      );
     }
   }
 }
@@ -228,14 +221,26 @@ class _EmojiImportPreview extends StatefulWidget {
 
 class _EmojiImportPreviewState extends State<_EmojiImportPreview> {
   final hasErrorNotifier = ValueNotifier(false);
+  final controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    controller.text = widget.entry.value;
+  }
+
+  @override
+  void dispose() {
+    hasErrorNotifier.dispose();
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     // TODO: support Lottie here as well ...
-    final controller = TextEditingController(text: widget.entry.value);
-
     return Stack(
       alignment: Alignment.topRight,
       children: [
@@ -250,21 +255,20 @@ class _EmojiImportPreviewState extends State<_EmojiImportPreview> {
             if (hasError) return _ImageFileError(name: widget.entry.key.name);
 
             return Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: .min,
+              mainAxisAlignment: .center,
+              crossAxisAlignment: .center,
               children: [
                 Image.memory(
                   widget.entry.key.content,
                   height: 64,
                   width: 64,
                   errorBuilder: (context, e, s) {
-                    WidgetsBinding.instance
-                        .addPostFrameCallback((_) => _setRenderError());
-
-                    return _ImageFileError(
-                      name: widget.entry.key.name,
+                    WidgetsBinding.instance.addPostFrameCallback(
+                      (_) => _setRenderError(),
                     );
+
+                    return _ImageFileError(name: widget.entry.key.name);
                   },
                 ),
                 SizedBox(
@@ -303,7 +307,7 @@ class _EmojiImportPreviewState extends State<_EmojiImportPreview> {
     );
   }
 
-  _setRenderError() {
+  void _setRenderError() {
     hasErrorNotifier.value = true;
     widget.onRemove.call();
   }
@@ -323,9 +327,9 @@ class _ImageFileError extends StatelessWidget {
       child: Tooltip(
         message: name,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: .start,
+          mainAxisSize: .min,
+          crossAxisAlignment: .center,
           children: [
             const Icon(Icons.error),
             Text(
@@ -347,8 +351,7 @@ extension on String {
   /// Used to compute emote name proposal based on file name
   String get emoteNameFromPath {
     // ... removing leading path
-    return split(RegExp(r'[/\\]'))
-        .last
+    return split(RegExp(r'[/\\]')).last
         // ... removing file extension
         .split('.')
         .first

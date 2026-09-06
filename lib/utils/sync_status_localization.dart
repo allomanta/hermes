@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 extension SyncStatusLocalization on SyncStatusUpdate {
   String calcLocalizedString(BuildContext context) {
@@ -12,8 +15,9 @@ extension SyncStatusLocalization on SyncStatusUpdate {
       case SyncStatus.waitingForResponse:
         return L10n.of(context).waitingForServer;
       case SyncStatus.error:
-        return ((error?.exception ?? Object()) as Object)
-            .toLocalizedString(context);
+        return ((error?.exception ?? Object()) as Object).toLocalizedString(
+          context,
+        );
       case SyncStatus.processing:
       case SyncStatus.cleaningUp:
       case SyncStatus.finished:

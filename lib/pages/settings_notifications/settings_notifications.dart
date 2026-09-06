@@ -1,6 +1,9 @@
-import 'dart:convert';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
 import 'package:matrix/matrix.dart';
 import 'package:hermes/l10n/l10n.dart';
@@ -13,6 +16,7 @@ import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import '../../widgets/matrix.dart';
 import 'settings_notifications_view.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SettingsNotifications extends StatefulWidget {
   const SettingsNotifications({super.key});
@@ -25,7 +29,7 @@ class SettingsNotifications extends StatefulWidget {
 class SettingsNotificationsController extends State<SettingsNotifications> {
   bool isLoading = false;
 
-  void onPusherTap(Pusher pusher) async {
+  Future<void> onPusherTap(Pusher pusher) async {
     final delete = await showModalActionPopup<bool>(
       context: context,
       title: pusher.deviceDisplayName,
@@ -40,15 +44,13 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
       ],
     );
     if (delete != true) return;
+    if (!mounted) return;
 
     final success = await showFutureLoadingDialog(
       context: context,
       future: () => Matrix.of(context).client.deletePusher(
-            PusherId(
-              appId: pusher.appId,
-              pushkey: pusher.pushkey,
-            ),
-          ),
+        PusherId(appId: pusher.appId, pushkey: pusher.pushkey),
+      ),
     );
 
     if (success.error != null) return;
@@ -60,15 +62,12 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
 
   Future<List<Pusher>?>? pusherFuture;
 
-  void togglePushRule(PushRuleKind kind, PushRule pushRule) async {
+  Future<void> togglePushRule(PushRuleKind kind, PushRule pushRule) async {
     setState(() {
       isLoading = true;
     });
     try {
-      final updateFromSync = Matrix.of(context)
-          .client
-          .onSync
-          .stream
+      final updateFromSync = Matrix.of(context).client.onSync.stream
           .where(
             (syncUpdate) =>
                 syncUpdate.accountData?.any(
@@ -77,17 +76,16 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
                 false,
           )
           .first;
-      await Matrix.of(context).client.setPushRuleEnabled(
-            kind,
-            pushRule.ruleId,
-            !pushRule.enabled,
-          );
+      await Matrix.of(
+        context,
+      ).client.setPushRuleEnabled(kind, pushRule.ruleId, !pushRule.enabled);
       await updateFromSync;
     } catch (e, s) {
       Logs().w('Unable to toggle push rule', e, s);
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
     } finally {
       if (mounted) {
         setState(() {
@@ -97,7 +95,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
     }
   }
 
-  void editPushRule(PushRule rule, PushRuleKind kind) async {
+  Future<void> editPushRule(PushRule rule, PushRuleKind kind) async {
     final theme = Theme.of(context);
     final action = await showAdaptiveDialog<PushRuleDialogAction>(
       context: context,
@@ -115,9 +113,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
                 scrollDirection: Axis.horizontal,
                 child: SelectableText(
                   prettyJson(rule.toJson()),
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurface,
-                  ),
+                  style: TextStyle(color: theme.colorScheme.onSurface),
                 ),
               ),
             ),
@@ -157,10 +153,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
           isLoading = true;
         });
         try {
-          final updateFromSync = Matrix.of(context)
-              .client
-              .onSync
-              .stream
+          final updateFromSync = Matrix.of(context).client.onSync.stream
               .where(
                 (syncUpdate) =>
                     syncUpdate.accountData?.any(
@@ -169,17 +162,14 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
                     false,
               )
               .first;
-          await Matrix.of(context).client.deletePushRule(
-                kind,
-                rule.ruleId,
-              );
+          await Matrix.of(context).client.deletePushRule(kind, rule.ruleId);
           await updateFromSync;
         } catch (e, s) {
           Logs().w('Unable to delete push rule', e, s);
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toLocalizedString(context))),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
         } finally {
           if (mounted) {
             setState(() {

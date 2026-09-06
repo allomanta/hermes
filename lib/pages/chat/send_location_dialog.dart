@@ -1,23 +1,23 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-
-import 'package:geolocator/geolocator.dart';
-import 'package:matrix/matrix.dart';
-
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat/events/map_bubble.dart';
 import 'package:hermes/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class SendLocationDialog extends StatefulWidget {
   final Room room;
 
-  const SendLocationDialog({
-    required this.room,
-    super.key,
-  });
+  const SendLocationDialog({required this.room, super.key});
 
   @override
   SendLocationDialogState createState() => SendLocationDialogState();
@@ -76,7 +76,7 @@ class SendLocationDialogState extends State<SendLocationDialog> {
     }
   }
 
-  void sendAction() async {
+  Future<void> sendAction() async {
     setState(() => isSending = true);
     final body =
         'https://www.openstreetmap.org/?mlat=${position!.latitude}&mlon=${position!.longitude}#map=16/${position!.latitude}/${position!.longitude}';
@@ -86,6 +86,7 @@ class SendLocationDialogState extends State<SendLocationDialog> {
       context: context,
       future: () => widget.room.sendLocation(body, uri),
     );
+    if (!mounted) return;
     Navigator.of(context, rootNavigator: false).pop();
   }
 
@@ -102,12 +103,13 @@ class SendLocationDialogState extends State<SendLocationDialog> {
     } else if (denied) {
       contentWidget = Text(L10n.of(context).locationPermissionDeniedNotice);
     } else if (error != null) {
-      contentWidget =
-          Text(L10n.of(context).errorObtainingLocation(error.toString()));
+      contentWidget = Text(
+        L10n.of(context).errorObtainingLocation(error.toString()),
+      );
     } else {
       contentWidget = Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: .min,
+        mainAxisAlignment: .center,
         children: [
           const CupertinoActivityIndicator(),
           const SizedBox(width: 12),

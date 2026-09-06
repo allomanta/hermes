@@ -1,10 +1,13 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:matrix/matrix.dart';
-
-import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../../config/app_config.dart';
 
 class ReplyContent extends StatelessWidget {
@@ -29,21 +32,21 @@ class ReplyContent extends StatelessWidget {
     final theme = Theme.of(context);
 
     final timeline = this.timeline;
-    final displayEvent =
-        timeline != null ? replyEvent.getDisplayEvent(timeline) : replyEvent;
-    final fontSize =
-        AppConfig.messageFontSize * AppSettings.fontSizeFactor.value;
+    final displayEvent = timeline != null
+        ? replyEvent.getDisplayEvent(timeline)
+        : replyEvent;
+    const fontSize = AppConfig.messageFontSize;
     final color = theme.brightness == Brightness.dark
         ? theme.colorScheme.onTertiaryContainer
         : ownMessage
-            ? theme.colorScheme.tertiaryContainer
-            : theme.colorScheme.tertiary;
+        ? theme.colorScheme.tertiaryContainer
+        : theme.colorScheme.tertiary;
 
     return Material(
       color: Colors.transparent,
       borderRadius: borderRadius,
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: <Widget>[
           Container(
             width: 5,
@@ -56,8 +59,8 @@ class ReplyContent extends StatelessWidget {
           const SizedBox(width: 6),
           Flexible(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: .start,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 FutureBuilder<User?>(
                   initialData: displayEvent.senderFromMemoryOrFallback,
@@ -76,19 +79,23 @@ class ReplyContent extends StatelessWidget {
                   },
                 ),
                 Text(
-                  displayEvent.calcLocalizedBodyFallback(
-                    MatrixLocals(L10n.of(context)),
-                    withSenderNamePrefix: false,
-                    hideReply: true,
-                  ),
+                  displayEvent
+                      .calcLocalizedBodyFallback(
+                        MatrixLocals(L10n.of(context)),
+                        withSenderNamePrefix: false,
+                        hideReply: true,
+                        plaintextBody: true,
+                      )
+                      .trim()
+                      .replaceAll('\n', ' '),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: TextStyle(
                     color: theme.brightness == Brightness.dark
                         ? theme.colorScheme.onSurface
                         : ownMessage
-                            ? theme.colorScheme.onTertiary
-                            : theme.colorScheme.onSurface,
+                        ? theme.colorScheme.onTertiary
+                        : theme.colorScheme.onSurface,
                     fontSize: fontSize,
                   ),
                 ),

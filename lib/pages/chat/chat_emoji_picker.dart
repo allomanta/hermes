@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -6,6 +9,8 @@ import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/chat/sticker_picker_dialog.dart';
 import 'chat.dart';
+import 'package:hermes/pages/chat/trust_user_key_dialog.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ChatEmojiPicker extends StatelessWidget {
   final ChatController controller;
@@ -52,8 +57,9 @@ class ChatEmojiPicker extends StatelessWidget {
                             ),
                             categoryViewConfig: CategoryViewConfig(
                               backspaceColor: theme.colorScheme.primary,
-                              iconColor:
-                                  theme.colorScheme.primary.withAlpha(128),
+                              iconColor: theme.colorScheme.primary.withAlpha(
+                                128,
+                              ),
                               iconColorSelected: theme.colorScheme.primary,
                               indicatorColor: theme.colorScheme.primary,
                               backgroundColor: theme.colorScheme.surface,
@@ -70,7 +76,12 @@ class ChatEmojiPicker extends StatelessWidget {
                         ),
                         StickerPickerDialog(
                           room: controller.room,
-                          onSelected: (sticker) {
+                          onSelected: (sticker) async {
+                            final proceed = await showTrustUserInRoomDialog(
+                              context,
+                              controller.room,
+                            );
+                            if (!proceed) return;
                             controller.room.sendEvent(
                               {
                                 'body': sticker.body,

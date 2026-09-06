@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/themes.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class UnreadBubble extends StatelessWidget {
   final Room room;
@@ -15,8 +18,8 @@ class UnreadBubble extends StatelessWidget {
     final hasNotifications = room.notificationCount > 0;
     final unreadBubbleSize = unread || room.hasNewMessages
         ? room.notificationCount > 0
-            ? 20.0
-            : 14.0
+              ? 20.0
+              : 14.0
         : 0.0;
     return AnimatedContainer(
       duration: PantheonThemes.animationDuration,
@@ -27,28 +30,28 @@ class UnreadBubble extends StatelessWidget {
       width: !hasNotifications && !unread && !room.hasNewMessages
           ? 0
           : (unreadBubbleSize - 9) * room.notificationCount.toString().length +
-              9,
+                9,
       decoration: BoxDecoration(
         color: room.highlightCount > 0
             ? theme.colorScheme.error
             : hasNotifications || room.markedUnread
-                ? theme.colorScheme.primary
-                : theme.colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(7),
+            ? theme.colorScheme.primary
+            : theme.colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(unreadBubbleSize),
       ),
-      child: hasNotifications
+      child: hasNotifications || room.markedUnread
           ? Text(
               room.notificationCount.toString(),
               style: TextStyle(
                 color: room.highlightCount > 0
                     ? theme.colorScheme.onError
                     : hasNotifications
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.onPrimaryContainer,
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onPrimaryContainer,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
-              textAlign: TextAlign.center,
+              textAlign: .center,
             )
           : const SizedBox.shrink(),
     );

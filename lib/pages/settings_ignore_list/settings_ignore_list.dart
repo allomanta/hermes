@@ -1,9 +1,13 @@
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../widgets/matrix.dart';
 import 'settings_ignore_list_view.dart';
 
@@ -33,7 +37,7 @@ class SettingsIgnoreListController extends State<SettingsIgnoreList> {
   void ignoreUser(BuildContext context) {
     final userId = controller.text.trim();
     if (userId.isEmpty) return;
-    if (!userId.isValidMatrixId || userId.sigil != '@') {
+    if (!userId.isValidMatrixIdStrict() || userId.sigil != '@') {
       setState(() {
         errorText = L10n.of(context).invalidInput;
       });
@@ -50,6 +54,12 @@ class SettingsIgnoreListController extends State<SettingsIgnoreList> {
     );
     setState(() {});
     controller.clear();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override

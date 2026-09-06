@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'package:matrix/matrix.dart';
 
 extension FileDescriptionExtension on Event {
@@ -11,12 +16,14 @@ extension FileDescriptionExtension on Event {
     }.contains(messageType)) {
       return null;
     }
-    final formattedBody = content.tryGet<String>('formatted_body');
-    if (formattedBody != null) return formattedBody;
-
     final filename = content.tryGet<String>('filename');
-    final body = content.tryGet<String>('body');
-    if (filename != body && body != null && filename != null) return body;
+    final body = calcUnlocalizedBody(hideReply: true, plaintextBody: true);
+
+    if (filename != body &&
+        filename != null &&
+        content.tryGet<String>('body')?.isNotEmpty == true) {
+      return body;
+    }
     return null;
   }
 }

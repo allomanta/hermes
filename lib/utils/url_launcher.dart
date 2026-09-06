@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:go_router/go_router.dart';
@@ -13,6 +16,7 @@ import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/matrix.dart';
 import '../widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'platform_infos.dart';
+import 'package:material_ui/material_ui.dart';
 
 class UrlLauncher {
   /// The url to open.
@@ -26,7 +30,9 @@ class UrlLauncher {
 
   const UrlLauncher(this.context, this.url, [this.name]);
 
-  void launchUrl() async {
+  Future<void> launchUrl() async {
+    final l10n = L10n.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         url!.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
         {'#', '@', '!', '+', '\$'}.contains(url![0]) ||
@@ -36,8 +42,8 @@ class UrlLauncher {
     final uri = Uri.tryParse(url!);
     if (uri == null) {
       // we can't open this thing
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context).cantOpenUri(url!))),
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.cantOpenUri(url!))),
       );
       return;
     }
@@ -47,10 +53,10 @@ class UrlLauncher {
       // that the user can see the actual url before opening the browser.
       final consent = await showOkCancelAlertDialog(
         context: context,
-        title: L10n.of(context).openLinkInBrowser,
+        title: l10n.openLinkInBrowser,
         message: url,
-        okLabel: L10n.of(context).open,
-        cancelLabel: L10n.of(context).cancel,
+        okLabel: l10n.open,
+        cancelLabel: l10n.cancel,
       );
       if (consent != OkCancelResult.ok) return;
     }
@@ -65,7 +71,7 @@ class UrlLauncher {
             .split(';')
             .first
             .split(',')
-            .map((s) => double.tryParse(s))
+            .map(double.tryParse)
             .toList();
         if (latlong.length == 2 &&
             latlong.first != null &&
@@ -90,21 +96,24 @@ class UrlLauncher {
       return;
     }
     if (uri.host.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context).cantOpenUri(url!))),
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.cantOpenUri(url!))),
       );
       return;
     }
     // okay, we have either an http or an https URI.
     // As some platforms have issues with opening unicode URLs, we are going to help
     // them out by punycode-encoding them for them ourself.
-    final newHost = uri.host.split('.').map((hostPartEncoded) {
-      final hostPart = Uri.decodeComponent(hostPartEncoded);
-      final hostPartPunycode = punycodeEncode(hostPart);
-      return hostPartPunycode != '$hostPart-'
-          ? 'xn--$hostPartPunycode'
-          : hostPart;
-    }).join('.');
+    final newHost = uri.host
+        .split('.')
+        .map((hostPartEncoded) {
+          final hostPart = Uri.decodeComponent(hostPartEncoded);
+          final hostPartPunycode = punycodeEncode(hostPart);
+          return hostPartPunycode != '$hostPart-'
+              ? 'xn--$hostPartPunycode'
+              : hostPart;
+        })
+        .join('.');
     // Force LaunchMode.externalApplication, otherwise url_launcher will default
     // to opening links in a webview on mobile platforms.
     launchUrlString(
@@ -113,20 +122,20 @@ class UrlLauncher {
     );
   }
 
-  void openMatrixToUrl() async {
+  Future<void> openMatrixToUrl() async {
     final matrix = Matrix.of(context);
     final url = this.url!.replaceFirst(
-          AppConfig.deepLinkPrefix,
-          AppConfig.inviteLinkPrefix,
-        );
+      AppConfig.deepLinkPrefix,
+      AppConfig.inviteLinkPrefix,
+    );
 
     // The identifier might be a matrix.to url and needs escaping. Or, it might have multiple
     // identifiers (room id & event id), or it might also have a query part.
     // All this needs parsing.
-    final identityParts = url.parseIdentifierIntoParts() ??
+    final identityParts =
+        url.parseIdentifierIntoParts() ??
         Uri.tryParse(url)?.host.parseIdentifierIntoParts() ??
-        Uri.tryParse(url)
-            ?.pathSegments
+        Uri.tryParse(url)?.pathSegments
             .lastWhereOrNull((_) => true)
             ?.parseIdentifierIntoParts();
     if (identityParts == null) {
@@ -137,7 +146,8 @@ class UrlLauncher {
       // we got a room! Let's open that one
       final roomIdOrAlias = identityParts.primaryIdentifier;
       final event = identityParts.secondaryIdentifier;
-      var room = matrix.client.getRoomByAlias(roomIdOrAlias) ??
+      var room =
+          matrix.client.getRoomByAlias(roomIdOrAlias) ??
           matrix.client.getRoomById(roomIdOrAlias);
       var roomId = room?.id;
       // we make the servers a set and later on convert to a list, so that we can easily
@@ -149,14 +159,15 @@ class UrlLauncher {
           context: context,
           future: () => matrix.client.getRoomIdByAlias(roomIdOrAlias),
         );
-        if (response.error != null) {
-          return; // nothing to do, the alias doesn't exist
+        final result = response.result;
+        if (result != null) {
+          roomId = result.roomId;
+          servers.addAll(result.servers!);
+          room = matrix.client.getRoomById(roomId!);
         }
-        roomId = response.result!.roomId;
-        servers.addAll(response.result!.servers!);
-        room = matrix.client.getRoomById(roomId!);
       }
       servers.addAll(identityParts.via);
+      if (!context.mounted) return;
       if (room != null) {
         if (room.isSpace) {
           // TODO: Implement navigate to space
@@ -167,24 +178,23 @@ class UrlLauncher {
         // we have the room, so....just open it
         if (event != null) {
           context.go(
-            '/${Uri(
-              pathSegments: ['rooms', room.id],
-              queryParameters: {'event': event},
-            )}',
+            '/${Uri(pathSegments: ['rooms', room.id], queryParameters: {'event': event})}',
           );
         } else {
           context.go('/rooms/${room.id}');
         }
         return;
       } else {
+        if (!context.mounted) return;
         await showAdaptiveDialog(
           context: context,
-          builder: (c) => PublicRoomDialog(
-            roomAlias: identityParts.primaryIdentifier,
-          ),
+          barrierDismissible: true,
+          builder: (c) =>
+              PublicRoomDialog(roomAlias: identityParts.primaryIdentifier),
         );
       }
       if (roomIdOrAlias.sigil == '!') {
+        if (!context.mounted) return;
         if (await showOkCancelAlertDialog(
               useRootNavigator: false,
               context: context,
@@ -192,19 +202,22 @@ class UrlLauncher {
             ) ==
             OkCancelResult.ok) {
           roomId = roomIdOrAlias;
+          if (!context.mounted) return;
           final response = await showFutureLoadingDialog(
             context: context,
             future: () => matrix.client.joinRoom(
               roomIdOrAlias,
-              serverName: servers.isNotEmpty ? servers.toList() : null,
+              via: servers.isNotEmpty ? servers.toList() : null,
             ),
           );
           if (response.error != null) return;
+          if (!context.mounted) return;
           // wait for two seconds so that it probably came down /sync
           await showFutureLoadingDialog(
             context: context,
             future: () => Future.delayed(const Duration(seconds: 2)),
           );
+          if (!context.mounted) return;
           if (event != null) {
             context.go(
               Uri(
@@ -222,13 +235,13 @@ class UrlLauncher {
       var noProfileWarning = false;
       final profileResult = await showFutureLoadingDialog(
         context: context,
-        future: () => matrix.client.getProfileFromUserId(userId).catchError(
-          (_) {
-            noProfileWarning = true;
-            return Profile(userId: userId);
-          },
-        ),
+        future: () =>
+            matrix.client.getProfileFromUserId(userId).catchError((_) {
+              noProfileWarning = true;
+              return Profile(userId: userId);
+            }),
       );
+      if (!context.mounted) return;
       await UserDialog.show(
         context: context,
         profile: profileResult.result!,

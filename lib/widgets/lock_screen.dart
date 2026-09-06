@@ -1,10 +1,15 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hermes/l10n/l10n.dart';
-import 'package:hermes/config/themes.dart';
 import 'package:hermes/widgets/app_lock.dart';
+import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:material_ui/material_ui.dart';
 
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});
@@ -19,14 +24,43 @@ class _LockScreenState extends State<LockScreen> {
   bool _inputBlocked = false;
   final TextEditingController _textEditingController = TextEditingController();
 
-  void tryUnlock(String text) async {
+  Future<void> tryUnlockWithBiometrics() async {
     setState(() {
       _errorText = null;
     });
-    if (text.length < 4) return;
+
+    final success = await AppLock.of(context).unlockWithBiometrics();
+
+    if (success) {
+      setState(() {
+        _inputBlocked = false;
+        _errorText = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _errorText = L10n.of(context).wrongPinEntered(_coolDownSeconds);
+      _inputBlocked = true;
+    });
+    Future.delayed(Duration(seconds: _coolDownSeconds)).then((_) {
+      setState(() {
+        _inputBlocked = false;
+        _coolDownSeconds *= 2;
+        _errorText = null;
+      });
+    });
+    _textEditingController.clear();
+  }
+
+  Future<void> tryUnlock(String text) async {
+    text = text.trim();
+    setState(() {
+      _errorText = null;
+    });
 
     final enteredPin = int.tryParse(text);
-    if (enteredPin == null || text.length != 4) {
+    if (enteredPin == null) {
       setState(() {
         _errorText = L10n.of(context).invalidInput;
       });
@@ -34,7 +68,7 @@ class _LockScreenState extends State<LockScreen> {
       return;
     }
 
-    if (AppLock.of(context).unlock(enteredPin.toString())) {
+    if (AppLock.of(context).unlock(text)) {
       setState(() {
         _inputBlocked = false;
         _errorText = null;
@@ -59,61 +93,100 @@ class _LockScreenState extends State<LockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(L10n.of(context).pleaseEnterYourPin),
-        centerTitle: true,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: PantheonThemes.columnWidth,
+    return Overlay(
+      initialEntries: [
+        OverlayEntry(
+          builder: (context) => Scaffold(
+            appBar: AppBar(
+              title: Text(L10n.of(context).pleaseEnterYourPin),
+              centerTitle: true,
             ),
-            child: ListView(
+            body: ListView(
               shrinkWrap: true,
+              padding: const EdgeInsets.all(16.0),
               children: [
+                Center(child: Image.asset('assets/info-logo.png', width: 256)),
+                const SizedBox(height: 16),
                 Center(
-                  child: Image.asset(
-                    'assets/info-logo.png',
-                    width: 256,
-                  ),
-                ),
-                TextField(
-                  controller: _textEditingController,
-                  textInputAction: TextInputAction.done,
-                  keyboardType: TextInputType.number,
-                  obscureText: true,
-                  autofocus: true,
-                  textAlign: TextAlign.center,
-                  readOnly: _inputBlocked,
-                  onChanged: tryUnlock,
-                  onSubmitted: tryUnlock,
-                  style: const TextStyle(fontSize: 40),
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(4),
-                  ],
-                  decoration: InputDecoration(
-                    errorText: _errorText,
-                    hintText: '****',
-                    suffix: IconButton(
-                      icon: const Icon(Icons.lock_open_outlined),
-                      onPressed: () => tryUnlock(_textEditingController.text),
+                  child: TextField(
+                    controller: _textEditingController,
+                    textInputAction: TextInputAction.go,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    autofocus: true,
+                    textAlign: TextAlign.center,
+                    readOnly: _inputBlocked,
+                    onChanged: (text) {
+                      if (text.length >= 6) tryUnlock(text);
+                    },
+                    onSubmitted: tryUnlock,
+                    style: const TextStyle(fontSize: 40),
+                    inputFormatters: [LengthLimitingTextInputFormatter(6)],
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      errorText: _errorText,
+                      hintText: '✱✱✱✱',
+                      hintStyle: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
+                      ),
+                      prefix: AppLock.of(context).useBiometrics
+                          ? IconButton(
+                              tooltip: L10n.of(context).unlockWithBiometrics,
+                              icon: FutureBuilder(
+                                future: LocalAuthentication()
+                                    .getAvailableBiometrics(),
+                                builder: (context, snapshot) {
+                                  final availableBiometrics =
+                                      snapshot.data ?? [];
+                                  if (availableBiometrics.contains(
+                                    BiometricType.face,
+                                  )) {
+                                    return Icon(Icons.face_unlock_outlined);
+                                  }
+                                  return Icon(Icons.fingerprint_outlined);
+                                },
+                              ),
+                              onPressed: _inputBlocked
+                                  ? null
+                                  : tryUnlockWithBiometrics,
+                            )
+                          : IconButton(
+                              tooltip: L10n.of(context).reset,
+                              icon: Icon(Icons.cancel_outlined),
+                              onPressed: _inputBlocked
+                                  ? null
+                                  : _textEditingController.clear,
+                            ),
+                      suffix: IconButton(
+                        tooltip: L10n.of(context).unlock,
+                        icon: Icon(Icons.send_outlined),
+                        onPressed: _inputBlocked
+                            ? null
+                            : () => tryUnlock(_textEditingController.text),
+                      ),
                     ),
                   ),
                 ),
                 if (_inputBlocked)
                   const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: LinearProgressIndicator(),
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator.adaptive(),
                   ),
               ],
             ),
           ),
         ),
-      ),
+      ],
     );
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
   }
 }

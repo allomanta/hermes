@@ -1,23 +1,26 @@
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/utils/string_color.dart';
 import 'package:hermes/widgets/mxc_image.dart';
 import 'package:hermes/widgets/presence_builder.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class Avatar extends StatelessWidget {
   final Uri? mxContent;
   final String? name;
   final double size;
   final void Function()? onTap;
-  static const double defaultSize = 44;
+  static const double defaultSize = 48;
   final Client? client;
   final String? presenceUserId;
   final Color? presenceBackgroundColor;
   final BorderRadius? borderRadius;
   final IconData? icon;
-  final BorderSide? border;
+  final ShapeBorder? shapeBorder;
   final Color? backgroundColor;
   final Color? textColor;
 
@@ -30,22 +33,29 @@ class Avatar extends StatelessWidget {
     this.presenceUserId,
     this.presenceBackgroundColor,
     this.borderRadius,
-    this.border,
+    this.shapeBorder,
     this.icon,
     this.backgroundColor,
     this.textColor,
     super.key,
   });
 
+  String _calcFallbackLetters() {
+    final name = this.name?.trim();
+    if (name == null || name.isEmpty) return '@';
+    final words = name.split(' ');
+    if (words.length <= 1) return name.substring(0, 1);
+    return '${words.first.substring(0, 1)}${words.last.substring(0, 1)}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final name = this.name;
-    final fallbackLetters =
-        name == null || name.isEmpty ? '@' : name.substring(0, 1);
+    final fallbackLetters = _calcFallbackLetters();
 
-    final noPic = mxContent == null ||
+    final noPic =
+        mxContent == null ||
         mxContent.toString().isEmpty ||
         mxContent.toString() == 'null';
     final borderRadius = this.borderRadius ?? BorderRadius.circular(size / 2);
@@ -59,10 +69,12 @@ class Avatar extends StatelessWidget {
             color: theme.brightness == Brightness.light
                 ? Colors.white
                 : Colors.black,
-            shape: RoundedRectangleBorder(
-              borderRadius: borderRadius,
-              side: border ?? BorderSide.none,
-            ),
+            shape:
+                shapeBorder ??
+                RoundedSuperellipseBorder(
+                  borderRadius: borderRadius,
+                  side: BorderSide.none,
+                ),
             clipBehavior: Clip.antiAlias,
             child: MxcImage(
               client: client,
@@ -76,7 +88,9 @@ class Avatar extends StatelessWidget {
               placeholder: (_) => noPic
                   ? Container(
                       decoration: BoxDecoration(
-                        color: backgroundColor ?? name?.lightColorAvatar,
+                        color:
+                            backgroundColor ??
+                            fallbackLetters.colorScheme.primaryContainer,
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -84,7 +98,9 @@ class Avatar extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'RobotoMono',
-                          color: textColor ?? Colors.white,
+                          color:
+                              textColor ??
+                              fallbackLetters.colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.bold,
                           fontSize: (size / 2.5).roundToDouble(),
                         ),
@@ -113,8 +129,8 @@ class Avatar extends StatelessWidget {
               final dotColor = presence.presence.isOnline
                   ? Colors.green
                   : presence.presence.isUnavailable
-                      ? Colors.orange
-                      : Colors.grey;
+                  ? Colors.orange
+                  : Colors.grey;
               return Positioned(
                 bottom: -3,
                 right: -3,
@@ -147,10 +163,7 @@ class Avatar extends StatelessWidget {
     if (onTap == null) return container;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: container,
-      ),
+      child: GestureDetector(onTap: onTap, child: container),
     );
   }
 }

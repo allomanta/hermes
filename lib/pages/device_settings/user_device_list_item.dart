@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'package:matrix/matrix.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
@@ -7,14 +5,9 @@ import 'package:hermes/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import '../../utils/date_time_extension.dart';
 import '../../utils/matrix_sdk_extensions/device_extension.dart';
 import '../../widgets/matrix.dart';
+import 'package:material_ui/material_ui.dart';
 
-enum UserDeviceListItemAction {
-  rename,
-  remove,
-  verify,
-  block,
-  unblock,
-}
+enum UserDeviceListItemAction { rename, remove, verify, block, unblock }
 
 class UserDeviceListItem extends StatelessWidget {
   final Device userDevice;
@@ -37,7 +30,8 @@ class UserDeviceListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
-    final keys = client.userDeviceKeys[Matrix.of(context).client.userID]
+    final keys = client
+        .userDeviceKeys[Matrix.of(context).client.userID]
         ?.deviceKeys[userDevice.deviceId];
     final isOwnDevice = userDevice.deviceId == client.deviceID;
 
@@ -112,10 +106,10 @@ class UserDeviceListItem extends StatelessWidget {
             backgroundColor: keys == null
                 ? Colors.grey[700]
                 : keys.blocked
-                    ? Colors.red
-                    : keys.verified
-                        ? Colors.green
-                        : Colors.orange,
+                ? Colors.red
+                : keys.verified
+                ? Colors.green
+                : Colors.orange,
             child: Icon(userDevice.icon),
           ),
           title: Text(
@@ -125,8 +119,9 @@ class UserDeviceListItem extends StatelessWidget {
           ),
           subtitle: Text(
             L10n.of(context).lastActiveAgo(
-              DateTime.fromMillisecondsSinceEpoch(userDevice.lastSeenTs ?? 0)
-                  .localizedTimeShort(context),
+              DateTime.fromMillisecondsSinceEpoch(
+                userDevice.lastSeenTs ?? 0,
+              ).localizedTimeShort(context),
             ),
             style: const TextStyle(fontWeight: FontWeight.w300),
           ),
@@ -136,14 +131,14 @@ class UserDeviceListItem extends StatelessWidget {
                   keys.blocked
                       ? L10n.of(context).blocked
                       : keys.verified
-                          ? L10n.of(context).verified
-                          : L10n.of(context).unverified,
+                      ? L10n.of(context).verified
+                      : L10n.of(context).unverified,
                   style: TextStyle(
                     color: keys.blocked
                         ? Colors.red
                         : keys.verified
-                            ? Colors.green
-                            : Colors.orange,
+                        ? Colors.green
+                        : Colors.orange,
                   ),
                 ),
         ),

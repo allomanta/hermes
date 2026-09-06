@@ -1,10 +1,13 @@
-import 'package:flutter/material.dart';
-
-import 'package:go_router/go_router.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/settings_password/settings_password.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SettingsPasswordView extends StatelessWidget {
   final SettingsPasswordController controller;
@@ -15,9 +18,7 @@ class SettingsPasswordView extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(L10n.of(context).changePassword),
-      ),
+      appBar: AppBar(title: Text(L10n.of(context).changePassword)),
       body: ListTileTheme(
         iconColor: theme.colorScheme.onSurface,
         child: MaxWidthBody(
@@ -69,8 +70,9 @@ class SettingsPasswordView extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed:
-                        controller.loading ? null : controller.changePassword,
+                    onPressed: controller.loading
+                        ? null
+                        : controller.changePassword,
                     child: controller.loading
                         ? const LinearProgressIndicator()
                         : Text(L10n.of(context).changePassword),

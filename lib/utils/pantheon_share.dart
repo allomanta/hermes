@@ -1,10 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-import 'package:share_plus/share_plus.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:share_plus/share_plus.dart';
+
 import '../widgets/matrix.dart';
 
 abstract class PantheonShare {
@@ -13,6 +17,8 @@ abstract class PantheonShare {
     BuildContext context, {
     bool copyOnly = false,
   }) async {
+    final l10n = L10n.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     if (PlatformInfos.isMobile && !copyOnly) {
       final box = context.findRenderObject() as RenderBox;
       await SharePlus.instance.share(
@@ -23,22 +29,24 @@ abstract class PantheonShare {
       );
       return;
     }
-    await Clipboard.setData(
-      ClipboardData(text: text),
-    );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(L10n.of(context).copiedToClipboard)),
-    );
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!PlatformInfos.isMobile) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(showCloseIcon: true, content: Text(l10n.copiedToClipboard)),
+      );
+    }
     return;
   }
 
   static Future<void> shareInviteLink(BuildContext context) async {
+    final l10n = L10n.of(context);
     final client = Matrix.of(context).client;
     final ownProfile = await client.fetchOwnProfile();
+    if (!context.mounted) return;
     await PantheonShare.share(
-      L10n.of(context).inviteText(
+      l10n.inviteText(
         ownProfile.displayName ?? client.userID!,
-        'https://matrix.to/#/${client.userID}?client=im.hermes',
+        'https://matrix.to/#/${client.userID}?client=im.fluffychat',
       ),
       context,
     );

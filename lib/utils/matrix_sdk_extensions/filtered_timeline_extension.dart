@@ -1,34 +1,37 @@
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/setting_keys.dart';
+import 'package:matrix/matrix.dart';
 
 extension VisibleInGuiExtension on List<Event> {
   List<Event> filterByVisibleInGui({
     String? exceptionEventId,
     String? threadId,
-  }) =>
-      where(
-        (event) {
-          if (threadId != null &&
-              event.relationshipType != RelationshipTypes.reaction) {
-            if ((event.relationshipType != RelationshipTypes.thread ||
-                    event.relationshipEventId != threadId) &&
-                event.eventId != threadId) {
-              return false;
-            }
-          } else if (event.relationshipType == RelationshipTypes.thread) {
-            return false;
-          }
-          return event.isVisibleInGui || event.eventId == exceptionEventId;
-        },
-      ).toList();
+  }) => where((event) {
+    if (threadId != null &&
+        event.relationshipType != RelationshipTypes.reaction) {
+      if ((event.relationshipType != RelationshipTypes.thread ||
+              event.relationshipEventId != threadId) &&
+          event.eventId != threadId) {
+        return false;
+      }
+    } else if (event.relationshipType == RelationshipTypes.thread) {
+      return false;
+    }
+    return event.isVisibleInGui || event.eventId == exceptionEventId;
+  }).toList();
 }
 
 extension IsStateExtension on Event {
   bool get isVisibleInGui =>
       // always filter out edit and reaction relationships
-      !{RelationshipTypes.edit, RelationshipTypes.reaction}
-          .contains(relationshipType) &&
+      !{
+        RelationshipTypes.edit,
+        RelationshipTypes.reaction,
+      }.contains(relationshipType) &&
       // always filter out m.key.* and other known but unimportant events
       !isKnownHiddenStates &&
       // event types to hide: redaction and reaction events
@@ -39,23 +42,16 @@ extension IsStateExtension on Event {
       // if we enabled to hide all unknown events, don't show those
       (!AppSettings.hideUnknownEvents.value || isEventTypeKnown);
 
-  bool get isState => !{
-        EventTypes.Message,
-        EventTypes.Sticker,
-        EventTypes.Encrypted,
-      }.contains(type);
+  bool get isState => !{EventTypes.Message, EventTypes.Sticker}.contains(type);
 
   bool get isCollapsedState => !{
-        EventTypes.Message,
-        EventTypes.Sticker,
-        EventTypes.Encrypted,
-        EventTypes.RoomCreate,
-        EventTypes.RoomTombstone,
-      }.contains(type);
+    EventTypes.Message,
+    EventTypes.Sticker,
+    EventTypes.RoomCreate,
+    EventTypes.RoomTombstone,
+  }.contains(type);
 
   bool get isKnownHiddenStates =>
-      {
-        PollEventContent.responseType,
-      }.contains(type) ||
+      {PollEventContent.responseType}.contains(type) ||
       type.startsWith('m.key.verification.');
 }

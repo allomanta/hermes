@@ -1,6 +1,10 @@
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 
 /// This is a temporary helper class until there is a proper solution to this with the new system
 class MatrixLocals extends MatrixLocalizations {
@@ -37,13 +41,13 @@ class MatrixLocals extends MatrixLocalizations {
   }
 
   @override
-  String changedTheChatDescriptionTo(String senderName, String content) {
-    return l10n.changedTheChatDescriptionTo(senderName, content);
+  String changedTheChatDescriptionTo(String senderName, _) {
+    return l10n.changedTheChatDescription(senderName);
   }
 
   @override
-  String changedTheChatNameTo(String senderName, String content) {
-    return l10n.changedTheChatNameTo(senderName, content);
+  String changedTheChatNameTo(String senderName, _) {
+    return l10n.changedTheChatName(senderName);
   }
 
   @override
@@ -353,13 +357,15 @@ class MatrixLocals extends MatrixLocalizations {
   String get cancelledSend => l10n.sendCanceled;
 
   @override
-  String voiceMessage(String senderName, Duration? duration) =>
-      l10n.sentVoiceMessage(
-        senderName,
-        duration == null
-            ? ''
-            : '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
-      );
+  String voiceMessage(
+    String senderName,
+    Duration? duration,
+  ) => l10n.sentVoiceMessage(
+    senderName,
+    duration == null
+        ? ''
+        : '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
+  );
 
   @override
   String get refreshingLastEvent => l10n.loadingPleaseWait;
@@ -369,4 +375,8 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String get pollHasBeenEnded => l10n.pollHasBeenEnded;
+
+  @override
+  String incomingCallFrom(String senderName) =>
+      l10n.incomingCallFrom(senderName);
 }

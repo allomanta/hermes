@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:hermes/l10n/l10n.dart';
@@ -10,6 +8,8 @@ import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/sync_status_localization.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/presence_builder.dart';
+import 'package:hermes/utils/verified_room_extension.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ChatAppBarTitle extends StatelessWidget {
   final ChatController controller;
@@ -33,8 +33,8 @@ class ChatAppBarTitle extends StatelessWidget {
       onTap: controller.isArchived
           ? null
           : () => PantheonThemes.isThreeColumnMode(context)
-              ? controller.toggleDisplayChatDetailsColumn()
-              : context.go('/rooms/${room.id}/details'),
+                ? controller.toggleDisplayChatDetailsColumn()
+                : context.go('/rooms/${room.id}/details'),
       child: Row(
         children: [
           Hero(
@@ -50,55 +50,99 @@ class ChatAppBarTitle extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: .min,
+              crossAxisAlignment: .start,
               children: [
-                Text(
-                  room.getLocalizedDisplayname(MatrixLocals(L10n.of(context))),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
+                Row(
+                  spacing: 4,
+                  children: [
+                    if (room.allUsersVerified)
+                      Icon(
+                        Icons.verified,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 16,
+                      ),
+                    Expanded(
+                      child: Text(
+                        room.getLocalizedDisplayname(
+                          MatrixLocals(L10n.of(context)),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
                 ),
                 StreamBuilder(
                   stream: room.client.onSyncStatus.stream,
                   builder: (context, snapshot) {
-                    final status = room.client.onSyncStatus.value ??
+                    final status =
+                        room.client.onSyncStatus.value ??
                         const SyncStatusUpdate(SyncStatus.waitingForResponse);
-                    final hide = PantheonThemes.isColumnMode(context) ||
+                    final hide =
+                        PantheonThemes.isColumnMode(context) ||
                         (room.client.onSync.value != null &&
                             status.status != SyncStatus.error &&
                             room.client.prevBatch != null);
+                    final style = TextStyle(fontSize: 11);
                     return AnimatedSize(
                       duration: PantheonThemes.animationDuration,
                       child: hide
-                          ? PresenceBuilder(
-                              userId: room.directChatMatrixID,
-                              builder: (context, presence) {
-                                final lastActiveTimestamp =
-                                    presence?.lastActiveTimestamp;
-                                final style = TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(context).colorScheme.outline,
-                                );
-                                if (presence?.currentlyActive == true) {
-                                  return Text(
-                                    L10n.of(context).currentlyActive,
-                                    style: style,
-                                  );
-                                }
-                                if (lastActiveTimestamp != null) {
-                                  return Text(
-                                    L10n.of(context).lastActiveAgo(
-                                      lastActiveTimestamp
-                                          .localizedTimeShort(context),
-                                    ),
-                                    style: style,
-                                  );
-                                }
-                                return const SizedBox.shrink();
-                              },
-                            )
+                          ? room.isDirectChat
+                                ? PresenceBuilder(
+                                    userId: room.directChatMatrixID,
+                                    builder: (context, presence) {
+                                      final statusMessage = presence?.statusMsg
+                                          ?.trim();
+
+                                      final lastActiveTimestamp =
+                                          presence?.lastActiveTimestamp;
+
+                                      final texts = [
+                                        if (presence?.currentlyActive == true)
+                                          L10n.of(context).currentlyActive
+                                        else if (lastActiveTimestamp != null)
+                                          L10n.of(context).lastActiveAgo(
+                                            lastActiveTimestamp
+                                                .localizedTimeShort(context),
+                                          ),
+                                        ?statusMessage,
+                                      ];
+                                      final text = texts.join(' ◦ ');
+                                      if (text.isEmpty) {
+                                        return const SizedBox.shrink();
+                                      }
+
+                                      return Text(text, style: style);
+                                    },
+                                  )
+                                : Row(
+                                    children: [
+                                      Text(
+                                        L10n.of(context).countParticipants(
+                                          (room.summary.mJoinedMemberCount ??
+                                                  1) +
+                                              (room
+                                                      .summary
+                                                      .mInvitedMemberCount ??
+                                                  0),
+                                        ),
+                                        maxLines: 1,
+                                        style: style,
+                                      ),
+                                      if (room.topic.isNotEmpty) ...[
+                                        Text(' ◦ ', style: style),
+                                        Expanded(
+                                          child: Text(
+                                            room.topic,
+                                            style: style,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  )
                           : Row(
                               children: [
                                 SizedBox.square(
@@ -106,23 +150,13 @@ class ChatAppBarTitle extends StatelessWidget {
                                   child: CircularProgressIndicator.adaptive(
                                     strokeWidth: 1,
                                     value: status.progress,
-                                    valueColor: status.error != null
-                                        ? AlwaysStoppedAnimation<Color>(
-                                            Theme.of(context).colorScheme.error,
-                                          )
-                                        : null,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
                                     status.calcLocalizedString(context),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: status.error != null
-                                          ? Theme.of(context).colorScheme.error
-                                          : null,
-                                    ),
+                                    style: TextStyle(fontSize: 12),
                                   ),
                                 ),
                               ],

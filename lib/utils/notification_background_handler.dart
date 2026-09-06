@@ -1,38 +1,42 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:convert';
 import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/client_manager.dart';
+import 'package:hermes/utils/push_helper.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:hermes/utils/client_download_content_extension.dart';
-import 'package:hermes/l10n/l10n.dart';
-import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:hermes/utils/platform_infos.dart';
-import 'package:hermes/utils/push_helper.dart';
+
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
-import 'package:hermes/utils/client_manager.dart';
 
 bool _vodInitialized = false;
 
 extension NotificationResponseJson on NotificationResponse {
   String toJsonString() => jsonEncode({
-        'type': notificationResponseType.name,
-        'id': id,
-        'actionId': actionId,
-        'input': input,
-        'payload': payload,
-        'data': data,
-      });
+    'type': notificationResponseType.name,
+    'id': id,
+    'actionId': actionId,
+    'input': input,
+    'payload': payload,
+    'data': data,
+  });
 
   static NotificationResponse fromJsonString(String jsonString) {
     final json = jsonDecode(jsonString) as Map<String, Object?>;
     return NotificationResponse(
-      notificationResponseType: NotificationResponseType.values
-          .singleWhere((t) => t.name == json['type']),
+      notificationResponseType: NotificationResponseType.values.singleWhere(
+        (t) => t.name == json['type'],
+      ),
       id: json['id'] as int?,
       actionId: json['actionId'] as String?,
       input: json['input'] as String?,
@@ -51,11 +55,12 @@ Future<void> waitForPushIsolateDone() async {
 }
 
 @pragma('vm:entry-point')
-void notificationTapBackground(
+Future<void> notificationTapBackground(
   NotificationResponse notificationResponse,
 ) async {
-  final sendPort =
-      IsolateNameServer.lookupPortByName(AppConfig.mainIsolatePortName);
+  final sendPort = IsolateNameServer.lookupPortByName(
+    AppConfig.mainIsolatePortName,
+  );
   if (sendPort != null) {
     sendPort.send(notificationResponse.toJsonString());
     Logs().i('Notification tap sent to main isolate!');
@@ -76,11 +81,14 @@ void notificationTapBackground(
     _vodInitialized = true;
   }
   final store = await AppSettings.init();
-  final client = (await ClientManager.getClients(
-    initialize: false,
-    store: store,
-  ))
-      .first;
+
+  final payload = HermesPushPayload.fromString(
+    notificationResponse.payload ?? '',
+  );
+  final clientName = payload.clientName;
+  final client = clientName == null
+      ? (await ClientManager.getClients(store: store, initialize: false)).first
+      : (await ClientManager.createClient(clientName, store));
   await client.abortSync();
   await client.init(
     waitForFirstSync: false,
@@ -91,7 +99,7 @@ void notificationTapBackground(
     throw Exception('Notification tab in background but not logged in!');
   }
   try {
-    await notificationTap(notificationResponse, client: client);
+    await notificationTap(notificationResponse, clients: [client]);
   } finally {
     await client.dispose(closeDatabase: false);
     pushIsolateReceivePort.sendPort.send('DONE');
@@ -103,15 +111,28 @@ void notificationTapBackground(
 Future<void> notificationTap(
   NotificationResponse notificationResponse, {
   GoRouter? router,
-  required Client client,
+  required List<Client> clients,
   L10n? l10n,
 }) async {
   Logs().d(
     'Notification action handler started',
     notificationResponse.notificationResponseType.name,
   );
-  final payload =
-      HermesPushPayload.fromString(notificationResponse.payload ?? '');
+  final payload = HermesPushPayload.fromString(
+    notificationResponse.payload ?? '',
+  );
+  final client =
+      clients.firstWhereOrNull(
+        (client) => client.clientName == payload.clientName,
+      ) ??
+      clients.first;
+
+  updateSummaryNotification(
+    flutterLocalNotificationsPlugin: FlutterLocalNotificationsPlugin(),
+    clientName: client.clientName,
+    l10n: await lookupL10n(PlatformDispatcher.instance.locale),
+  );
+
   switch (notificationResponse.notificationResponseType) {
     case NotificationResponseType.selectedNotification:
       final roomId = payload.roomId;
@@ -131,8 +152,8 @@ Future<void> notificationTap(
       }
       router.go(
         client.getRoomById(roomId)?.membership == Membership.invite
-            ? '/rooms'
-            : '/rooms/$roomId',
+            ? '/rooms?client=${client.clientName}'
+            : '/rooms/$roomId?client=${client.clientName}',
       );
     case NotificationResponseType.selectedNotificationAction:
       final actionType = HermesNotificationActions.values.singleWhereOrNull(
@@ -169,91 +190,25 @@ Future<void> notificationTap(
             );
           }
 
-          final eventId = await room.sendTextEvent(
+          await room.sendTextEvent(
             input,
             parseCommands: false,
             displayPendingEvent: false,
           );
-
-          if (PlatformInfos.isAndroid) {
-            final ownProfile = await room.client.fetchOwnProfile();
-            final avatar = ownProfile.avatarUrl;
-            final avatarFile = avatar == null
-                ? null
-                : await client
-                    .downloadMxcCached(
-                      avatar,
-                      thumbnailMethod: ThumbnailMethod.crop,
-                      width: notificationAvatarDimension,
-                      height: notificationAvatarDimension,
-                      animated: false,
-                      isThumbnail: true,
-                      rounded: true,
-                    )
-                    .timeout(const Duration(seconds: 3));
-            final messagingStyleInformation =
-                await AndroidFlutterLocalNotificationsPlugin()
-                    .getActiveNotificationMessagingStyle(room.id.hashCode);
-            if (messagingStyleInformation == null) return;
-            l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
-            messagingStyleInformation.messages?.add(
-              Message(
-                input,
-                DateTime.now(),
-                Person(
-                  key: room.client.userID,
-                  name: l10n.you,
-                  icon: avatarFile == null
-                      ? null
-                      : ByteArrayAndroidIcon(avatarFile),
-                ),
-              ),
-            );
-
-            await FlutterLocalNotificationsPlugin().show(
-              room.id.hashCode,
-              room.getLocalizedDisplayname(MatrixLocals(l10n)),
-              input,
-              NotificationDetails(
-                android: AndroidNotificationDetails(
-                  AppConfig.pushNotificationsChannelId,
-                  l10n.incomingMessages,
-                  category: AndroidNotificationCategory.message,
-                  shortcutId: room.id,
-                  styleInformation: messagingStyleInformation,
-                  groupKey: room.id,
-                  playSound: false,
-                  enableVibration: false,
-                  actions: <AndroidNotificationAction>[
-                    AndroidNotificationAction(
-                      HermesNotificationActions.reply.name,
-                      l10n.reply,
-                      inputs: [
-                        AndroidNotificationActionInput(
-                          label: l10n.writeAMessage,
-                        ),
-                      ],
-                      cancelNotification: false,
-                      allowGeneratedReplies: true,
-                      semanticAction: SemanticAction.reply,
-                    ),
-                    AndroidNotificationAction(
-                      HermesNotificationActions.markAsRead.name,
-                      l10n.markAsRead,
-                      semanticAction: SemanticAction.markAsRead,
-                    ),
-                  ],
-                ),
-              ),
-              payload: HermesPushPayload(
-                client.clientName,
-                room.id,
-                eventId,
-              ).toString(),
-            );
-          }
+        case HermesNotificationActions.mute:
+          await room.setPushRuleState(PushRuleState.mentionsOnly);
+        case HermesNotificationActions.open:
+          router?.go(
+            client.getRoomById(roomId)?.membership == Membership.invite
+                ? '/rooms?client=${client.clientName}'
+                : '/rooms/$roomId?client=${client.clientName}',
+          );
+        case HermesNotificationActions.enterCall:
+          router?.go('/rooms/$roomId?client=${client.clientName}&action=call');
       }
+    case NotificationResponseType.notificationDismissed:
+      return;
   }
 }
 
-enum HermesNotificationActions { markAsRead, reply }
+enum HermesNotificationActions { markAsRead, reply, mute, open, enterCall }

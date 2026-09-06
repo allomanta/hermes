@@ -1,11 +1,14 @@
-import 'package:flutter/material.dart';
-
-import 'package:flutter_linkify/flutter_linkify.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:hermes/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:material_ui/material_ui.dart';
 
 Future<String?> showTextInputDialog({
   required BuildContext context,
@@ -28,6 +31,7 @@ Future<String?> showTextInputDialog({
   int? maxLength,
   bool autocorrect = true,
 }) {
+  // TODO: Dispose this somewhere
   final controller = TextEditingController(text: initialText);
   return showAdaptiveDialog<String>(
     context: context,
@@ -42,7 +46,7 @@ Future<String?> showTextInputDialog({
         content: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 256),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: [
               if (message != null)
                 SelectableLinkify(

@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/device_settings/device_settings.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'user_device_list_item.dart';
+import 'package:material_ui/material_ui.dart';
 
 class DevicesSettingsView extends StatelessWidget {
   final DevicesSettingsController controller;
@@ -26,7 +26,7 @@ class DevicesSettingsView extends StatelessWidget {
             if (snapshot.hasError) {
               return Center(
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: .min,
                   children: <Widget>[
                     const Icon(Icons.error_outlined),
                     Text(snapshot.error.toString()),
@@ -46,7 +46,7 @@ class DevicesSettingsView extends StatelessWidget {
               itemBuilder: (BuildContext context, int i) {
                 if (i == 0) {
                   return Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize: .min,
                     children: [
                       if (controller.chatBackupEnabled == false)
                         Padding(
@@ -56,8 +56,9 @@ class DevicesSettingsView extends StatelessWidget {
                               child: Icon(Icons.info_outlined),
                             ),
                             subtitle: Text(
-                              L10n.of(context)
-                                  .noticeChatBackupDeviceVerification,
+                              L10n.of(
+                                context,
+                              ).noticeChatBackupDeviceVerification,
                             ),
                           ),
                         ),

@@ -1,45 +1,31 @@
-import 'dart:io';
-
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:file_picker/file_picker.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/size_string.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:universal_html/html.dart' as html;
-
-import 'package:hermes/l10n/l10n.dart';
-import 'package:hermes/utils/platform_infos.dart';
-import 'package:hermes/utils/size_string.dart';
-import 'package:hermes/widgets/future_loading_dialog.dart';
 
 extension MatrixFileExtension on MatrixFile {
-  void save(BuildContext context) async {
-    if (PlatformInfos.isWeb) {
-      _webDownload();
-      return;
-    }
-
-    final downloadPath = await FilePicker.platform.saveFile(
-      dialogTitle: L10n.of(context).saveFile,
+  Future<void> save(BuildContext context) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final l10n = L10n.of(context);
+    final downloadPath = await FilePicker.saveFile(
+      dialogTitle: l10n.saveFile,
       fileName: name,
       type: filePickerFileType,
       bytes: bytes,
     );
     if (downloadPath == null) return;
 
-    if (PlatformInfos.isDesktop) {
-      final result = await showFutureLoadingDialog(
-        context: context,
-        future: () => File(downloadPath).writeAsBytes(bytes),
-      );
-      if (result.error != null) return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
+    scaffoldMessenger.showSnackBar(
       SnackBar(
-        content: Text(
-          L10n.of(context).fileHasBeenSavedAt(downloadPath),
-        ),
+        content: Text(l10n.fileHasBeenSavedAt(downloadPath.toString())),
+        showCloseIcon: true,
       ),
     );
   }
@@ -51,20 +37,7 @@ extension MatrixFileExtension on MatrixFile {
     return FileType.any;
   }
 
-  void _webDownload() {
-    html.AnchorElement(
-      href: html.Url.createObjectUrlFromBlob(
-        html.Blob(
-          [bytes],
-          mimeType,
-        ),
-      ),
-    )
-      ..download = name
-      ..click();
-  }
-
-  void share(BuildContext context) async {
+  Future<void> share(BuildContext context) async {
     // Workaround for iPad from
     // https://github.com/fluttercommunity/plus_plugins/tree/main/packages/share_plus/share_plus#ipad
     final box = context.findRenderObject() as RenderBox?;
@@ -72,8 +45,9 @@ extension MatrixFileExtension on MatrixFile {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile.fromData(bytes, name: name, mimeType: mimeType)],
-        sharePositionOrigin:
-            box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+        sharePositionOrigin: box == null
+            ? null
+            : box.localToGlobal(Offset.zero) & box.size,
       ),
     );
     return;

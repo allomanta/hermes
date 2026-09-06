@@ -1,12 +1,17 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:matrix/matrix.dart';
-
-import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat/utd_dialog.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:hermes/widgets/avatar.dart';
+import 'package:flutter/gestures.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../../config/app_config.dart';
 
 class StateMessage extends StatelessWidget {
@@ -35,8 +40,9 @@ class StateMessage extends StatelessWidget {
                   padding: const EdgeInsets.all(4),
                   child: Material(
                     color: theme.colorScheme.surface.withAlpha(128),
-                    borderRadius:
-                        BorderRadius.circular(AppConfig.borderRadius / 3),
+                    borderRadius: BorderRadius.circular(
+                      AppConfig.borderRadius / 3,
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8.0,
@@ -45,20 +51,52 @@ class StateMessage extends StatelessWidget {
                       child: Text.rich(
                         TextSpan(
                           children: [
-                            TextSpan(
-                              text: event.calcLocalizedBodyFallback(
-                                MatrixLocals(L10n.of(context)),
+                            if (event.type != EventTypes.Encrypted)
+                              TextSpan(
+                                text: event.calcLocalizedBodyFallback(
+                                  MatrixLocals(L10n.of(context)),
+                                ),
+                              )
+                            else ...[
+                              WidgetSpan(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 4.0),
+                                  child: Avatar(
+                                    name: event.senderFromMemoryOrFallback
+                                        .calcDisplayname(),
+                                    size: 14,
+                                    mxContent: event
+                                        .senderFromMemoryOrFallback
+                                        .avatarUrl,
+                                  ),
+                                ),
                               ),
-                            ),
+                              TextSpan(
+                                text: L10n.of(context).messageNotDecryptable,
+                              ),
+                              if (!event.redacted)
+                                WidgetSpan(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 4.0),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(7),
+                                      onTap: () =>
+                                          UtdDialog.show(context, event),
+                                      child: Icon(
+                                        Icons.info_outlined,
+                                        size: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                             if (onExpand != null) ...[
-                              const TextSpan(
-                                text: ' + ',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
+                              const TextSpan(text: '\n'),
                               TextSpan(
                                 style: TextStyle(
                                   color: theme.colorScheme.primary,
                                   decoration: TextDecoration.underline,
+                                  decorationColor: theme.colorScheme.primary,
                                 ),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = onExpand,
@@ -69,7 +107,7 @@ class StateMessage extends StatelessWidget {
                         ),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 12 * AppSettings.fontSizeFactor.value,
+                          fontSize: 11,
                           decoration: event.redacted
                               ? TextDecoration.lineThrough
                               : null,

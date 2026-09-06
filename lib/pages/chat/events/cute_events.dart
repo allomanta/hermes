@@ -1,11 +1,14 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:math';
-
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
 
 import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class CuteContent extends StatefulWidget {
   final Event event;
@@ -37,13 +40,10 @@ class _CuteContentState extends State<CuteContent> {
         return GestureDetector(
           onTap: addOverlay,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
             children: [
-              Text(
-                widget.event.text,
-                style: const TextStyle(fontSize: 150),
-              ),
+              Text(widget.event.text, style: const TextStyle(fontSize: 150)),
               if (label != null) Text(label),
             ],
           ),
@@ -55,6 +55,7 @@ class _CuteContentState extends State<CuteContent> {
   Future<void> addOverlay() async {
     _isOverlayShown = true;
     await Future.delayed(const Duration(milliseconds: 50));
+    if (!mounted) return;
 
     OverlayEntry? overlay;
     overlay = OverlayEntry(
@@ -69,7 +70,7 @@ class _CuteContentState extends State<CuteContent> {
     Overlay.of(context).insert(overlay);
   }
 
-  generateLabel(User? user) {
+  String? generateLabel(User? user) {
     switch (widget.event.content['cute_type']) {
       case 'googly_eyes':
         return L10n.of(context).googlyEyesContent(
@@ -90,6 +91,7 @@ class _CuteContentState extends State<CuteContent> {
               '',
         );
     }
+    return null;
   }
 }
 
@@ -111,10 +113,7 @@ class _CuteEventOverlayState extends State<CuteEventOverlay>
     with TickerProviderStateMixin {
   final List<Size> items = List.generate(
     50,
-    (index) => Size(
-      Random().nextDouble(),
-      4 + (Random().nextDouble() * 4),
-    ),
+    (index) => Size(Random().nextDouble(), 4 + (Random().nextDouble() * 4)),
   );
 
   AnimationController? controller;
@@ -149,14 +148,13 @@ class _CuteEventOverlayState extends State<CuteEventOverlay>
                     .map(
                       (position) => Positioned(
                         left: position.width * width,
-                        bottom: (height *
+                        bottom:
+                            (height *
                                 .25 *
                                 position.height *
                                 (controller?.value ?? 0)) -
                             _CuteOverlayContent.size,
-                        child: _CuteOverlayContent(
-                          emoji: widget.emoji,
-                        ),
+                        child: _CuteOverlayContent(emoji: widget.emoji),
                       ),
                     )
                     .toList(),
@@ -173,6 +171,12 @@ class _CuteEventOverlayState extends State<CuteEventOverlay>
       widget.onAnimationEnd.call();
     }
   }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
 }
 
 class _CuteOverlayContent extends StatelessWidget {
@@ -185,10 +189,7 @@ class _CuteOverlayContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox.square(
       dimension: size,
-      child: Text(
-        emoji,
-        style: const TextStyle(fontSize: 48),
-      ),
+      child: Text(emoji, style: const TextStyle(fontSize: 48)),
     );
   }
 }

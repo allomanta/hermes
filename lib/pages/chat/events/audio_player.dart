@@ -1,22 +1,26 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
 import 'package:async/async.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:matrix/matrix.dart';
-import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
-import 'package:path_provider/path_provider.dart';
-
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/utils/error_reporter.dart';
 import 'package:hermes/utils/file_description.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/utils/url_launcher.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+import 'package:ogg_caf_converter/ogg_caf_converter.dart';
+import 'package:path_provider/path_provider.dart';
+
 import '../../../utils/matrix_sdk_extensions/event_extension.dart';
 import '../../../widgets/hermes_app.dart';
 import '../../../widgets/matrix.dart';
@@ -100,12 +104,13 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                   onPressed: () {
                     audioPlayer.pause();
                     audioPlayer.dispose();
-                    matrix.voiceMessageEventId.value =
-                        matrix.audioPlayer = null;
+                    matrix.voiceMessageEventId.value = matrix.audioPlayer =
+                        null;
 
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ScaffoldMessenger.of(matrix.context)
-                          .clearMaterialBanners();
+                      ScaffoldMessenger.of(
+                        matrix.context,
+                      ).clearMaterialBanners();
                     });
                   },
                   icon: const Icon(Icons.close_outlined),
@@ -122,18 +127,16 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     }
   }
 
-  void _onButtonTap() async {
+  Future<void> _onButtonTap() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
     });
     final currentPlayer =
         matrix.voiceMessageEventId.value != widget.event.eventId
-            ? null
-            : matrix.audioPlayer;
-    if (currentPlayer != null) {
-      if (currentPlayer.isAtEndPosition) {
-        currentPlayer.seek(Duration.zero);
-      } else if (currentPlayer.playing) {
+        ? null
+        : matrix.audioPlayer;
+    if (currentPlayer != null && !currentPlayer.isAtEndPosition) {
+      if (currentPlayer.playing) {
         currentPlayer.pause();
       } else {
         currentPlayer.play();
@@ -151,25 +154,26 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     setState(() => status = AudioPlayerStatus.downloading);
     try {
       final fileSize = widget.event.content
-          .tryGetMap<String, dynamic>('info')
+          .tryGetMap<String, Object?>('info')
           ?.tryGet<int>('size');
       matrixFile = await widget.event.downloadAndDecryptAttachment(
         onDownloadProgress: fileSize != null && fileSize > 0
             ? (progress) {
                 final progressPercentage = progress / fileSize;
                 setState(() {
-                  _downloadProgress =
-                      progressPercentage < 1 ? progressPercentage : null;
+                  _downloadProgress = progressPercentage < 1
+                      ? progressPercentage
+                      : null;
                 });
               }
             : null,
       );
 
-      if (!kIsWeb) {
+      final attachmentUrl = widget.event.attachmentOrThumbnailMxcUrl();
+
+      if (!kIsWeb && attachmentUrl != null) {
         final tempDir = await getTemporaryDirectory();
-        final fileName = Uri.encodeComponent(
-          widget.event.attachmentOrThumbnailMxcUrl()!.pathSegments.last,
-        );
+        final fileName = Uri.encodeComponent(attachmentUrl.pathSegments.last);
         file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
 
         await file.writeAsBytes(matrixFile.bytes);
@@ -179,7 +183,10 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
           Logs().v('Convert ogg audio file for iOS...');
           final convertedFile = File('${file.path}.caf');
           if (await convertedFile.exists() == false) {
-            OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
+            await OggCafConverter().convertOggToCaf(
+              input: file.path,
+              output: convertedFile.path,
+            );
           }
           file = convertedFile;
         }
@@ -190,11 +197,10 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
       });
     } catch (e, s) {
       Logs().v('Could not download audio file', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toLocalizedString(context)),
-        ),
-      );
+      if (!mounted) rethrow;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
       rethrow;
     }
     if (!context.mounted) return;
@@ -205,16 +211,20 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     if (file != null) {
       audioPlayer.setFilePath(file.path);
     } else {
-      await audioPlayer.setAudioSource(MatrixFileAudioSource(matrixFile));
+      await audioPlayer.setAudioSource(
+        AudioSource.uri(
+          Uri.dataFromBytes(matrixFile.bytes, mimeType: matrixFile.mimeType),
+        ),
+      );
     }
+    if (!mounted) return;
 
     audioPlayer.play().onError(
-          ErrorReporter(context, 'Unable to play audio message')
-              .onErrorCallback,
-        );
+      ErrorReporter(context, 'Unable to play audio message').onErrorCallback,
+    );
   }
 
-  void _toggleSpeed() async {
+  Future<void> _toggleSpeed() async {
     final audioPlayer = matrix.audioPlayer;
     if (audioPlayer == null) return;
     switch (audioPlayer.speed) {
@@ -240,7 +250,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
 
   List<int>? _getWaveform() {
     final eventWaveForm = widget.event.content
-        .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
+        .tryGetMap<String, Object?>('org.matrix.msc1767.audio')
         ?.tryGetList<int>('waveform');
     if (eventWaveForm == null || eventWaveForm.isEmpty) {
       return null;
@@ -273,7 +283,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     }
 
     final durationInt = widget.event.content
-        .tryGetMap<String, dynamic>('info')
+        .tryGetMap<String, Object?>('info')
         ?.tryGet<int>('duration');
     if (durationInt != null) {
       final duration = Duration(milliseconds: durationInt);
@@ -289,8 +299,9 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     return ValueListenableBuilder(
       valueListenable: matrix.voiceMessageEventId,
       builder: (context, eventId, _) {
-        final audioPlayer =
-            eventId != widget.event.eventId ? null : matrix.audioPlayer;
+        final audioPlayer = eventId != widget.event.eventId
+            ? null
+            : matrix.audioPlayer;
 
         final fileDescription = widget.event.fileDescription;
 
@@ -317,15 +328,15 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
             return Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: .min,
+                crossAxisAlignment: .start,
                 children: [
                   ConstrainedBox(
                     constraints: const BoxConstraints(
                       maxWidth: PantheonThemes.columnWidth,
                     ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: .min,
                       children: <Widget>[
                         SizedBox(
                           width: buttonSize,
@@ -366,9 +377,11 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                   ),
                                   child: Row(
                                     children: [
-                                      for (var i = 0;
-                                          i < AudioPlayerWidget.wavesCount;
-                                          i++)
+                                      for (
+                                        var i = 0;
+                                        i < AudioPlayerWidget.wavesCount;
+                                        i++
+                                      )
                                         Expanded(
                                           child: Container(
                                             height: 32,
@@ -376,13 +389,14 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                             child: Container(
                                               margin:
                                                   const EdgeInsets.symmetric(
-                                                horizontal: 1,
-                                              ),
+                                                    horizontal: 1,
+                                                  ),
                                               decoration: BoxDecoration(
                                                 color: i < wavePosition
                                                     ? widget.color
-                                                    : widget.color
-                                                        .withAlpha(128),
+                                                    : widget.color.withAlpha(
+                                                        128,
+                                                      ),
                                                 borderRadius:
                                                     BorderRadius.circular(64),
                                               ),
@@ -396,7 +410,8 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                               SizedBox(
                                 height: 32,
                                 child: Slider(
-                                  thumbColor: widget.event.senderId ==
+                                  thumbColor:
+                                      widget.event.senderId ==
                                           widget.event.room.client.userID
                                       ? theme.colorScheme.onPrimary
                                       : theme.colorScheme.primary,
@@ -425,10 +440,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                           width: 36,
                           child: Text(
                             statusText,
-                            style: TextStyle(
-                              color: widget.color,
-                              fontSize: 12,
-                            ),
+                            style: TextStyle(color: widget.color, fontSize: 12),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -442,18 +454,20 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                           ),
                           secondChild: Material(
                             color: widget.color.withAlpha(64),
-                            borderRadius:
-                                BorderRadius.circular(AppConfig.borderRadius),
+                            borderRadius: BorderRadius.circular(
+                              AppConfig.borderRadius,
+                            ),
                             child: InkWell(
-                              borderRadius:
-                                  BorderRadius.circular(AppConfig.borderRadius),
+                              borderRadius: BorderRadius.circular(
+                                AppConfig.borderRadius,
+                              ),
                               onTap: _toggleSpeed,
                               child: SizedBox(
                                 width: 32,
                                 height: 20,
                                 child: Center(
                                   child: Text(
-                                    '${audioPlayer?.speed.toString()}x',
+                                    '${audioPlayer?.speed}x',
                                     style: TextStyle(
                                       color: widget.color,
                                       fontSize: 9,
@@ -481,8 +495,9 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                       ),
                       child: Linkify(
                         text: fileDescription,
-                        textScaleFactor:
-                            MediaQuery.textScalerOf(context).scale(1),
+                        textScaleFactor: MediaQuery.textScalerOf(
+                          context,
+                        ).scale(1),
                         style: TextStyle(
                           color: widget.color,
                           fontSize: widget.fontSize,
@@ -505,26 +520,6 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
           },
         );
       },
-    );
-  }
-}
-
-/// To use a MatrixFile as an AudioSource for the just_audio package
-class MatrixFileAudioSource extends StreamAudioSource {
-  final MatrixFile file;
-
-  MatrixFileAudioSource(this.file);
-
-  @override
-  Future<StreamAudioResponse> request([int? start, int? end]) async {
-    start ??= 0;
-    end ??= file.bytes.length;
-    return StreamAudioResponse(
-      sourceLength: file.bytes.length,
-      contentLength: end - start,
-      offset: start,
-      stream: Stream.value(file.bytes.sublist(start, end)),
-      contentType: file.mimeType,
     );
   }
 }

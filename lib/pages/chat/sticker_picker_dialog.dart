@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:matrix/matrix.dart';
@@ -8,6 +7,7 @@ import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/mxc_image.dart';
 import '../../widgets/avatar.dart';
+import 'package:material_ui/material_ui.dart';
 
 class _CloseStickerPickerIntent extends Intent {
   const _CloseStickerPickerIntent();
@@ -15,12 +15,14 @@ class _CloseStickerPickerIntent extends Intent {
 
 class StickerPickerDialog extends StatefulWidget {
   final Room room;
+  final ImagePackUsage usage;
   final void Function(ImagePackImageContent) onSelected;
   final VoidCallback? onEscape;
 
   const StickerPickerDialog({
     required this.onSelected,
     required this.room,
+    this.usage = ImagePackUsage.sticker,
     this.onEscape,
     super.key,
   });
@@ -62,7 +64,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final stickerPacks = widget.room.getImagePacks(ImagePackUsage.sticker);
+    final stickerPacks = widget.room.getImagePacks(widget.usage);
     final packSlugs = stickerPacks.keys.toList();
 
     // ignore: prefer_function_declarations_over_variables
@@ -71,15 +73,17 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
       final filteredImagePackImageEntried = pack.images.entries.toList();
       if (searchFilter?.isNotEmpty ?? false) {
         filteredImagePackImageEntried.removeWhere(
-          (e) => !(e.key.toLowerCase().contains(searchFilter!.toLowerCase()) ||
-              (e.value.body
-                      ?.toLowerCase()
-                      .contains(searchFilter!.toLowerCase()) ??
-                  false)),
+          (e) =>
+              !(e.key.toLowerCase().contains(searchFilter!.toLowerCase()) ||
+                  (e.value.body?.toLowerCase().contains(
+                        searchFilter!.toLowerCase(),
+                      ) ??
+                      false)),
         );
       }
-      final imageKeys =
-          filteredImagePackImageEntried.map((e) => e.key).toList();
+      final imageKeys = filteredImagePackImageEntried
+          .map((e) => e.key)
+          .toList();
       if (imageKeys.isEmpty) {
         return const SizedBox.shrink();
       }
@@ -113,8 +117,9 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                   key: ValueKey(image.url.toString()),
                   onTap: () {
                     // copy the image
-                    final imageCopy =
-                        ImagePackImageContent.fromJson(image.toJson().copy());
+                    final imageCopy = ImagePackImageContent.fromJson(
+                      image.toJson().copy(),
+                    );
                     // set the body, if it doesn't exist, to the key
                     imageCopy.body ??= imageKeys[imageIndex];
                     _handleStickerSelected(imageCopy);

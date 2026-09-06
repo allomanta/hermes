@@ -1,13 +1,17 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:matrix/matrix.dart';
-import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/config/app_config.dart';
-import 'package:hermes/pages/image_viewer/image_viewer.dart';
+import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/utils/file_description.dart';
 import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/mxc_image.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../../widgets/blur_hash.dart';
 
 class ImageBubble extends StatelessWidget {
@@ -42,39 +46,6 @@ class ImageBubble extends StatelessWidget {
     super.key,
   });
 
-  Widget _buildPlaceholder(BuildContext context) {
-    final String blurHashString =
-        event.infoMap['xyz.amorgan.blurhash'] is String
-            ? event.infoMap['xyz.amorgan.blurhash']
-            : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
-    return SizedBox(
-      width: width,
-      height: height,
-      child: BlurHash(
-        blurhash: blurHashString,
-        width: width,
-        height: height,
-        fit: fit,
-      ),
-    );
-  }
-
-  void _onTap(BuildContext context) {
-    if (onTap != null) {
-      onTap!();
-      return;
-    }
-    if (!tapToView) return;
-    showDialog(
-      context: context,
-      builder: (_) => ImageViewer(
-        event,
-        timeline: timeline,
-        outerContext: context,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -93,7 +64,7 @@ class ImageBubble extends StatelessWidget {
     }
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       spacing: 8,
       children: [
         Material(
@@ -108,21 +79,40 @@ class ImageBubble extends StatelessWidget {
             ),
           ),
           child: InkWell(
-            onTap: () => _onTap(context),
+            onTap: onTap,
             borderRadius: borderRadius,
-            child: Hero(
-              tag: event.eventId,
-              child: MxcImage(
-                event: event,
-                width: width,
-                height: height,
-                fit: fit,
-                animated: animated,
-                isThumbnail: thumbnailOnly,
-                placeholder: event.messageType == MessageTypes.Sticker
-                    ? null
-                    : _buildPlaceholder,
-              ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Hero(
+                  tag: event.eventId,
+                  child: AppSettings.showThumbnailsInTimeline.value
+                      ? MxcImage(
+                          cacheKey: event.transactionId ?? event.eventId,
+                          cacheName: event.room.id,
+                          event: event,
+                          width: width,
+                          height: height,
+                          fit: fit,
+                          animated: animated,
+                          isThumbnail: thumbnailOnly,
+                          placeholder: event.messageType == MessageTypes.Sticker
+                              ? null
+                              : (_) => _ImageBubblePlaceholder(
+                                  event: event,
+                                  width: width,
+                                  height: height,
+                                  fit: fit,
+                                ),
+                        )
+                      : _ImageBubblePlaceholder(
+                          event: event,
+                          width: width,
+                          height: height,
+                          fit: fit,
+                        ),
+                ),
+              ],
             ),
           ),
         ),
@@ -130,23 +120,18 @@ class ImageBubble extends StatelessWidget {
           SizedBox(
             width: width,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Linkify(
                 text: fileDescription,
                 textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
                 style: TextStyle(
                   color: textColor,
-                  fontSize: AppSettings.fontSizeFactor.value *
-                      AppConfig.messageFontSize,
+                  fontSize: AppConfig.messageFontSize,
                 ),
                 options: const LinkifyOptions(humanize: false),
                 linkStyle: TextStyle(
                   color: linkColor,
-                  fontSize: AppSettings.fontSizeFactor.value *
-                      AppConfig.messageFontSize,
+                  fontSize: AppConfig.messageFontSize,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),
@@ -155,6 +140,36 @@ class ImageBubble extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _ImageBubblePlaceholder extends StatelessWidget {
+  final Event event;
+  final double width, height;
+  final BoxFit fit;
+
+  const _ImageBubblePlaceholder({
+    required this.event,
+    required this.width,
+    required this.height,
+    required this.fit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final blurHashString =
+        event.infoMap.tryGet<String>('xyz.amorgan.blurhash') ??
+        'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+    return SizedBox(
+      width: width,
+      height: height,
+      child: BlurHash(
+        blurhash: blurHashString,
+        width: width,
+        height: height,
+        fit: fit,
+      ),
     );
   }
 }

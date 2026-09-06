@@ -1,8 +1,12 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-
 import 'package:http/http.dart' as http;
+import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../widgets/matrix.dart';
@@ -17,7 +21,7 @@ class SettingsHomeserver extends StatefulWidget {
 
 class SettingsHomeserverController extends State<SettingsHomeserver> {
   Future<({String name, String version, Uri federationBaseUrl})>
-      fetchServerInfo() async {
+  fetchServerInfo() async {
     final client = Matrix.of(context).client;
     final domain = client.userID!.domain!;
     final httpClient = client.httpClient;
@@ -37,15 +41,10 @@ class SettingsHomeserverController extends State<SettingsHomeserver> {
     }
 
     final serverVersionResult = await http.get(
-      federationBaseUrl.resolveUri(
-        Uri(path: '/_matrix/federation/v1/version'),
-      ),
+      federationBaseUrl.resolveUri(Uri(path: '/_matrix/federation/v1/version')),
     );
     final {
-      'server': {
-        'name': String name,
-        'version': String version,
-      },
+      'server': {'name': String name, 'version': String version},
     } = Map<String, Map<String, dynamic>>.from(
       jsonDecode(serverVersionResult.body),
     );

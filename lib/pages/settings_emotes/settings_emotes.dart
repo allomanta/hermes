@@ -1,55 +1,82 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
-import 'package:collection/collection.dart';
-import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' hide Client;
-import 'package:matrix/matrix.dart';
-
+import 'package:archive/archive.dart'
+    if (dart.library.io) 'package:archive/archive_io.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/client_manager.dart';
 import 'package:hermes/utils/file_selector.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' hide Client;
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../widgets/matrix.dart';
 import 'import_archive_dialog.dart';
 import 'settings_emotes_view.dart';
 
-import 'package:archive/archive.dart'
-    if (dart.library.io) 'package:archive/archive_io.dart';
-
 class EmotesSettings extends StatefulWidget {
-  const EmotesSettings({super.key});
+  final String? roomId;
+  const EmotesSettings({required this.roomId, super.key});
 
   @override
   EmotesSettingsController createState() => EmotesSettingsController();
 }
 
 class EmotesSettingsController extends State<EmotesSettings> {
-  String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
+  late final Room? room;
 
-  Room? get room =>
-      roomId != null ? Matrix.of(context).client.getRoomById(roomId!) : null;
+  String? stateKey;
 
-  String? get stateKey => GoRouterState.of(context).pathParameters['state_key'];
+  List<String>? get packKeys {
+    final room = this.room;
+    if (room == null) return null;
+    final keys = room.states['im.ponies.room_emotes']?.keys.toList() ?? [];
+    keys.sort();
+    return keys;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    room = widget.roomId != null
+        ? Matrix.of(context).client.getRoomById(widget.roomId!)
+        : null;
+    setStateKey(packKeys?.firstOrNull, reset: false);
+  }
+
+  void setStateKey(String? key, {reset = true}) {
+    stateKey = key;
+
+    final event = key == null
+        ? null
+        : room?.getState('im.ponies.room_emotes', key);
+    final eventPack = event?.content.tryGetMap<String, Object?>('pack');
+    packDisplayNameController.text =
+        eventPack?.tryGet<String>('display_name') ?? '';
+    packAttributionController.text =
+        eventPack?.tryGet<String>('attribution') ?? '';
+    if (reset) resetAction();
+  }
 
   bool showSave = false;
-  TextEditingController newImageCodeController = TextEditingController();
-  ValueNotifier<ImagePackImageContent?> newImageController =
-      ValueNotifier<ImagePackImageContent?>(null);
 
   ImagePackContent _getPack() {
     final client = Matrix.of(context).client;
-    final event = (room != null
+    final event =
+        (room != null
             ? room!.getState('im.ponies.room_emotes', stateKey ?? '')
             : client.accountData['im.ponies.user_emotes']) ??
-        BasicEvent(
-          type: 'm.dummy',
-          content: {},
-        );
+        BasicEvent(type: 'm.dummy', content: {});
     // make sure we work on a *copy* of the event
     return BasicEvent.fromJson(event.toJson()).parsedImagePackContent;
   }
@@ -69,25 +96,25 @@ class EmotesSettingsController extends State<EmotesSettings> {
       return;
     }
     final client = Matrix.of(context).client;
-    if (room != null) {
-      await showFutureLoadingDialog(
-        context: context,
-        future: () => client.setRoomStateWithKey(
-          room!.id,
-          'im.ponies.room_emotes',
-          stateKey ?? '',
-          pack!.toJson(),
-        ),
-      );
-    } else {
-      await showFutureLoadingDialog(
-        context: context,
-        future: () => client.setAccountData(
-          client.userID!,
-          'im.ponies.user_emotes',
-          pack!.toJson(),
-        ),
-      );
+    final result = await showFutureLoadingDialog(
+      context: context,
+      future: () => room != null
+          ? client.setRoomStateWithKey(
+              room!.id,
+              'im.ponies.room_emotes',
+              stateKey ?? '',
+              pack!.toJson(),
+            )
+          : client.setAccountData(
+              client.userID!,
+              'im.ponies.user_emotes',
+              pack!.toJson(),
+            ),
+    );
+    if (!result.isError) {
+      setState(() {
+        showSave = false;
+      });
     }
   }
 
@@ -96,7 +123,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
       return;
     }
     final client = Matrix.of(context).client;
-    final content = client.accountData['im.ponies.emote_rooms']?.content ??
+    final content =
+        client.accountData['im.ponies.emote_rooms']?.content ??
         <String, dynamic>{};
     if (active) {
       if (content['rooms'] is! Map) {
@@ -123,17 +151,57 @@ class EmotesSettingsController extends State<EmotesSettings> {
     setState(() {});
   }
 
+  final TextEditingController packDisplayNameController =
+      TextEditingController();
+
+  final TextEditingController packAttributionController =
+      TextEditingController();
+
   void removeImageAction(String oldImageCode) => setState(() {
-        pack!.images.remove(oldImageCode);
-        showSave = true;
-      });
+    pack!.images.remove(oldImageCode);
+    showSave = true;
+  });
+
+  void toggleUsage(String imageCode, ImagePackUsage usage) {
+    setState(() {
+      final usages = pack!.images[imageCode]!.usage ??= List.from(
+        ImagePackUsage.values,
+      );
+      if (!usages.remove(usage)) usages.add(usage);
+      showSave = true;
+    });
+  }
+
+  void submitDisplaynameAction() {
+    if (readonly) return;
+    packDisplayNameController.text = packDisplayNameController.text.trim();
+    final input = packDisplayNameController.text;
+
+    setState(() {
+      pack!.pack.displayName = input;
+      showSave = true;
+    });
+  }
+
+  void submitAttributionAction() {
+    if (readonly) return;
+    packAttributionController.text = packAttributionController.text.trim();
+    final input = packAttributionController.text;
+
+    setState(() {
+      pack!.pack.attribution = input;
+      showSave = true;
+    });
+  }
 
   void submitImageAction(
     String oldImageCode,
-    String imageCode,
     ImagePackImageContent image,
     TextEditingController controller,
   ) {
+    controller.text = controller.text.trim().replaceAll(' ', '-');
+    final imageCode = controller.text;
+    if (imageCode == oldImageCode) return;
     if (pack!.images.keys.any((k) => k == imageCode && k != oldImageCode)) {
       controller.text = oldImageCode;
       showOkAlertDialog(
@@ -170,104 +238,127 @@ class EmotesSettingsController extends State<EmotesSettings> {
           null;
 
   bool get readonly =>
-      room == null ? false : !(room!.canSendEvent('im.ponies.room_emotes'));
+      room != null &&
+      room?.canChangeStateEvent('im.ponies.room_emotes') == false;
 
-  void saveAction() async {
-    await save(context);
+  void resetAction() {
     setState(() {
+      _pack = _getPack();
       showSave = false;
     });
   }
 
-  void addImageAction() async {
-    if (newImageCodeController.text.isEmpty ||
-        newImageController.value == null) {
-      await showOkAlertDialog(
-        useRootNavigator: false,
-        context: context,
-        title: L10n.of(context).emoteWarnNeedToPick,
-        okLabel: L10n.of(context).ok,
-      );
-      return;
-    }
-    final imageCode = newImageCodeController.text;
-    if (pack!.images.containsKey(imageCode)) {
-      await showOkAlertDialog(
-        useRootNavigator: false,
-        context: context,
-        title: L10n.of(context).emoteExists,
-        okLabel: L10n.of(context).ok,
-      );
-      return;
-    }
-    if (!RegExp(r'^[-\w]+$').hasMatch(imageCode)) {
-      await showOkAlertDialog(
-        useRootNavigator: false,
-        context: context,
-        title: L10n.of(context).emoteInvalid,
-        okLabel: L10n.of(context).ok,
-      );
-      return;
-    }
-    pack!.images[imageCode] = newImageController.value!;
-    await save(context);
-    setState(() {
-      newImageCodeController.text = '';
-      newImageController.value = null;
-      showSave = false;
-    });
-  }
+  Future<void> createImagePack() async {
+    final room = this.room;
+    if (room == null) throw Exception('Cannot create image pack without room');
 
-  void imagePickerAction(
-    ValueNotifier<ImagePackImageContent?> controller,
-  ) async {
-    final result = await selectFiles(
-      context,
-      type: FileSelectorType.images,
-    );
-    final pickedFile = result.firstOrNull;
-    if (pickedFile == null) return;
-    var file = MatrixImageFile(
-      bytes: await pickedFile.readAsBytes(),
-      name: pickedFile.name,
-    );
-    try {
-      file = (await file.generateThumbnail(
-        nativeImplementations: ClientManager.nativeImplementations,
-      ))!;
-    } catch (e, s) {
-      Logs().w('Unable to create thumbnail', e, s);
-    }
-    final uploadResp = await showFutureLoadingDialog(
+    final input = await showTextInputDialog(
       context: context,
-      future: () => Matrix.of(context).client.uploadContent(
+      title: L10n.of(context).newStickerPack,
+      hintText: L10n.of(context).name,
+      okLabel: L10n.of(context).create,
+    );
+    final name = input?.trim();
+    if (name == null || name.isEmpty) return;
+    if (!mounted) return;
+
+    final keyName = name.toLowerCase().replaceAll(' ', '_');
+
+    if (packKeys?.contains(name) ?? false) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(L10n.of(context).stickerPackNameAlreadyExists)),
+      );
+      return;
+    }
+
+    await showFutureLoadingDialog(
+      context: context,
+      future: () => room.client.setRoomStateWithKey(
+        room.id,
+        'im.ponies.room_emotes',
+        keyName,
+        {
+          'images': {},
+          'pack': {'display_name': name},
+        },
+      ),
+    );
+    if (!mounted) return;
+    setState(() {});
+    await room.client.oneShotSync();
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  Future<void> saveAction() async {
+    await save(context);
+    setState(() {
+      showSave = false;
+    });
+  }
+
+  Future<void> createStickers() async {
+    final matrix = Matrix.of(context);
+    final pickedFiles = await selectFiles(
+      context,
+      type: FileType.image,
+      allowMultiple: true,
+    );
+    if (pickedFiles.isEmpty) return;
+    if (!mounted) return;
+
+    await showFutureLoadingDialog(
+      context: context,
+      futureWithProgress: (setProgress) async {
+        for (final (i, pickedFile) in pickedFiles.indexed) {
+          setProgress(i / pickedFiles.length);
+          var file = MatrixImageFile(
+            bytes: await pickedFile.readAsBytes(),
+            name: pickedFile.name,
+          );
+          file =
+              await file.generateThumbnail(
+                nativeImplementations: ClientManager.nativeImplementations,
+              ) ??
+              file;
+          final uri = await matrix.client.uploadContent(
             file.bytes,
             filename: file.name,
             contentType: file.mimeType,
-          ),
-    );
-    if (uploadResp.error == null) {
-      setState(() {
-        final info = <String, dynamic>{
-          ...file.info,
-        };
-        // normalize width / height to 256, required for stickers
-        if (info['w'] is int && info['h'] is int) {
-          final ratio = info['w'] / info['h'];
-          if (info['w'] > info['h']) {
-            info['w'] = 256;
-            info['h'] = (256.0 / ratio).round();
-          } else {
-            info['h'] = 256;
-            info['w'] = (ratio * 256.0).round();
-          }
+          );
+
+          setState(() {
+            final info = <String, dynamic>{...file.info};
+            // normalize width / height to 256, required for stickers
+            if (info['w'] is int && info['h'] is int) {
+              final ratio = info['w'] / info['h'];
+              if (info['w'] > info['h']) {
+                info['w'] = 256;
+                info['h'] = (256.0 / ratio).round();
+              } else {
+                info['h'] = 256;
+                info['w'] = (ratio * 256.0).round();
+              }
+            }
+            final imageCode = pickedFile.name.split('.').first;
+            pack!.images[imageCode] = ImagePackImageContent.fromJson(
+              <String, dynamic>{'url': uri.toString(), 'info': info},
+            );
+          });
         }
-        controller.value = ImagePackImageContent.fromJson(<String, dynamic>{
-          'url': uploadResp.result.toString(),
-          'info': info,
-        });
-      });
-    }
+      },
+    );
+
+    setState(() {
+      showSave = true;
+    });
+  }
+
+  @override
+  void dispose() {
+    packDisplayNameController.dispose();
+    packAttributionController.dispose();
+    super.dispose();
   }
 
   @override
@@ -276,25 +367,21 @@ class EmotesSettingsController extends State<EmotesSettings> {
   }
 
   Future<void> importEmojiZip() async {
-    final result = await selectFiles(
-      context,
-      type: FileSelectorType.zip,
-    );
+    final result = await selectFiles(context, type: FileType.any);
 
     if (result.isEmpty) return;
 
     final buffer = InputMemoryStream(await result.single.readAsBytes());
 
     final archive = ZipDecoder().decodeStream(buffer);
+    if (!mounted) return;
 
     await showDialog(
       context: context,
       // breaks [Matrix.of] calls otherwise
       useRootNavigator: false,
-      builder: (context) => ImportEmoteArchiveDialog(
-        controller: this,
-        archive: archive,
-      ),
+      builder: (context) =>
+          ImportEmoteArchiveDialog(controller: this, archive: archive),
     );
     setState(() {});
   }
@@ -302,7 +389,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
   Future<void> exportAsZip() async {
     final client = Matrix.of(context).client;
 
-    await showFutureLoadingDialog(
+    final result = await showFutureLoadingDialog<MatrixFile>(
       context: context,
       future: () async {
         final pack = _getPack();
@@ -317,22 +404,19 @@ class EmotesSettingsController extends State<EmotesSettings> {
           );
 
           archive.addFile(
-            ArchiveFile(
-              name,
-              response.bodyBytes.length,
-              response.bodyBytes,
-            ),
+            ArchiveFile(name, response.bodyBytes.length, response.bodyBytes),
           );
         }
         final fileName =
             '${pack.pack.displayName ?? client.userID?.localpart ?? 'emotes'}.zip';
         final output = ZipEncoder().encode(archive);
 
-        MatrixFile(
-          name: fileName,
-          bytes: Uint8List.fromList(output),
-        ).save(context);
+        return MatrixFile(name: fileName, bytes: Uint8List.fromList(output));
       },
     );
+    final file = result.result;
+    if (file == null) return;
+    if (!mounted) return;
+    file.save(context);
   }
 }

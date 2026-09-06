@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:math' show min;
 import 'dart:typed_data';
 import 'dart:ui';
@@ -22,7 +27,7 @@ extension ClientDownloadContentExtension on Client {
             width: width,
             height: height,
             animated: animated,
-            method: thumbnailMethod!,
+            method: thumbnailMethod,
           )
         : mxc;
 
@@ -41,11 +46,12 @@ extension ClientDownloadContentExtension on Client {
 
     final response = await httpClient.get(
       httpUri,
-      headers:
-          accessToken == null ? null : {'authorization': 'Bearer $accessToken'},
+      headers: accessToken == null
+          ? null
+          : {'authorization': 'Bearer $accessToken'},
     );
     if (response.statusCode != 200) {
-      throw Exception();
+      unexpectedResponse(response, response.bodyBytes);
     }
     var imageData = response.bodyBytes;
 

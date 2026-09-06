@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/themes.dart';
+import 'package:material_ui/material_ui.dart';
 
 Future<T?> showScaffoldDialog<T>({
   required BuildContext context,
@@ -10,28 +14,25 @@ Future<T?> showScaffoldDialog<T>({
   double maxWidth = 480,
   double maxHeight = 720,
   required Widget Function(BuildContext context) builder,
-}) =>
-    showDialog<T>(
-      context: context,
-      useSafeArea: false,
-      builder: PantheonThemes.isColumnMode(context)
-          ? (context) => Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      AppConfig.borderRadius,
-                    ),
-                    color: containerColor ??
-                        Theme.of(context).scaffoldBackgroundColor,
-                  ),
-                  clipBehavior: Clip.hardEdge,
-                  margin: const EdgeInsets.all(16),
-                  constraints: BoxConstraints(
-                    maxWidth: maxWidth,
-                    maxHeight: maxHeight,
-                  ),
-                  child: builder(context),
-                ),
-              )
-          : builder,
-    );
+}) => showDialog<T>(
+  context: context,
+  useSafeArea: false,
+  builder: PantheonThemes.isColumnMode(context)
+      ? (context) => Center(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+              color:
+                  containerColor ?? Theme.of(context).scaffoldBackgroundColor,
+            ),
+            clipBehavior: Clip.hardEdge,
+            margin: const EdgeInsets.all(16),
+            constraints: BoxConstraints(
+              maxWidth: maxWidth,
+              maxHeight: maxHeight,
+            ),
+            child: builder(context),
+          ),
+        )
+      : builder,
+);

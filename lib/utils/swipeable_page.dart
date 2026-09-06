@@ -22,15 +22,18 @@ class SwipePopPage<T> extends Page<T> {
     super.name,
     super.arguments,
     super.restorationId,
-  })  : duration = duration ??
-            Duration(milliseconds: AppSettings.swipePopDuration.value),
-        enableFullScreenDrag = enableFullScreenDrag ??
-            AppSettings.swipePopEnableFullScreenDrag.value,
-        minimumDragFraction = (minimumDragFraction ??
-                AppSettings.swipePopMinimumDragFraction.value)
-            .clamp(0.0, 1.0),
-        velocityThreshold =
-            velocityThreshold ?? AppSettings.swipePopVelocityThreshold.value;
+  }) : duration =
+           duration ??
+           Duration(milliseconds: AppSettings.swipePopDuration.value),
+       enableFullScreenDrag =
+           enableFullScreenDrag ??
+           AppSettings.swipePopEnableFullScreenDrag.value,
+       minimumDragFraction =
+           (minimumDragFraction ??
+                   AppSettings.swipePopMinimumDragFraction.value)
+               .clamp(0.0, 1.0),
+       velocityThreshold =
+           velocityThreshold ?? AppSettings.swipePopVelocityThreshold.value;
 
   final Widget child;
   final Duration duration;
@@ -44,7 +47,6 @@ class SwipePopPage<T> extends Page<T> {
   @override
   Route<T> createRoute(BuildContext context) {
     return SwipePopPageRoute<T>(
-      builder: (_) => child,
       duration: duration,
       curve: curve,
       reverseCurve: reverseCurve,
@@ -60,7 +62,6 @@ class SwipePopPage<T> extends Page<T> {
 class SwipePopPageRoute<T> extends PageRoute<T> {
   /// Configures a swipe-enabled route with the provided animation options.
   SwipePopPageRoute({
-    required this.builder,
     required this.duration,
     required this.curve,
     required this.reverseCurve,
@@ -70,7 +71,6 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
     super.settings,
   }) : assert(minimumDragFraction >= 0 && minimumDragFraction <= 1);
 
-  final WidgetBuilder builder;
   final Duration duration;
   final Curve curve;
   final Curve reverseCurve;
@@ -116,8 +116,7 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-  ) =>
-      builder(context);
+  ) => (settings as SwipePopPage<T>).child;
 
   /// Wrap the page with gesture handling and Cupertino-style animations.
   @override
@@ -182,16 +181,17 @@ class _FullScreenPopGestureDetectorState<T>
   @override
   void initState() {
     super.initState();
-    _recognizer = HorizontalSwipeRecognizer(
-      allowedSign: 1,
-      debugOwner: this,
-      allowedPointerKinds: HorizontalSwipeRecognizer.touchPointerKinds,
-    )
-      ..onStart = _handleDragStart
-      ..onUpdate = _handleDragUpdate
-      ..onEnd = _handleDragEnd
-      ..onCancel = _handleDragCancel
-      ..dragStartBehavior = DragStartBehavior.down;
+    _recognizer =
+        HorizontalSwipeRecognizer(
+            allowedSign: 1,
+            debugOwner: this,
+            allowedPointerKinds: HorizontalSwipeRecognizer.touchPointerKinds,
+          )
+          ..onStart = _handleDragStart
+          ..onUpdate = _handleDragUpdate
+          ..onEnd = _handleDragEnd
+          ..onCancel = _handleDragCancel
+          ..dragStartBehavior = DragStartBehavior.down;
   }
 
   /// Update gesture settings when inherited configuration changes.
@@ -317,8 +317,8 @@ class _FullScreenPopGestureController<T> {
     required this.reverseCurve,
     required this.minimumDragFraction,
     required this.velocityThreshold,
-  })  : controller = route.popGestureController,
-        navigator = route.popGestureNavigator {
+  }) : controller = route.popGestureController,
+       navigator = route.popGestureNavigator {
     getIsCurrent = () => route.isCurrent;
     navigator.didStartUserGesture();
   }
@@ -347,8 +347,8 @@ class _FullScreenPopGestureController<T> {
     final shouldPop = (velocity > velocityThreshold)
         ? true
         : (velocity < -velocityThreshold)
-            ? false
-            : (dragFraction > minimumDragFraction);
+        ? false
+        : (dragFraction > minimumDragFraction);
 
     if (shouldPop) {
       navigator.pop();

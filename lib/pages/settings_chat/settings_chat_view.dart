@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'package:go_router/go_router.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/setting_keys.dart';
@@ -12,6 +10,9 @@ import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/utils/backfill_service.dart';
 import 'settings_chat.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:hermes/utils/adaptive_bottom_sheet.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SettingsChatView extends StatelessWidget {
   final SettingsChatController controller;
@@ -56,9 +57,7 @@ class SettingsChatView extends StatelessWidget {
               ),
               ListTile(
                 title: Text(L10n.of(context).swipeDistance),
-                subtitle: Text(
-                  L10n.of(context).swipeDistanceDescription,
-                ),
+                subtitle: Text(L10n.of(context).swipeDistanceDescription),
                 trailing: Text(
                   '${(controller.swipeMinimumDragFraction * 100).round()}%',
                 ),
@@ -80,8 +79,9 @@ class SettingsChatView extends StatelessWidget {
               ListTile(
                 title: Text(L10n.of(context).swipeVelocity),
                 subtitle: Text(L10n.of(context).swipeVelocityDescription),
-                trailing:
-                    Text('${controller.swipeVelocityThreshold.round()} px/s'),
+                trailing: Text(
+                  '${controller.swipeVelocityThreshold.round()} px/s',
+                ),
               ),
               Slider.adaptive(
                 min: 50,
@@ -109,6 +109,10 @@ class SettingsChatView extends StatelessWidget {
                 setting: AppSettings.hideRedactedEvents,
               ),
               SettingsSwitchListTile.adaptive(
+                title: L10n.of(context).hideRoomsInSpaces,
+                setting: AppSettings.hideRoomsInSpaces,
+              ),
+              SettingsSwitchListTile.adaptive(
                 title: L10n.of(context).hideInvalidOrUnknownMessageFormats,
                 setting: AppSettings.hideUnknownEvents,
               ),
@@ -125,6 +129,74 @@ class SettingsChatView extends StatelessWidget {
                 title: L10n.of(context).swipeRightToLeftToReply,
                 setting: AppSettings.swipeRightToLeftToReply,
               ),
+              SettingsSwitchListTile.adaptive(
+                title: L10n.of(context).showThumbnailsInTimeline,
+                setting: AppSettings.showThumbnailsInTimeline,
+              ),
+              SettingsSwitchListTile.adaptive(
+                title: L10n.of(context).doubleTapToReact,
+                subtitle: L10n.of(context).doubleTapToReactDescription,
+                setting: AppSettings.doubleTapToReact,
+                onChanged: (_) => controller.updateState(),
+              ),
+              if (AppSettings.doubleTapToReact.value)
+                ListTile(
+                  title: Text(L10n.of(context).doubleTapReaction),
+                  trailing: Text(
+                    AppSettings.doubleTapReaction.value,
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  onTap: () async {
+                    final emoji = await showAdaptiveBottomSheet<String>(
+                      context: context,
+                      builder: (context) => Scaffold(
+                        appBar: AppBar(
+                          title: Text(L10n.of(context).doubleTapReaction),
+                          leading: CloseButton(
+                            onPressed: () => Navigator.of(context).pop(null),
+                          ),
+                        ),
+                        body: SizedBox(
+                          height: double.infinity,
+                          child: EmojiPicker(
+                            onEmojiSelected: (_, emoji) =>
+                                Navigator.of(context).pop(emoji.emoji),
+                            config: Config(
+                              locale: Localizations.localeOf(context),
+                              emojiViewConfig: const EmojiViewConfig(
+                                backgroundColor: Colors.transparent,
+                              ),
+                              bottomActionBarConfig:
+                                  const BottomActionBarConfig(enabled: false),
+                              categoryViewConfig: CategoryViewConfig(
+                                initCategory: Category.SMILEYS,
+                                backspaceColor: theme.colorScheme.primary,
+                                iconColor: theme.colorScheme.primary.withAlpha(
+                                  128,
+                                ),
+                                iconColorSelected: theme.colorScheme.primary,
+                                indicatorColor: theme.colorScheme.primary,
+                                backgroundColor: theme.colorScheme.surface,
+                              ),
+                              skinToneConfig: SkinToneConfig(
+                                dialogBackgroundColor: Color.lerp(
+                                  theme.colorScheme.surface,
+                                  theme.colorScheme.primaryContainer,
+                                  0.75,
+                                )!,
+                                indicatorColor: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                    if (emoji != null) {
+                      await AppSettings.doubleTapReaction.setItem(emoji);
+                      controller.updateState();
+                    }
+                  },
+                ),
               // Backfill all chats action (text-only; media lazy-loads as usual)
               const Divider(),
               ListTile(
@@ -149,11 +221,11 @@ class SettingsChatView extends StatelessWidget {
                     context: context,
                     futureWithProgress: (setProgress) =>
                         BackfillService.backfillAllChats(
-                      client,
-                      setProgress: setProgress,
-                      perRequest: 200,
-                      maxPerRoom: 2000,
-                    ),
+                          client,
+                          setProgress: setProgress,
+                          perRequest: 200,
+                          maxPerRoom: 2000,
+                        ),
                     title: 'Backfilling chats…',
                   );
 
@@ -196,14 +268,6 @@ class SettingsChatView extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              SettingsSwitchListTile.adaptive(
-                title: L10n.of(context).experimentalVideoCalls,
-                onChanged: (b) {
-                  Matrix.of(context).createVoipPlugin();
-                  return;
-                },
-                setting: AppSettings.experimentalVoip,
               ),
             ],
           ),

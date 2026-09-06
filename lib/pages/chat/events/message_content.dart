@@ -1,6 +1,9 @@
-import 'dart:math';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter/material.dart';
+import 'dart:math';
 
 import 'package:matrix/matrix.dart';
 
@@ -17,13 +20,14 @@ import '../../../config/app_config.dart';
 import '../../../utils/event_checkbox_extension.dart';
 import '../../../utils/platform_infos.dart';
 import '../../../utils/url_launcher.dart';
-import '../../bootstrap/bootstrap_dialog.dart';
 import 'audio_player.dart';
 import 'cute_events.dart';
 import 'html_message.dart';
 import 'image_bubble.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
+import 'package:hermes/pages/image_viewer/image_viewer.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MessageContent extends StatelessWidget {
   final Event event;
@@ -33,6 +37,7 @@ class MessageContent extends StatelessWidget {
   final BorderRadius borderRadius;
   final Timeline timeline;
   final bool selected;
+  final Set<String> bigEmojis;
 
   const MessageContent(
     this.event, {
@@ -43,72 +48,12 @@ class MessageContent extends StatelessWidget {
     required this.linkColor,
     required this.borderRadius,
     required this.selected,
+    required this.bigEmojis,
   });
-
-  void _verifyOrRequestKey(BuildContext context) async {
-    final l10n = L10n.of(context);
-    if (event.content['can_request_session'] != true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            event.calcLocalizedBodyFallback(MatrixLocals(l10n)),
-          ),
-        ),
-      );
-      return;
-    }
-    final client = Matrix.of(context).client;
-    if (client.isUnknownSession && client.encryption!.crossSigning.enabled) {
-      final success = await BootstrapDialog(
-        client: Matrix.of(context).client,
-      ).show(context);
-      if (success != true) return;
-    }
-    event.requestKey();
-    final sender = event.senderFromMemoryOrFallback;
-    await showAdaptiveBottomSheet(
-      context: context,
-      builder: (context) => Scaffold(
-        appBar: AppBar(
-          leading: CloseButton(onPressed: Navigator.of(context).pop),
-          title: Text(
-            l10n.whyIsThisMessageEncrypted,
-            style: const TextStyle(fontSize: 16),
-          ),
-        ),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Avatar(
-                  mxContent: sender.avatarUrl,
-                  name: sender.calcDisplayname(),
-                  presenceUserId: sender.stateKey,
-                  client: event.room.client,
-                ),
-                title: Text(sender.calcDisplayname()),
-                subtitle: Text(event.originServerTs.localizedTime(context)),
-                trailing: const Icon(Icons.lock_outlined),
-              ),
-              const Divider(),
-              Text(
-                event.calcLocalizedBodyFallback(
-                  MatrixLocals(l10n),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    final fontSize =
-        AppConfig.messageFontSize * AppSettings.fontSizeFactor.value;
+    const fontSize = AppConfig.messageFontSize;
     final buttonTextColor = textColor;
     switch (event.type) {
       case EventTypes.Message:
@@ -118,7 +63,9 @@ class MessageContent extends StatelessWidget {
           case MessageTypes.Image:
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
-            const maxSize = 256.0;
+            final maxSize = event.messageType == MessageTypes.Sticker
+                ? 128.0
+                : 256.0;
             final w = event.content
                 .tryGetMap<String, Object?>('info')
                 ?.tryGet<int>('w');
@@ -148,17 +95,22 @@ class MessageContent extends StatelessWidget {
               borderRadius: borderRadius,
               timeline: timeline,
               textColor: textColor,
+              onTap: () => showDialog(
+                context: context,
+                builder: (_) => ImageViewer(
+                  event,
+                  timeline: timeline,
+                  outerContext: context,
+                ),
+              ),
             );
           case CuteEventContent.eventType:
             return CuteContent(event);
           case MessageTypes.Audio:
             if (PlatformInfos.isMobile ||
-                    PlatformInfos.isMacOS ||
-                    PlatformInfos.isWeb
-                // Disabled until https://github.com/bleonard252/just_audio_mpv/issues/3
-                // is fixed
-                //   || PlatformInfos.isLinux
-                ) {
+                PlatformInfos.isMacOS ||
+                PlatformInfos.isWeb ||
+                PlatformInfos.isLinux) {
               return AudioPlayerWidget(
                 event,
                 color: textColor,
@@ -184,46 +136,25 @@ class MessageContent extends StatelessWidget {
               textColor: textColor,
               linkColor: linkColor,
             );
-          case MessageTypes.BadEncrypted:
-          case EventTypes.Encrypted:
-            return _ButtonContent(
-              textColor: buttonTextColor,
-              onPressed: () => _verifyOrRequestKey(context),
-              icon: '🔒',
-              label: L10n.of(context).encrypted,
-              fontSize: fontSize,
-            );
           case MessageTypes.Location:
-            final geoUri =
-                Uri.tryParse(event.content.tryGet<String>('geo_uri')!);
+            final geoUri = Uri.tryParse(
+              event.content.tryGet<String>('geo_uri')!,
+            );
             if (geoUri != null && geoUri.scheme == 'geo') {
               final latlong = geoUri.path
                   .split(';')
                   .first
                   .split(',')
-                  .map((s) => double.tryParse(s))
+                  .map(double.tryParse)
                   .toList();
               if (latlong.length == 2 &&
                   latlong.first != null &&
                   latlong.last != null) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    MapBubble(
-                      latitude: latlong.first!,
-                      longitude: latlong.last!,
-                    ),
-                    const SizedBox(height: 6),
-                    OutlinedButton.icon(
-                      icon: Icon(Icons.location_on_outlined, color: textColor),
-                      onPressed:
-                          UrlLauncher(context, geoUri.toString()).launchUrl,
-                      label: Text(
-                        L10n.of(context).openInMaps,
-                        style: TextStyle(color: textColor),
-                      ),
-                    ),
-                  ],
+                return MapBubble(
+                  onTap: () =>
+                      UrlLauncher(context, geoUri.toString()).launchUrl(),
+                  latitude: latlong.first!,
+                  longitude: latlong.last!,
                 );
               }
             }
@@ -244,31 +175,24 @@ class MessageContent extends StatelessWidget {
             }
             var html = AppSettings.renderHtml.value && event.isRichMessage
                 ? event.formattedText
-                : event.body;
+                : event.body.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
             if (event.messageType == MessageTypes.Emote) {
               html = '* $html';
             }
 
-            final bigEmotes = event.onlyEmotes &&
-                event.numberEmotes > 0 &&
-                event.numberEmotes <= 3;
+            final bigEmotes =
+                !event.isRichMessage && bigEmojis.contains(event.body);
+
             return Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: HtmlMessage(
                 html: html,
                 textColor: textColor,
                 room: event.room,
-                fontSize: AppSettings.fontSizeFactor.value *
-                    AppConfig.messageFontSize *
-                    (bigEmotes ? 5 : 1),
-                limitHeight: !selected,
+                fontSize: AppConfig.messageFontSize * (bigEmotes ? 5 : 1),
                 linkStyle: TextStyle(
                   color: linkColor,
-                  fontSize: AppSettings.fontSizeFactor.value *
-                      AppConfig.messageFontSize,
+                  fontSize: AppConfig.messageFontSize,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),
@@ -353,16 +277,14 @@ class RedactionWidget extends StatelessWidget {
       future: event.redactedBecause?.fetchSenderUser(),
       builder: (context, snapshot) {
         final reason = event.redactedBecause?.content.tryGet<String>('reason');
-        final redactedBy = snapshot.data?.calcDisplayname() ??
+        final redactedBy =
+            snapshot.data?.calcDisplayname() ??
             event.redactedBecause?.senderId.localpart ??
             L10n.of(context).user;
         return _ButtonContent(
           label: reason == null
               ? L10n.of(context).redactedBy(redactedBy)
-              : L10n.of(context).redactedByBecause(
-                  redactedBy,
-                  reason,
-                ),
+              : L10n.of(context).redactedByBecause(redactedBy, reason),
           icon: '🗑️',
           textColor: buttonTextColor.withAlpha(128),
           onPressed: () => onInfoTab!(event),
@@ -391,18 +313,12 @@ class _ButtonContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
         onTap: onPressed,
         child: Text(
           '$icon  $label',
-          style: TextStyle(
-            color: textColor,
-            fontSize: fontSize,
-          ),
+          style: TextStyle(color: textColor, fontSize: fontSize),
         ),
       ),
     );

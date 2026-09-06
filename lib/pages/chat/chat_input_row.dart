@@ -1,15 +1,21 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:animations/animations.dart';
-import 'package:matrix/matrix.dart';
+import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
 import 'package:hermes/config/setting_keys.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat/recording_input_row.dart';
 import 'package:hermes/pages/chat/recording_view_model.dart';
-import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/other_party_can_receive.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/widgets/avatar.dart';
+import 'package:hermes/widgets/hover_builder.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../config/themes.dart';
 import 'chat.dart';
 import 'input_bar.dart';
@@ -17,13 +23,17 @@ import 'input_bar.dart';
 class ChatInputRow extends StatelessWidget {
   final ChatController controller;
 
+  static const double height = 56.0;
+
   const ChatInputRow(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    const height = 48.0;
+    final textMessageOnly =
+        controller.sendController.text.isNotEmpty ||
+        controller.replyEvent != null ||
+        controller.editEvent != null;
 
     if (!controller.room.otherPartyCanReceiveMessages) {
       return Center(
@@ -51,12 +61,13 @@ class ChatInputRow extends StatelessWidget {
           );
         }
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: .end,
+          mainAxisAlignment: .spaceBetween,
           children: controller.selectMode
               ? <Widget>[
-                  if (controller.selectedEvents
-                      .every((event) => event.status == EventStatus.error))
+                  if (controller.selectedEvents.every(
+                    (event) => event.status == EventStatus.error,
+                  ))
                     SizedBox(
                       height: height,
                       child: TextButton(
@@ -88,152 +99,44 @@ class ChatInputRow extends StatelessWidget {
                     ),
                   controller.selectedEvents.length == 1
                       ? controller.selectedEvents.first
-                              .getDisplayEvent(controller.timeline!)
-                              .status
-                              .isSent
-                          ? SizedBox(
-                              height: height,
-                              child: TextButton(
-                                style: selectedTextButtonStyle,
-                                onPressed: controller.replyAction,
-                                child: Row(
-                                  children: <Widget>[
-                                    Text(L10n.of(context).reply),
-                                    const Icon(Icons.keyboard_arrow_right),
-                                  ],
+                                .getDisplayEvent(controller.timeline!)
+                                .status
+                                .isSent
+                            ? SizedBox(
+                                height: height,
+                                child: TextButton(
+                                  style: selectedTextButtonStyle,
+                                  onPressed: controller.replyAction,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text(L10n.of(context).reply),
+                                      const Icon(Icons.keyboard_arrow_right),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )
-                          : SizedBox(
-                              height: height,
-                              child: TextButton(
-                                style: selectedTextButtonStyle,
-                                onPressed: controller.sendAgainAction,
-                                child: Row(
-                                  children: <Widget>[
-                                    Text(L10n.of(context).tryToSendAgain),
-                                    const SizedBox(width: 4),
-                                    const Icon(Icons.send_outlined, size: 16),
-                                  ],
+                              )
+                            : SizedBox(
+                                height: height,
+                                child: TextButton(
+                                  style: selectedTextButtonStyle,
+                                  onPressed: controller.sendAgainAction,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text(L10n.of(context).tryToSendAgain),
+                                      const SizedBox(width: 4),
+                                      const Icon(Icons.send_outlined, size: 16),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )
+                              )
                       : const SizedBox.shrink(),
                 ]
               : <Widget>[
-                  const SizedBox(width: 4),
-                  Container(
-                    height: height,
-                    width: height - 10,
-                    alignment: Alignment.center,
-                    child: IconButton(
-                      tooltip: L10n.of(context).emojis,
-                      color: theme.colorScheme.onPrimaryContainer,
-                      icon: PageTransitionSwitcher(
-                        transitionBuilder: (
-                          Widget child,
-                          Animation<double> primaryAnimation,
-                          Animation<double> secondaryAnimation,
-                        ) {
-                          return SharedAxisTransition(
-                            animation: primaryAnimation,
-                            secondaryAnimation: secondaryAnimation,
-                            transitionType: SharedAxisTransitionType.scaled,
-                            fillColor: Colors.transparent,
-                            child: child,
-                          );
-                        },
-                        child: Icon(
-                          controller.showEmojiPicker
-                              ? Icons.keyboard
-                              : Icons.add_reaction_outlined,
-                          key: ValueKey(controller.showEmojiPicker),
-                        ),
-                      ),
-                      onPressed: controller.emojiPickerAction,
-                    ),
-                  ),
-                  if (!controller.showEmojiPicker)
-                    Container(
-                      height: height,
-                      width: height,
-                      alignment: Alignment.center,
-                      child: IconButton(
-                        tooltip: L10n.of(context).stickers,
-                        color: theme.colorScheme.onPrimaryContainer,
-                        icon: PageTransitionSwitcher(
-                          transitionBuilder: (
-                            Widget child,
-                            Animation<double> primaryAnimation,
-                            Animation<double> secondaryAnimation,
-                          ) {
-                            return SharedAxisTransition(
-                              animation: primaryAnimation,
-                              secondaryAnimation: secondaryAnimation,
-                              transitionType: SharedAxisTransitionType.scaled,
-                              fillColor: Colors.transparent,
-                              child: child,
-                            );
-                          },
-                          child: Icon(
-                            Icons.settings_system_daydream_outlined,
-                            key: ValueKey(controller.showEmojiPicker),
-                          ),
-                        ),
-                        onPressed: controller.stickerPickerAction,
-                      ),
-                    ),
-                  if (Matrix.of(context).isMultiAccount &&
-                      Matrix.of(context).hasComplexBundles &&
-                      Matrix.of(context).currentBundle!.length > 1)
-                    Container(
-                      height: height,
-                      width: height,
-                      alignment: Alignment.center,
-                      child: _ChatAccountPicker(controller),
-                    ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 0.0),
-                      child: InputBar(
-                        room: controller.room,
-                        minLines: 1,
-                        maxLines: 8,
-                        autofocus: !PlatformInfos.isMobile,
-                        keyboardType: TextInputType.multiline,
-                        textInputAction:
-                            AppSettings.sendOnEnter.value == true &&
-                                    PlatformInfos.isMobile
-                                ? TextInputAction.send
-                                : null,
-                        onSubmitted: controller.onInputBarSubmitted,
-                        onSubmitImage: controller.sendImageFromClipBoard,
-                        focusNode: controller.inputFocus,
-                        controller: controller.sendController,
-                        decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.only(
-                            left: 6.0,
-                            right: 6.0,
-                            bottom: 6.0,
-                            top: 3.0,
-                          ),
-                          counter: const SizedBox.shrink(),
-                          hintText: L10n.of(context).writeAMessage,
-                          hintMaxLines: 1,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          filled: false,
-                        ),
-                        onChanged: controller.onInputBarChanged,
-                      ),
-                    ),
-                  ),
+                  const SizedBox(width: 8),
                   AnimatedContainer(
                     duration: PantheonThemes.animationDuration,
                     curve: PantheonThemes.animationCurve,
-                    width: controller.sendController.text.isNotEmpty
-                        ? 0
-                        : height - 10,
+                    width: textMessageOnly ? 0 : 48,
                     height: height,
                     alignment: Alignment.center,
                     decoration: const BoxDecoration(),
@@ -243,9 +146,8 @@ class ChatInputRow extends StatelessWidget {
                       icon: const Icon(Icons.add_circle_outline),
                       iconColor: theme.colorScheme.onPrimaryContainer,
                       onSelected: controller.onAddPopupMenuButtonSelected,
-                      offset: const Offset(0.0, -250.0),
                       itemBuilder: (BuildContext context) => [
-                        if (PlatformInfos.isMobile) ...[
+                        if (PlatformInfos.isMobile)
                           PopupMenuItem(
                             value: AddPopupMenuActions.location,
                             child: ListTile(
@@ -254,11 +156,39 @@ class ChatInputRow extends StatelessWidget {
                                     theme.colorScheme.onPrimaryContainer,
                                 foregroundColor:
                                     theme.colorScheme.primaryContainer,
-                                child: const Icon(
-                                  Icons.gps_fixed_outlined,
-                                ),
+                                child: const Icon(Icons.gps_fixed_outlined),
                               ),
                               title: Text(L10n.of(context).shareLocation),
+                              contentPadding: const EdgeInsets.all(0),
+                            ),
+                          ),
+                        PopupMenuItem(
+                          value: AddPopupMenuActions.poll,
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor:
+                                  theme.colorScheme.onPrimaryContainer,
+                              foregroundColor:
+                                  theme.colorScheme.primaryContainer,
+                              child: const Icon(Icons.poll_outlined),
+                            ),
+                            title: Text(L10n.of(context).startPoll),
+                            contentPadding: const EdgeInsets.all(0),
+                          ),
+                        ),
+                        PopupMenuDivider(),
+                        if (PlatformInfos.isMobile) ...[
+                          PopupMenuItem(
+                            value: AddPopupMenuActions.videoCamera,
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor:
+                                    theme.colorScheme.onPrimaryContainer,
+                                foregroundColor:
+                                    theme.colorScheme.primaryContainer,
+                                child: const Icon(Icons.videocam_outlined),
+                              ),
+                              title: Text(L10n.of(context).recordAVideo),
                               contentPadding: const EdgeInsets.all(0),
                             ),
                           ),
@@ -276,47 +206,19 @@ class ChatInputRow extends StatelessWidget {
                               contentPadding: const EdgeInsets.all(0),
                             ),
                           ),
+                          PopupMenuDivider(),
                         ],
                         PopupMenuItem(
-                          value: AddPopupMenuActions.image,
+                          value: AddPopupMenuActions.media,
                           child: ListTile(
                             leading: CircleAvatar(
                               backgroundColor:
                                   theme.colorScheme.onPrimaryContainer,
                               foregroundColor:
                                   theme.colorScheme.primaryContainer,
-                              child: const Icon(Icons.photo_outlined),
+                              child: const Icon(Icons.image_outlined),
                             ),
-                            title: Text(L10n.of(context).sendImage),
-                            contentPadding: const EdgeInsets.all(0),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: AddPopupMenuActions.videoCamera,
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor:
-                                  theme.colorScheme.onPrimaryContainer,
-                              foregroundColor:
-                                  theme.colorScheme.primaryContainer,
-                              child: const Icon(Icons.videocam_outlined),
-                            ),
-                            title: Text(L10n.of(context).recordAVideo),
-                            contentPadding: const EdgeInsets.all(0),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: AddPopupMenuActions.video,
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor:
-                                  theme.colorScheme.onPrimaryContainer,
-                              foregroundColor:
-                                  theme.colorScheme.primaryContainer,
-                              child:
-                                  const Icon(Icons.video_camera_back_outlined),
-                            ),
-                            title: Text(L10n.of(context).sendVideo),
+                            title: Text(L10n.of(context).openGallery),
                             contentPadding: const EdgeInsets.all(0),
                           ),
                         ),
@@ -334,49 +236,143 @@ class ChatInputRow extends StatelessWidget {
                             contentPadding: const EdgeInsets.all(0),
                           ),
                         ),
-                        PopupMenuItem(
-                          value: AddPopupMenuActions.poll,
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor:
-                                  theme.colorScheme.onPrimaryContainer,
-                              foregroundColor:
-                                  theme.colorScheme.primaryContainer,
-                              child: const Icon(Icons.poll_outlined),
-                            ),
-                            title: Text(L10n.of(context).startPoll),
-                            contentPadding: const EdgeInsets.all(0),
-                          ),
-                        ),
                       ],
+                    ),
+                  ),
+                  Container(
+                    height: height,
+                    width: 48,
+                    alignment: Alignment.center,
+                    child: IconButton(
+                      tooltip: L10n.of(context).emojis,
+                      color: theme.colorScheme.onPrimaryContainer,
+                      icon: Icon(
+                        controller.showEmojiPicker
+                            ? Icons.keyboard
+                            : Icons.add_reaction_outlined,
+                        key: ValueKey(controller.showEmojiPicker),
+                      ),
+                      onPressed: controller.emojiPickerAction,
+                    ),
+                  ),
+                  if (!controller.showEmojiPicker)
+                    Container(
+                      height: height,
+                      width: 48,
+                      alignment: Alignment.center,
+                      child: IconButton(
+                        tooltip: L10n.of(context).stickers,
+                        color: theme.colorScheme.onPrimaryContainer,
+                        icon: const Icon(
+                          Icons.settings_system_daydream_outlined,
+                        ),
+                        onPressed: controller.stickerPickerAction,
+                      ),
+                    ),
+                  if (Matrix.of(context).isMultiAccount &&
+                      Matrix.of(context).hasComplexBundles &&
+                      Matrix.of(context).currentBundle!.length > 1)
+                    Container(
+                      height: height,
+                      width: 48,
+                      alignment: Alignment.center,
+                      child: _ChatAccountPicker(controller),
+                    ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.0),
+                      child: InputBar(
+                        room: controller.room,
+                        minLines: 1,
+                        maxLines: 8,
+                        autofocus: !PlatformInfos.isMobile,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction:
+                            AppSettings.sendOnEnter.value == true &&
+                                PlatformInfos.isMobile
+                            ? TextInputAction.send
+                            : null,
+                        onSubmitted: controller.onInputBarSubmitted,
+                        onSubmitImage: controller.sendImageFromClipBoard,
+                        focusNode: controller.inputFocus,
+                        controller: controller.sendController,
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.only(
+                            left: 6.0,
+                            right: 6.0,
+                            bottom: 6.0,
+                            top: 3.0,
+                          ),
+                          counter: const SizedBox.shrink(),
+                          hintText: controller.room.encrypted
+                              ? L10n.of(context).encryptedMessage
+                              : L10n.of(context).unencryptedMessage,
+                          hintMaxLines: 1,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          filled: false,
+                        ),
+                        onChanged: controller.onInputBarChanged,
+                        suggestionEmojis:
+                            getDefaultEmojiLocale(
+                              AppSettings.emojiSuggestionLocale.value.isNotEmpty
+                                  ? Locale(
+                                      AppSettings.emojiSuggestionLocale.value,
+                                    )
+                                  : Localizations.localeOf(context),
+                            ).fold(
+                              [],
+                              (emojis, category) =>
+                                  emojis..addAll(category.emoji),
+                            ),
+                      ),
                     ),
                   ),
                   Container(
                     height: height,
                     width: height,
                     alignment: Alignment.center,
-                    child: PlatformInfos.platformCanRecord &&
-                            controller.sendController.text.isEmpty
-                        ? IconButton(
-                            tooltip: L10n.of(context).voiceMessage,
-                            onPressed: () =>
-                                ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  L10n.of(context)
-                                      .longPressToRecordVoiceMessage,
-                                ),
+                    child:
+                        PlatformInfos.platformCanRecord &&
+                            !controller.sendController.text.isNotEmpty &&
+                            controller.editEvent == null
+                        ? HoverBuilder(
+                            builder: (context, hovered) => IconButton(
+                              tooltip: L10n.of(context).voiceMessage,
+                              onPressed: hovered
+                                  ? () => recordingViewModel.startRecording(
+                                      controller.room,
+                                    )
+                                  : () => ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                          SnackBar(
+                                            margin: EdgeInsets.only(
+                                              bottom: height + 16,
+                                              left: 16,
+                                              right: 16,
+                                              top: 16,
+                                            ),
+                                            showCloseIcon: true,
+                                            content: Text(
+                                              L10n.of(
+                                                context,
+                                              ).longPressToRecordVoiceMessage,
+                                            ),
+                                          ),
+                                        ),
+                              onLongPress: () => recordingViewModel
+                                  .startRecording(controller.room),
+                              style: IconButton.styleFrom(
+                                backgroundColor: theme.bubbleColor,
+                                foregroundColor: theme.onBubbleColor,
+                              ),
+                              icon: Icon(
+                                hovered ? Icons.mic : Icons.mic_none_outlined,
                               ),
                             ),
-                            onLongPress: () => recordingViewModel
-                                .startRecording(controller.room),
-                            style: IconButton.styleFrom(
-                              backgroundColor: theme.bubbleColor,
-                              foregroundColor: theme.onBubbleColor,
-                            ),
-                            icon: const Icon(Icons.mic_none_outlined),
                           )
                         : IconButton(
+                            key: Key('send_button'),
                             tooltip: L10n.of(context).send,
                             onPressed: controller.send,
                             style: IconButton.styleFrom(
@@ -399,9 +395,9 @@ class _ChatAccountPicker extends StatelessWidget {
   const _ChatAccountPicker(this.controller);
 
   void _popupMenuButtonSelected(String mxid, BuildContext context) {
-    final client = Matrix.of(context)
-        .currentBundle!
-        .firstWhere((cl) => cl!.userID == mxid, orElse: () => null);
+    final client = Matrix.of(
+      context,
+    ).currentBundle!.firstWhere((cl) => cl!.userID == mxid, orElse: () => null);
     if (client == null) {
       Logs().w('Attempted to switch to a non-existing client $mxid');
       return;
@@ -428,7 +424,8 @@ class _ChatAccountPicker extends StatelessWidget {
                     builder: (context, snapshot) => ListTile(
                       leading: Avatar(
                         mxContent: snapshot.data?.avatarUrl,
-                        name: snapshot.data?.displayName ??
+                        name:
+                            snapshot.data?.displayName ??
                             client.userID!.localpart,
                         size: 20,
                       ),
@@ -441,7 +438,8 @@ class _ChatAccountPicker extends StatelessWidget {
               .toList(),
           child: Avatar(
             mxContent: snapshot.data?.avatarUrl,
-            name: snapshot.data?.displayName ??
+            name:
+                snapshot.data?.displayName ??
                 Matrix.of(context).client.userID!.localpart,
             size: 20,
           ),

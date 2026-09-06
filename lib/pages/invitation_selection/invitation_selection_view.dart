@@ -1,12 +1,16 @@
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/invitation_selection/invitation_selection.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../widgets/adaptive_dialogs/user_dialog.dart';
 
 class InvitationSelectionView extends StatelessWidget {
@@ -16,13 +20,12 @@ class InvitationSelectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final room =
-        Matrix.of(context).client.getRoomById(controller.widget.roomId);
+    final room = Matrix.of(
+      context,
+    ).client.getRoomById(controller.widget.roomId);
     if (room == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(L10n.of(context).oopsSomethingWentWrong),
-        ),
+        appBar: AppBar(title: Text(L10n.of(context).oopsSomethingWentWrong)),
         body: Center(
           child: Text(L10n.of(context).youAreNoLongerParticipatingInThisChat),
         ),
@@ -76,11 +79,14 @@ class InvitationSelectionView extends StatelessWidget {
               ),
             ),
             StreamBuilder<Object>(
-              stream: room.client.onRoomState.stream
-                  .where((update) => update.roomId == room.id),
+              stream: room.client.onRoomState.stream.where(
+                (update) => update.roomId == room.id,
+              ),
               builder: (context, snapshot) {
-                final participants =
-                    room.getParticipants().map((user) => user.id).toSet();
+                final participants = room
+                    .getParticipants()
+                    .map((user) => user.id)
+                    .toSet();
                 return controller.foundProfiles.isNotEmpty
                     ? ListView.builder(
                         physics: const NeverScrollableScrollPhysics(),
@@ -88,17 +94,21 @@ class InvitationSelectionView extends StatelessWidget {
                         itemCount: controller.foundProfiles.length,
                         itemBuilder: (BuildContext context, int i) =>
                             _InviteContactListTile(
-                          profile: controller.foundProfiles[i],
-                          isMember: participants
-                              .contains(controller.foundProfiles[i].userId),
-                          onTap: () => controller.inviteAction(
-                            context,
-                            controller.foundProfiles[i].userId,
-                            controller.foundProfiles[i].displayName ??
-                                controller.foundProfiles[i].userId.localpart ??
-                                L10n.of(context).user,
-                          ),
-                        ),
+                              profile: controller.foundProfiles[i],
+                              isMember: participants.contains(
+                                controller.foundProfiles[i].userId,
+                              ),
+                              onTap: () => controller.inviteAction(
+                                context,
+                                controller.foundProfiles[i].userId,
+                                controller.foundProfiles[i].displayName ??
+                                    controller
+                                        .foundProfiles[i]
+                                        .userId
+                                        .localpart ??
+                                    L10n.of(context).user,
+                              ),
+                            ),
                       )
                     : FutureBuilder<List<User>>(
                         future: controller.getContacts(context),
@@ -117,23 +127,26 @@ class InvitationSelectionView extends StatelessWidget {
                             itemCount: contacts.length,
                             itemBuilder: (BuildContext context, int i) =>
                                 _InviteContactListTile(
-                              user: contacts[i],
-                              profile: Profile(
-                                avatarUrl: contacts[i].avatarUrl,
-                                displayName: contacts[i].displayName ??
-                                    contacts[i].id.localpart ??
-                                    L10n.of(context).user,
-                                userId: contacts[i].id,
-                              ),
-                              isMember: participants.contains(contacts[i].id),
-                              onTap: () => controller.inviteAction(
-                                context,
-                                contacts[i].id,
-                                contacts[i].displayName ??
-                                    contacts[i].id.localpart ??
-                                    L10n.of(context).user,
-                              ),
-                            ),
+                                  user: contacts[i],
+                                  profile: Profile(
+                                    avatarUrl: contacts[i].avatarUrl,
+                                    displayName:
+                                        contacts[i].displayName ??
+                                        contacts[i].id.localpart ??
+                                        L10n.of(context).user,
+                                    userId: contacts[i].id,
+                                  ),
+                                  isMember: participants.contains(
+                                    contacts[i].id,
+                                  ),
+                                  onTap: () => controller.inviteAction(
+                                    context,
+                                    contacts[i].id,
+                                    contacts[i].displayName ??
+                                        contacts[i].id.localpart ??
+                                        L10n.of(context).user,
+                                  ),
+                                ),
                           );
                         },
                       );
@@ -169,10 +182,7 @@ class _InviteContactListTile extends StatelessWidget {
         mxContent: profile.avatarUrl,
         name: profile.displayName,
         presenceUserId: profile.userId,
-        onTap: () => UserDialog.show(
-          context: context,
-          profile: profile,
-        ),
+        onTap: () => UserDialog.show(context: context, profile: profile),
       ),
       title: Text(
         profile.displayName ?? profile.userId.localpart ?? l10n.user,
@@ -183,14 +193,11 @@ class _InviteContactListTile extends StatelessWidget {
         profile.userId,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: theme.colorScheme.secondary,
-        ),
+        style: TextStyle(color: theme.colorScheme.secondary),
       ),
-      trailing: TextButton.icon(
+      trailing: TextButton(
         onPressed: isMember ? null : onTap,
-        label: Text(isMember ? l10n.participant : l10n.invite),
-        icon: Icon(isMember ? Icons.check : Icons.add),
+        child: Text(isMember ? l10n.participant : l10n.invite),
       ),
     );
   }

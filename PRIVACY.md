@@ -1,4 +1,6 @@
-# Privacy
+<!--
+SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
 
 Hermes is available on Android, iOS, Linux and as a web version. Desktop versions for Windows and macOS may follow.
 

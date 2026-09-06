@@ -1,15 +1,18 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'dart:async';
-
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:hermes/widgets/hermes_app.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 extension UiaRequestManager on MatrixState {
   Future uiaRequestHandler(UiaRequest uiaRequest) async {
@@ -26,7 +29,8 @@ extension UiaRequestManager on MatrixState {
       Logs().d('Uia Request Stage: $stage');
       switch (stage) {
         case AuthenticationTypes.password:
-          final input = cachedPassword ??
+          final input =
+              cachedPassword ??
               (await showTextInputDialog(
                 context: navigatorContext,
                 title: l10n.pleaseEnterYourPassword,
@@ -40,41 +44,15 @@ extension UiaRequestManager on MatrixState {
           if (input == null || input.isEmpty) {
             return uiaRequest.cancel();
           }
-          return uiaRequest.completeStage(
+          return await uiaRequest.completeStage(
             AuthenticationPassword(
               session: uiaRequest.session,
               password: input,
               identifier: AuthenticationUserIdentifier(user: client.userID!),
             ),
           );
-        case AuthenticationTypes.emailIdentity:
-          if (currentThreepidCreds == null) {
-            return uiaRequest.cancel(
-              UiaException(L10n.of(context).serverRequiresEmail),
-            );
-          }
-          final auth = AuthenticationThreePidCreds(
-            session: uiaRequest.session,
-            type: AuthenticationTypes.emailIdentity,
-            threepidCreds: ThreepidCreds(
-              sid: currentThreepidCreds!.sid,
-              clientSecret: currentClientSecret,
-            ),
-          );
-          if (OkCancelResult.ok ==
-              await showOkCancelAlertDialog(
-                useRootNavigator: false,
-                context: navigatorContext,
-                title: l10n.weSentYouAnEmail,
-                message: l10n.pleaseClickOnLink,
-                okLabel: l10n.iHaveClickedOnLink,
-                cancelLabel: l10n.cancel,
-              )) {
-            return uiaRequest.completeStage(auth);
-          }
-          return uiaRequest.cancel();
         case AuthenticationTypes.dummy:
-          return uiaRequest.completeStage(
+          return await uiaRequest.completeStage(
             AuthenticationData(
               type: AuthenticationTypes.dummy,
               session: uiaRequest.session,
@@ -86,9 +64,7 @@ extension UiaRequestManager on MatrixState {
               ?.tryGet<String>('url');
           final fallbackUrl = client.homeserver!.replace(
             path: '/_matrix/client/v3/auth/$stage/fallback/web',
-            queryParameters: {
-              'session': uiaRequest.session,
-            },
+            queryParameters: {'session': uiaRequest.session},
           );
           final url = stageUrl != null
               ? (Uri.tryParse(stageUrl) ?? fallbackUrl)
@@ -105,13 +81,15 @@ extension UiaRequestManager on MatrixState {
 
           launchUrl(url, mode: LaunchMode.inAppBrowserView);
           final completer = Completer();
-          final listener =
-              AppLifecycleListener(onResume: () => completer.complete());
+          final listener = AppLifecycleListener(onResume: completer.complete);
           await completer.future;
           listener.dispose();
 
-          return uiaRequest.completeStage(
-            AuthenticationData(session: uiaRequest.session),
+          return await uiaRequest.completeStage(
+            AuthenticationData(
+              session: uiaRequest.session,
+              type: stageUrl == null ? null : stage,
+            ),
           );
       }
     } catch (e, s) {

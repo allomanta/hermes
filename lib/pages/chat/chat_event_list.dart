@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-
-import 'package:scroll_to_index/scroll_to_index.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/chat/chat.dart';
@@ -11,14 +11,21 @@ import 'package:hermes/pages/chat/typing_indicators.dart';
 import 'package:hermes/utils/account_config.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:collection/collection.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:hermes/config/setting_keys.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat/encryption_info.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix_api_lite/model/event_types.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+import '../../config/app_config.dart';
+import '../../utils/date_time_extension.dart';
 
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
 
-  const ChatEventList({
-    super.key,
-    required this.controller,
-  });
+  const ChatEventList({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -29,17 +36,13 @@ class ChatEventList extends StatelessWidget {
     }
     final theme = Theme.of(context);
 
-    final colors = [
-      theme.secondaryBubbleColor,
-      theme.bubbleColor,
-    ];
+    final colors = [theme.secondaryBubbleColor, theme.bubbleColor];
 
     final horizontalPadding = PantheonThemes.isColumnMode(context) ? 8.0 : 0.0;
 
     final events = timeline.events.filterByVisibleInGui(
       threadId: controller.activeThreadId,
     );
-    final animateInEventIndex = controller.animateInEventIndex;
 
     // create a map of eventId --> index to greatly improve performance of
     // ListView's findChildIndexCallback
@@ -52,141 +55,155 @@ class ChatEventList extends StatelessWidget {
         controller.room.client.applicationAccountConfig.wallpaperUrl != null;
 
     return SelectionArea(
-      child: ListView.custom(
-        padding: EdgeInsets.only(
-          top: 16,
-          bottom: 8,
-          left: horizontalPadding,
-          right: horizontalPadding,
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaler: TextScaler.linear(AppSettings.fontSizeFactor.value),
         ),
-        reverse: true,
-        controller: controller.scrollController,
-        keyboardDismissBehavior: PlatformInfos.isIOS
-            ? ScrollViewKeyboardDismissBehavior.onDrag
-            : ScrollViewKeyboardDismissBehavior.manual,
-        childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context, int i) {
-            // Footer to display typing indicator and read receipts:
-            if (i == 0) {
-              if (timeline.isRequestingFuture) {
-                return const Center(
-                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+        child: ListView.custom(
+          padding: EdgeInsets.only(
+            top: 8 + MediaQuery.paddingOf(context).top,
+            bottom: 8,
+            left: horizontalPadding,
+            right: horizontalPadding,
+          ),
+          reverse: true,
+          controller: controller.scrollController,
+          keyboardDismissBehavior: PlatformInfos.isIOS
+              ? ScrollViewKeyboardDismissBehavior.onDrag
+              : ScrollViewKeyboardDismissBehavior.manual,
+          childrenDelegate: SliverChildBuilderDelegate(
+            (BuildContext context, int i) {
+              // Footer to display typing indicator and read receipts:
+              if (i == 0) {
+                if (timeline.canRequestFuture) {
+                  return Center(
+                    child: TextButton.icon(
+                      onPressed: timeline.isRequestingFuture
+                          ? null
+                          : controller.requestFuture,
+                      icon: timeline.isRequestingFuture
+                          ? CircularProgressIndicator.adaptive(strokeWidth: 2)
+                          : const Icon(Icons.arrow_downward_outlined),
+                      label: Text(L10n.of(context).loadMore),
+                    ),
+                  );
+                }
+                return Column(
+                  mainAxisSize: .min,
+                  children: [
+                    if (events.isNotEmpty) SeenByRow(event: events.first),
+                    TypingIndicators(controller),
+                    EncryptionInfo(room: controller.room),
+                  ],
                 );
               }
-              if (timeline.canRequestFuture) {
-                return Center(
-                  child: IconButton(
-                    onPressed: controller.requestFuture,
-                    icon: const Icon(Icons.refresh_outlined),
-                  ),
-                );
-              }
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SeenByRow(controller),
-                  TypingIndicators(controller),
-                ],
-              );
-            }
 
-            // Request history button or progress indicator:
-            if (i == events.length + 1) {
-              if (timeline.isRequestingHistory) {
-                return const Center(
-                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                );
-              }
-              if (timeline.canRequestHistory &&
-                  controller.activeThreadId == null) {
+              // Request history button or progress indicator:
+              if (i == events.length + 1) {
+                if (controller.activeThreadId != null ||
+                    !timeline.canRequestHistory) {
+                  return const SizedBox.shrink();
+                }
                 return Builder(
                   builder: (context) {
-                    WidgetsBinding.instance
-                        .addPostFrameCallback(controller.requestHistory);
+                    final visibleIndex = timeline.events.lastIndexWhere(
+                      (event) =>
+                          !event.isCollapsedState && event.isVisibleInGui,
+                    );
+                    if (visibleIndex > timeline.events.length - 50) {
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        controller.requestHistory,
+                      );
+                    }
                     return Center(
-                      child: IconButton(
-                        onPressed: controller.requestHistory,
-                        icon: const Icon(Icons.refresh_outlined),
+                      child: TextButton.icon(
+                        onPressed: timeline.isRequestingHistory
+                            ? null
+                            : controller.requestHistory,
+                        icon: timeline.isRequestingHistory
+                            ? CircularProgressIndicator.adaptive(strokeWidth: 2)
+                            : const Icon(Icons.arrow_upward_outlined),
+                        label: Text(L10n.of(context).loadMore),
                       ),
                     );
                   },
                 );
               }
-              return const SizedBox.shrink();
-            }
-            i--;
+              i--;
 
-            // The message at this index:
-            final event = events[i];
-            final animateIn = animateInEventIndex != null &&
-                timeline.events.length > animateInEventIndex &&
-                event == timeline.events[animateInEventIndex];
+              // The message at this index:
+              final event = events[i];
+              final animateIn =
+                  (event.transactionId ?? event.eventId) ==
+                  controller.animateInEventId;
 
-            final nextEvent = i + 1 < events.length ? events[i + 1] : null;
-            final previousEvent = i > 0 ? events[i - 1] : null;
+              final nextEvent = i + 1 < events.length ? events[i + 1] : null;
+              final previousEvent = i > 0 ? events[i - 1] : null;
 
-            // Collapsed state event
-            final canExpand = event.isCollapsedState &&
-                nextEvent?.isCollapsedState == true &&
-                previousEvent?.isCollapsedState != true;
-            final isCollapsed = event.isCollapsedState &&
-                previousEvent?.isCollapsedState == true &&
-                !controller.expandedEventIds.contains(event.eventId);
+              // Collapsed state event
+              final canExpand =
+                  event.isCollapsedState &&
+                  nextEvent?.isCollapsedState == true &&
+                  previousEvent?.isCollapsedState != true;
+              final isCollapsed =
+                  event.isCollapsedState &&
+                  previousEvent?.isCollapsedState == true &&
+                  !controller.expandedEventIds.contains(event.eventId);
 
-            return AutoScrollTag(
-              key: ValueKey(event.eventId),
-              index: i,
-              controller: controller.scrollController,
-              child: Message(
-                event,
-                animateIn: animateIn,
-                resetAnimateIn: () {
-                  controller.animateInEventIndex = null;
-                },
-                onReply: () => controller.replyAction(replyTo: event),
-                onForward: () => controller.forwardEventAction(event),
-                onPin: () => controller.pinEvent(event),
-                onRedact: () => controller.redactEventAction(event),
-                onEdit: () => controller.editEventAction(event),
-                onCopy: () => controller.copyEventAction(event),
-                onInfoTab: controller.showEventInfo,
-                onMention: () => controller.sendController.text +=
-                    '${event.senderFromMemoryOrFallback.mention} ',
-                highlightMarker:
-                    controller.scrollToEventIdMarker == event.eventId,
-                onSelect: controller.onSelectMessage,
-                scrollToEventId: (String eventId) =>
-                    controller.scrollToEventId(eventId),
-                longPressSelect: controller.selectedEvents.isNotEmpty,
-                selected: controller.selectedEvents
-                    .any((e) => e.eventId == event.eventId),
-                singleSelected:
-                    controller.selectedEvents.singleOrNull?.eventId ==
-                        event.eventId,
-                timeline: timeline,
-                displayReadMarker:
-                    i > 0 && controller.readMarkerEventId == event.eventId,
-                nextEvent: nextEvent,
-                previousEvent: previousEvent,
-                wallpaperMode: hasWallpaper,
-                scrollController: controller.scrollController,
-                colors: colors,
-                isCollapsed: isCollapsed,
-                enterThread: controller.activeThreadId == null
-                    ? controller.enterThread
-                    : null,
-                onExpand: canExpand
-                    ? () => controller.expandEventsFrom(
+              return AutoScrollTag(
+                key: ValueKey(event.eventId),
+                index: i,
+                controller: controller.scrollController,
+                child: Message(
+                  event,
+                  bigEmojis: controller.bigEmojis,
+                  animateIn: animateIn,
+                  onReply: () => controller.replyAction(replyTo: event),
+                  onForward: () => controller.forwardEventAction(event),
+                  onPin: () => controller.pinEvent(event),
+                  onRedact: () => controller.redactEventAction(event),
+                  onEdit: () => controller.editEventAction(event),
+                  onCopy: () => controller.copyEventAction(event),
+                  onInfoTab: controller.showEventInfo,
+                  onMention: () => controller.sendController.text +=
+                      '${event.senderFromMemoryOrFallback.mention} ',
+                  highlightMarker:
+                      controller.scrollToEventIdMarker == event.eventId,
+                  onSelect: controller.onSelectMessage,
+                  scrollToEventId: (String eventId) =>
+                      controller.scrollToEventId(eventId),
+                  longPressSelect: controller.selectedEvents.isNotEmpty,
+                  selected: controller.selectedEvents.any(
+                    (e) => e.eventId == event.eventId,
+                  ),
+                  singleSelected:
+                      controller.selectedEvents.singleOrNull?.eventId ==
+                      event.eventId,
+                  timeline: timeline,
+                  displayReadMarker:
+                      i > 0 && controller.readMarkerEventId == event.eventId,
+                  nextEvent: nextEvent,
+                  previousEvent: previousEvent,
+                  wallpaperMode: hasWallpaper,
+                  scrollController: controller.scrollController,
+                  colors: colors,
+                  isCollapsed: isCollapsed,
+                  enterThread: controller.activeThreadId == null
+                      ? controller.enterThread
+                      : null,
+                  onExpand: canExpand
+                      ? () => controller.expandEventsFrom(
                           event,
                           !controller.expandedEventIds.contains(event.eventId),
                         )
-                    : null,
-              ),
-            );
-          },
-          childCount: events.length + 2,
-          findChildIndexCallback: (key) =>
-              controller.findChildIndexCallback(key, thisEventsKeyMap),
+                      : null,
+                ),
+              );
+            },
+            childCount: events.length + 2,
+            findChildIndexCallback: (key) =>
+                controller.findChildIndexCallback(key, thisEventsKeyMap),
+          ),
         ),
       ),
     );

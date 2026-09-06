@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/image_viewer/image_viewer_view.dart';
@@ -9,6 +9,9 @@ import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/utils/show_scaffold_dialog.dart';
 import 'package:hermes/widgets/share_scaffold_dialog.dart';
 import '../../utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class ImageViewer extends StatefulWidget {
   final Event event;
@@ -32,7 +35,8 @@ class ImageViewerController extends State<ImageViewer> {
   @override
   void initState() {
     super.initState();
-    allEvents = widget.timeline?.events
+    allEvents =
+        widget.timeline?.events
             .where(
               (event) => {
                 MessageTypes.Image,
@@ -44,8 +48,9 @@ class ImageViewerController extends State<ImageViewer> {
             .reversed
             .toList() ??
         [widget.event];
-    var index =
-        allEvents.indexWhere((event) => event.eventId == widget.event.eventId);
+    var index = allEvents.indexWhere(
+      (event) => event.eventId == widget.event.eventId,
+    );
     if (index < 0) index = 0;
     pageController = PageController(initialPage: index);
   }
@@ -67,7 +72,7 @@ class ImageViewerController extends State<ImageViewer> {
     }
   }
 
-  void prevImage() async {
+  Future<void> prevImage() async {
     await pageController.previousPage(
       duration: PantheonThemes.animationDuration,
       curve: PantheonThemes.animationCurve,
@@ -76,7 +81,7 @@ class ImageViewerController extends State<ImageViewer> {
     setState(() {});
   }
 
-  void nextImage() async {
+  Future<void> nextImage() async {
     await pageController.nextPage(
       duration: PantheonThemes.animationDuration,
       curve: PantheonThemes.animationCurve,
@@ -95,11 +100,10 @@ class ImageViewerController extends State<ImageViewer> {
 
   /// Forward this image to another room.
   void forwardAction() => showScaffoldDialog(
-        context: context,
-        builder: (context) => ShareScaffoldDialog(
-          items: [ContentShareItem(currentEvent.content)],
-        ),
-      );
+    context: context,
+    builder: (context) =>
+        ShareScaffoldDialog(items: [ContentShareItem(currentEvent.content)]),
+  );
 
   /// Save this file with a system call.
   void saveFileAction(BuildContext context) => currentEvent.saveFile(context);
@@ -117,6 +121,13 @@ class ImageViewerController extends State<ImageViewer> {
         Navigator.of(context, rootNavigator: false).pop();
       }
     }
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    pageController.dispose();
+    super.dispose();
   }
 
   @override

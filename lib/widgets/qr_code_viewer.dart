@@ -1,21 +1,24 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:image/image.dart';
-import 'package:matrix/matrix.dart';
-import 'package:pretty_qr_code/pretty_qr_code.dart';
-import 'package:qr_image/qr_image.dart';
-import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/pantheon_share.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image/image.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+import 'package:particles_network/particles_network.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart';
+import 'package:qr_image/qr_image.dart';
+
 import '../config/themes.dart';
 
-Future<void> showQrCodeViewer(
-  BuildContext context,
-  String content,
-) =>
+Future<void> showQrCodeViewer(BuildContext context, String content) =>
     showDialog(
       context: context,
       builder: (context) => QrCodeViewer(content: content),
@@ -26,16 +29,12 @@ class QrCodeViewer extends StatelessWidget {
 
   const QrCodeViewer({required this.content, super.key});
 
-  void _save(BuildContext context) async {
+  Future<void> _save(BuildContext context) async {
     final imageResult = await showFutureLoadingDialog(
       context: context,
-      future: () async {
+      future: () {
         final inviteLink = 'https://matrix.to/#/$content';
-        final image = QRImage(
-          inviteLink,
-          size: 256,
-          radius: 1,
-        ).generate();
+        final image = QRImage(inviteLink, size: 256, radius: 1).generate();
         return compute(encodePng, image);
       },
     );
@@ -75,10 +74,7 @@ class QrCodeViewer extends StatelessWidget {
               backgroundColor: Colors.black.withAlpha(128),
             ),
             icon: Icon(Icons.adaptive.share_outlined),
-            onPressed: () => PantheonShare.share(
-              inviteLink,
-              context,
-            ),
+            onPressed: () => PantheonShare.share(inviteLink, context),
             color: Colors.white,
             tooltip: L10n.of(context).share,
           ),
@@ -95,42 +91,53 @@ class QrCodeViewer extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: Center(
-        child: Container(
-          margin: const EdgeInsets.all(32.0),
-          padding: const EdgeInsets.all(32.0),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ConstrainedBox(
-                constraints:
-                    const BoxConstraints(maxWidth: PantheonThemes.columnWidth),
-                child: PrettyQrView.data(
-                  data: inviteLink,
-                  decoration: PrettyQrDecoration(
-                    shape: PrettyQrSmoothSymbol(
-                      roundFactor: 1,
-                      color: theme.colorScheme.onPrimaryContainer,
+      body: Stack(
+        children: [
+          if (!MediaQuery.disableAnimationsOf(context))
+            ParticleNetwork(maxSpeed: 0.25),
+          Center(
+            child: Container(
+              margin: const EdgeInsets.all(32.0),
+              padding: const EdgeInsets.all(32.0),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: theme.colorScheme.onSurface,
+                  width: 8,
+                ),
+                color: theme.colorScheme.surfaceBright,
+                borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+              ),
+              child: Column(
+                mainAxisSize: .min,
+                children: [
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: PantheonThemes.columnWidth,
+                    ),
+                    child: PrettyQrView.data(
+                      data: inviteLink,
+                      decoration: PrettyQrDecoration(
+                        shape: PrettyQrSmoothSymbol(
+                          roundFactor: 1,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 8.0),
+                  SelectableText(
+                    content,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimaryContainer,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8.0),
-              SelectableText(
-                content,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: theme.colorScheme.onPrimaryContainer,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

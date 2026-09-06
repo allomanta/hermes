@@ -75,6 +75,7 @@
 	<string>Share data with your contacts in Hermes.</string>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>voip</string>
 		<string>audio</string>
 		<string>fetch</string>
 		<string>processing</string>
@@ -112,5 +113,26 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+	<key>UIApplicationSupportsMultipleScenes</key>
+	<false/>
+	<key>UISceneConfigurations</key>
+	<dict>
+	<key>UIWindowSceneSessionRoleApplication</key>
+		<array>
+		<dict>
+			<key>UISceneClassName</key>
+			<string>UIWindowScene</string>
+			<key>UISceneDelegateClassName</key>
+			<string>FlutterSceneDelegate</string>
+			<key>UISceneConfigurationName</key>
+			<string>flutter</string>
+			<key>UISceneStoryboardFile</key>
+			<string>Main</string>
+		</dict>
+		</array>
+	</dict>
+	</dict>
 </dict>
 </plist>

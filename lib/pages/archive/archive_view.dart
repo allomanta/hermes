@@ -1,12 +1,15 @@
-import 'package:flutter/material.dart';
-
-import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/archive/archive.dart';
 import 'package:hermes/pages/chat_list/chat_list_item.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class ArchiveView extends StatelessWidget {
   final ArchiveController controller;
@@ -15,7 +18,7 @@ class ArchiveView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Room>>(
+    return FutureBuilder<List<ArchivedRoom>>(
       future: controller.getArchive(context),
       builder: (BuildContext context, snapshot) => Scaffold(
         appBar: AppBar(
@@ -58,10 +61,12 @@ class ArchiveView extends StatelessWidget {
                 return ListView.builder(
                   itemCount: controller.archive.length,
                   itemBuilder: (BuildContext context, int i) => ChatListItem(
-                    controller.archive[i],
+                    controller.archive[i].room,
                     onForget: () => controller.forgetRoomAction(i),
-                    onTap: () => context
-                        .go('/rooms/archive/${controller.archive[i].id}'),
+                    onTap: () => context.go(
+                      '/rooms/archive/${controller.archive[i].room.id}',
+                      extra: controller.archive[i].timeline,
+                    ),
                   ),
                 );
               }

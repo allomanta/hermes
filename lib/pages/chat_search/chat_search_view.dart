@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hermes/l10n/l10n.dart';
 
 import 'package:hermes/config/themes.dart';
@@ -8,6 +7,7 @@ import 'package:hermes/pages/chat_search/chat_search_message_tab.dart';
 import 'package:hermes/pages/chat_search/chat_search_page.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ChatSearchView extends StatelessWidget {
   final ChatSearchController controller;
@@ -48,9 +48,7 @@ class ChatSearchView extends StatelessWidget {
             if (PantheonThemes.isThreeColumnMode(context))
               const SizedBox(height: 16),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
                 controller: controller.searchController,
                 onSubmitted: (_) => controller.restartSearch(),
@@ -87,18 +85,27 @@ class ChatSearchView extends StatelessWidget {
                   ChatSearchMessageTab(
                     searchQuery: controller.searchController.text,
                     room: room,
-                    startSearch: controller.startMessageSearch,
-                    searchStream: controller.searchStream,
+                    onStartSearch: controller.startSearch,
+                    events: controller.messages,
+                    endReached: controller.messagesEndReached,
+                    isLoading: controller.isLoading,
+                    searchedUntil: controller.searchedUntil,
                   ),
                   ChatSearchImagesTab(
                     room: room,
-                    startSearch: controller.startGallerySearch,
-                    searchStream: controller.galleryStream,
+                    onStartSearch: controller.startSearch,
+                    events: controller.images,
+                    endReached: controller.imagesEndReached,
+                    isLoading: controller.isLoading,
+                    searchedUntil: controller.searchedUntil,
                   ),
                   ChatSearchFilesTab(
                     room: room,
-                    startSearch: controller.startFileSearch,
-                    searchStream: controller.fileStream,
+                    onStartSearch: controller.startSearch,
+                    events: controller.files,
+                    endReached: controller.filesEndReached,
+                    isLoading: controller.isLoading,
+                    searchedUntil: controller.searchedUntil,
                   ),
                 ],
               ),

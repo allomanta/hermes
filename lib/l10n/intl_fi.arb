@@ -1,6 +1,5 @@
 {
     "repeatPassword": "Salasana uudelleen",
-    "@repeatPassword": {},
     "about": "Tietoa Hermesista",
     "@about": {
         "type": "String",
@@ -50,7 +49,6 @@
         "placeholders": {}
     },
     "addToSpace": "Lisää tilaan",
-    "@addToSpace": {},
     "admin": "Ylläpitäjä",
     "@admin": {
         "type": "String",
@@ -63,11 +61,6 @@
     },
     "all": "Kaikki",
     "@all": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "allChats": "Kaikki keskustelut",
-    "@allChats": {
         "type": "String",
         "placeholders": {}
     },
@@ -120,19 +113,6 @@
         }
     },
     "sendOnEnter": "Lähetä painamalla rivinvaihtonäppäintä",
-    "@sendOnEnter": {},
-    "badServerVersionsException": "Kotipalvelin tukee Matrix Spec versio(it)a:\n{serverVersions}, mutta tämä sovellus tukee vain versio(it)a {supportedVersions}",
-    "@badServerVersionsException": {
-        "type": "String",
-        "placeholders": {
-            "serverVersions": {
-                "type": "String"
-            },
-            "supportedVersions": {
-                "type": "String"
-            }
-        }
-    },
     "badServerLoginTypesException": "Tämä kotipalvelin tukee sisäänkirjautumistapoja: \n{serverVersions},\nmutta tämä sovellus tukee vain -tapoja: \n{supportedVersions}",
     "@badServerLoginTypesException": {
         "type": "String",
@@ -177,11 +157,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "botMessages": "Bottien lähettämät viestit",
-    "@botMessages": {
-        "type": "String",
-        "placeholders": {}
-    },
     "cancel": "Peruuta",
     "@cancel": {
         "type": "String",
@@ -197,18 +172,6 @@
         "type": "String",
         "placeholders": {
             "username": {
-                "type": "String"
-            }
-        }
-    },
-    "changedTheChatNameTo": "{username} asetti keskustelun nimeksi: '{chatname}'",
-    "@changedTheChatNameTo": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            },
-            "chatname": {
                 "type": "String"
             }
         }
@@ -329,18 +292,6 @@
             }
         }
     },
-    "changedTheChatDescriptionTo": "{username} asetti keskustelun kuvaukseksi: '{description}'",
-    "@changedTheChatDescriptionTo": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            },
-            "description": {
-                "type": "String"
-            }
-        }
-    },
     "changedTheChatPermissions": "{username} muutti keskustelun oikeuksia",
     "@changedTheChatPermissions": {
         "type": "String",
@@ -355,15 +306,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "yourChatBackupHasBeenSetUp": "Keskustelujesi varmuuskopiointi on asetettu.",
-    "@yourChatBackupHasBeenSetUp": {},
     "chatBackup": "Keskustelun varmuuskopiointi",
     "@chatBackup": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "chatBackupDescription": "Vanhat viestisi on suojattu palautusavaimella. Varmistathan ettet hävitä sitä.",
-    "@chatBackupDescription": {
         "type": "String",
         "placeholders": {}
     },
@@ -372,8 +316,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "chatHasBeenAddedToThisSpace": "Keskustelu on lisätty tähän tilaan",
-    "@chatHasBeenAddedToThisSpace": {},
     "chats": "Keskustelut",
     "@chats": {
         "type": "String",
@@ -458,18 +400,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "dateWithoutYear": "{day}.{month}",
-    "@dateWithoutYear": {
-        "type": "String",
-        "placeholders": {
-            "month": {
-                "type": "String"
-            },
-            "day": {
-                "type": "String"
-            }
-        }
-    },
     "dateAndTimeOfDay": "{date}, {timeOfDay}",
     "@dateAndTimeOfDay": {
         "type": "String",
@@ -478,21 +408,6 @@
                 "type": "String"
             },
             "timeOfDay": {
-                "type": "String"
-            }
-        }
-    },
-    "dateWithYear": "{day}.{month}.{year}",
-    "@dateWithYear": {
-        "type": "String",
-        "placeholders": {
-            "year": {
-                "type": "String"
-            },
-            "month": {
-                "type": "String"
-            },
-            "day": {
                 "type": "String"
             }
         }
@@ -519,16 +434,6 @@
     },
     "deleteMessage": "Poista viesti",
     "@deleteMessage": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "device": "Laite",
-    "@device": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "deviceId": "Laite-ID",
-    "@deviceId": {
         "type": "String",
         "placeholders": {}
     },
@@ -587,23 +492,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "emotePacks": "Huoneen emote-paketit",
-    "@emotePacks": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "emoteSettings": "Emote-asetukset",
-    "@emoteSettings": {
-        "type": "String",
-        "placeholders": {}
-    },
     "emoteShortcode": "Emote-lyhytkoodi",
     "@emoteShortcode": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "emoteWarnNeedToPick": "Emote-lyhytkoodi ja kuva on valittava!",
-    "@emoteWarnNeedToPick": {
         "type": "String",
         "placeholders": {}
     },
@@ -636,13 +526,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "homeserver": "Kotipalvelin",
-    "@homeserver": {},
-    "enterYourHomeserver": "Syötä kotipalvelimesi",
-    "@enterYourHomeserver": {
-        "type": "String",
-        "placeholders": {}
-    },
     "errorObtainingLocation": "Virhe paikannuksessa: {error}",
     "@errorObtainingLocation": {
         "type": "String",
@@ -652,21 +535,6 @@
             }
         }
     },
-    "everythingReady": "Kaikki on valmista!",
-    "@everythingReady": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "extremeOffensive": "Erittäin loukkaavaa",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "fileName": "Tiedostonimi",
-    "@fileName": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fromJoining": "Alkaen liittymisestä",
     "@fromJoining": {
         "type": "String",
@@ -674,11 +542,6 @@
     },
     "fromTheInvitation": "Alkaen kutsumisesta",
     "@fromTheInvitation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "goToTheNewRoom": "Mene uuteen huoneeseen",
-    "@goToTheNewRoom": {
         "type": "String",
         "placeholders": {}
     },
@@ -733,28 +596,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "hideRedactedEvents": "Piilota poistetut tapahtumat",
-    "@hideRedactedEvents": {
-        "type": "String",
-        "placeholders": {}
-    },
     "hideUnknownEvents": "Piilota tuntemattomat tapahtumat",
     "@hideUnknownEvents": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "howOffensiveIsThisContent": "Kuinka loukkaavaa tämä sisältö on?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "id": "ID",
-    "@id": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "identity": "Identiteetti",
-    "@identity": {
         "type": "String",
         "placeholders": {}
     },
@@ -792,11 +635,6 @@
     },
     "invitedUsersOnly": "Vain kutsutut käyttäjät",
     "@invitedUsersOnly": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inviteForMe": "Kutsu minua varten",
-    "@inviteForMe": {
         "type": "String",
         "placeholders": {}
     },
@@ -857,11 +695,6 @@
     },
     "leftTheChat": "Poistui keskustelusta",
     "@leftTheChat": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "license": "Lisenssi",
-    "@license": {
         "type": "String",
         "placeholders": {}
     },
@@ -943,7 +776,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "newMessageInHermes": "💬 Uusi viesti Hermes",
+    "newMessageInHermes": "💬 Uusi viesti FluffyChätissä",
     "@newMessageInHermes": {
         "type": "String",
         "placeholders": {}
@@ -986,12 +819,6 @@
         }
     },
     "scanQrCode": "Skannaa QR-koodi",
-    "@scanQrCode": {},
-    "none": "Ei yhtään",
-    "@none": {
-        "type": "String",
-        "placeholders": {}
-    },
     "noPasswordRecoveryDescription": "Et ole vielä lisännyt tapaa salasanasi palauttamiseksi.",
     "@noPasswordRecoveryDescription": {
         "type": "String",
@@ -1021,23 +848,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "offensive": "Loukkaava",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offline": "Poissa verkosta",
-    "@offline": {
-        "type": "String",
-        "placeholders": {}
-    },
     "ok": "ok",
     "@ok": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "online": "Linjoilla",
-    "@online": {
         "type": "String",
         "placeholders": {}
     },
@@ -1062,7 +874,6 @@
         "placeholders": {}
     },
     "clearArchive": "Tyhjennä arkisto",
-    "@clearArchive": {},
     "forward": "Edelleenlähetä",
     "@forward": {
         "type": "String",
@@ -1080,16 +891,6 @@
     },
     "compareEmojiMatch": "Vertaa hymiöitä",
     "@compareEmojiMatch": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "confirm": "Vahvista",
-    "@confirm": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "containsUserName": "Sisältää käyttäjätunnuksen",
-    "@containsUserName": {
         "type": "String",
         "placeholders": {}
     },
@@ -1156,18 +957,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "connect": "Yhdistä",
-    "@connect": {
-        "type": "String",
-        "placeholders": {}
-    },
     "contactHasBeenInvitedToTheGroup": "Yhteystieto on kutsuttu ryhmään",
     "@contactHasBeenInvitedToTheGroup": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "containsDisplayName": "Sisältää näyttönimen",
-    "@containsDisplayName": {
         "type": "String",
         "placeholders": {}
     },
@@ -1197,11 +988,6 @@
     },
     "encryption": "Salaus",
     "@encryption": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Loukkaamatonta",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1239,11 +1025,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "hermes": "Hermes",
-    "@hermes": {
-        "type": "String",
-        "placeholders": {}
-    },
     "iHaveClickedOnLink": "Olen klikannut linkkiä",
     "@iHaveClickedOnLink": {
         "type": "String",
@@ -1263,23 +1044,8 @@
             }
         }
     },
-    "notificationsEnabledForThisAccount": "Tämän tunnuksen ilmoitukset ovat käytössä",
-    "@notificationsEnabledForThisAccount": {
-        "type": "String",
-        "placeholders": {}
-    },
     "joinRoom": "Liity huoneeseen",
     "@joinRoom": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "memberChanges": "Jäsenmuutoksia",
-    "@memberChanges": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "needPantalaimonWarning": "Tiedäthän tarvitsevasi toistaiseksi Pantalaimonin käyttääksesi päästä-päähän-salausta.",
-    "@needPantalaimonWarning": {
         "type": "String",
         "placeholders": {}
     },
@@ -1298,8 +1064,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "enableMultiAccounts": "(BETA) Ota käyttöön tuki usealle tilille tällä laitteella",
-    "@enableMultiAccounts": {},
     "onlineKeyBackupEnabled": "Verkkkoavainvarmuuskopio on käytössä",
     "@onlineKeyBackupEnabled": {
         "type": "String",
@@ -1326,17 +1090,11 @@
         "placeholders": {}
     },
     "oneClientLoggedOut": "Yksi tunnuksistasi on kirjattu ulos",
-    "@oneClientLoggedOut": {},
     "addAccount": "Lisää tili",
-    "@addAccount": {},
     "editBundlesForAccount": "Muokkaa tämän tilin kääröjä",
-    "@editBundlesForAccount": {},
     "addToBundle": "Lisää kääreeseen",
-    "@addToBundle": {},
     "removeFromBundle": "Poista tästä kääreestä",
-    "@removeFromBundle": {},
     "bundleName": "Kääreen nimi",
-    "@bundleName": {},
     "openInMaps": "Avaa kartoissa",
     "@openInMaps": {
         "type": "String",
@@ -1367,32 +1125,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "people": "Ihmiset",
-    "@people": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "pickImage": "Valitse kuva",
-    "@pickImage": {
-        "type": "String",
-        "placeholders": {}
-    },
     "pin": "Kiinnitä",
     "@pin": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "play": "Toista {fileName}",
-    "@play": {
-        "type": "String",
-        "placeholders": {
-            "fileName": {
-                "type": "String"
-            }
-        }
-    },
-    "pleaseChoose": "Valitse",
-    "@pleaseChoose": {
         "type": "String",
         "placeholders": {}
     },
@@ -1403,11 +1137,6 @@
     },
     "pleaseClickOnLink": "Klikkaa linkkiä sähköpostissa ja sitten jatka.",
     "@pleaseClickOnLink": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "pleaseEnter4Digits": "Syötä 4 numeroa tai jätä tyhjäksi poistaaksesi sovelluksen lukituksen.",
-    "@pleaseEnter4Digits": {
         "type": "String",
         "placeholders": {}
     },
@@ -1431,11 +1160,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "recording": "Tallenne",
-    "@recording": {
-        "type": "String",
-        "placeholders": {}
-    },
     "redactedAnEvent": "{username} poisti tapahtuman",
     "@redactedAnEvent": {
         "type": "String",
@@ -1447,11 +1171,6 @@
     },
     "redactMessage": "Poista viesti",
     "@redactMessage": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "register": "Rekisteröidy",
-    "@register": {
         "type": "String",
         "placeholders": {}
     },
@@ -1469,11 +1188,6 @@
             }
         }
     },
-    "rejoin": "Liity uudelleen",
-    "@rejoin": {
-        "type": "String",
-        "placeholders": {}
-    },
     "remove": "Poista",
     "@remove": {
         "type": "String",
@@ -1484,33 +1198,10 @@
         "type": "String",
         "placeholders": {}
     },
-    "removedBy": "Poistanut {username}",
-    "@removedBy": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            }
-        }
-    },
-    "removeDevice": "Poista laite",
-    "@removeDevice": {
-        "type": "String",
-        "placeholders": {}
-    },
     "unbanFromChat": "Poista porttikielto keskusteluun",
     "@unbanFromChat": {
         "type": "String",
         "placeholders": {}
-    },
-    "seenByUser": "Nähnyt {username}",
-    "@seenByUser": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            }
-        }
     },
     "sendAMessage": "Lähetä viesti",
     "@sendAMessage": {
@@ -1546,28 +1237,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "sendOriginal": "Lähetä alkuperäinen",
-    "@sendOriginal": {
-        "type": "String",
-        "placeholders": {}
-    },
     "setAsCanonicalAlias": "Aseta pääalias",
     "@setAsCanonicalAlias": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "setCustomEmotes": "Aseta mukautetut emotet",
-    "@setCustomEmotes": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "setInvitationLink": "Aseta kutsulinkki",
-    "@setInvitationLink": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "setPermissionsLevel": "Aseta oikeustasot",
-    "@setPermissionsLevel": {
         "type": "String",
         "placeholders": {}
     },
@@ -1594,11 +1265,6 @@
                 "type": "String"
             }
         }
-    },
-    "singlesignon": "Kertakirjautuminen",
-    "@singlesignon": {
-        "type": "String",
-        "placeholders": {}
     },
     "skip": "Ohita",
     "@skip": {
@@ -1645,29 +1311,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "title": "Hermes",
-    "@title": {
-        "description": "Title for the application",
-        "type": "String",
-        "placeholders": {}
-    },
-    "toggleMuted": "Mykistetty-kytkin",
-    "@toggleMuted": {
-        "type": "String",
-        "placeholders": {}
-    },
     "tooManyRequestsWarning": "Liikaa pyyntöjä. Yritä myöhemmin uudelleen!",
     "@tooManyRequestsWarning": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "toggleUnread": "Merkitse lukemattomaksi/luetuksi",
-    "@toggleUnread": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "transferFromAnotherDevice": "Siirrä toiselta laitteelta",
-    "@transferFromAnotherDevice": {
         "type": "String",
         "placeholders": {}
     },
@@ -1767,7 +1412,6 @@
         }
     },
     "unverified": "Varmistamaton",
-    "@unverified": {},
     "verified": "Varmistettu",
     "@verified": {
         "type": "String",
@@ -1823,11 +1467,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "wallpaper": "Taustakuva:",
-    "@wallpaper": {
-        "type": "String",
-        "placeholders": {}
-    },
     "warning": "Varoitus!",
     "@warning": {
         "type": "String",
@@ -1853,11 +1492,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "wipeChatBackup": "Pyyhi keskusteluvarmuuskopio luodaksesi uuden palautusavaimen?",
-    "@wipeChatBackup": {
-        "type": "String",
-        "placeholders": {}
-    },
     "withTheseAddressesRecoveryDescription": "Näillä osoitteilla voit palauttaa salasanasi.",
     "@withTheseAddressesRecoveryDescription": {
         "type": "String",
@@ -1874,13 +1508,6 @@
         "placeholders": {}
     },
     "removeFromSpace": "Poista tilasta",
-    "@removeFromSpace": {},
-    "addToSpaceDescription": "Valitse tila, johon tämä keskustelu lisätään.",
-    "@addToSpaceDescription": {},
-    "start": "Aloita",
-    "@start": {},
-    "serverRequiresEmail": "Tämän palvelimen täytyy tarkistaa sähköposti-osoitteesi rekisteröitymistä varten.",
-    "@serverRequiresEmail": {},
     "roomVersion": "Huoneen versio",
     "@roomVersion": {
         "type": "String",
@@ -1894,16 +1521,6 @@
                 "type": "String"
             }
         }
-    },
-    "unavailable": "Ei saatavilla",
-    "@unavailable": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "verify": "Varmista",
-    "@verify": {
-        "type": "String",
-        "placeholders": {}
     },
     "passphraseOrKey": "salalause tai palautusavain",
     "@passphraseOrKey": {
@@ -1944,7 +1561,6 @@
         }
     },
     "link": "Linkki",
-    "@link": {},
     "passwordForgotten": "Salasana unohtunut",
     "@passwordForgotten": {
         "type": "String",
@@ -1965,11 +1581,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "requestPermission": "Pyydä lupaa",
-    "@requestPermission": {
-        "type": "String",
-        "placeholders": {}
-    },
     "saveFile": "Tallenna tiedosto",
     "@saveFile": {
         "type": "String",
@@ -1980,18 +1591,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "sendSticker": "Lähetä tarra",
-    "@sendSticker": {
-        "type": "String",
-        "placeholders": {}
-    },
     "publicRooms": "Julkiset huoneet",
     "@publicRooms": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "pushRules": "Push-säännöt",
-    "@pushRules": {
         "type": "String",
         "placeholders": {}
     },
@@ -2042,32 +1643,12 @@
         "type": "String",
         "placeholders": {}
     },
-    "showPassword": "Näytä salasana",
-    "@showPassword": {
-        "type": "String",
-        "placeholders": {}
-    },
     "statusExampleMessage": "Millainen on vointisi?",
     "@statusExampleMessage": {
         "type": "String",
         "placeholders": {}
     },
-    "unreadChats": "{unreadCount, plural, =1{1 lukematon keskustelu} other{{unreadCount} lukematonta keskustelua}}",
-    "@unreadChats": {
-        "type": "String",
-        "placeholders": {
-            "unreadCount": {
-                "type": "int"
-            }
-        }
-    },
-    "videoCall": "Videopuhelu",
-    "@videoCall": {
-        "type": "String",
-        "placeholders": {}
-    },
     "sender": "Lähettäjä",
-    "@sender": {},
     "startedACall": "{senderName} aloitti puhelun",
     "@startedACall": {
         "type": "String",
@@ -2082,11 +1663,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "toggleFavorite": "Suosikki-kytkin",
-    "@toggleFavorite": {
-        "type": "String",
-        "placeholders": {}
-    },
     "unmuteChat": "Poista keskustelun mykistys",
     "@unmuteChat": {
         "type": "String",
@@ -2098,14 +1674,6 @@
         "placeholders": {}
     },
     "time": "Aika",
-    "@time": {},
-    "messageType": "Viestin tyyppi",
-    "@messageType": {},
-    "username": "Käyttäjätunnus",
-    "@username": {
-        "type": "String",
-        "placeholders": {}
-    },
     "writeAMessage": "Kirjoita viesti…",
     "@writeAMessage": {
         "type": "String",
@@ -2127,9 +1695,7 @@
         "placeholders": {}
     },
     "messageInfo": "Viestin tiedot",
-    "@messageInfo": {},
     "openGallery": "Avaa galleria",
-    "@openGallery": {},
     "commandHint_clearcache": "Tyhjennä välimuisti",
     "@commandHint_clearcache": {
         "type": "String",
@@ -2150,40 +1716,11 @@
         "type": "String",
         "description": "Usage hint for the command /discardsession"
     },
-    "openVideoCamera": "Avaa kamera videokuvausta varten",
-    "@openVideoCamera": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "videoWithSize": "Video ({size})",
-    "@videoWithSize": {
-        "type": "String",
-        "placeholders": {
-            "size": {
-                "type": "String"
-            }
-        }
-    },
-    "publish": "Julkaise",
-    "@publish": {},
     "markAsRead": "Merkitse luetuksi",
-    "@markAsRead": {},
-    "dismiss": "Hylkää",
-    "@dismiss": {},
     "emojis": "Hymiöt",
-    "@emojis": {},
     "unsupportedAndroidVersionLong": "Tämä ominaisuus vaatii uudemman Android-version. Tarkistathan päivitykset tai Lineage OS :n tuki.",
-    "@unsupportedAndroidVersionLong": {},
     "unsupportedAndroidVersion": "Ei tuettu Android-versio",
-    "@unsupportedAndroidVersion": {},
     "reportUser": "Ilmianna käyttäjä",
-    "@reportUser": {},
-    "voiceCall": "Äänipuhelu",
-    "@voiceCall": {},
-    "videoCallsBetaWarning": "Huomaathan videopuheluiden ovan beta-asteella. Ne eivät ehkä toimi odotetusti tai toimi ollenkaan kaikilla alustoilla.",
-    "@videoCallsBetaWarning": {},
-    "placeCall": "Soita",
-    "@placeCall": {},
     "reactedWith": "{sender} reagoi {reaction}",
     "@reactedWith": {
         "type": "String",
@@ -2196,53 +1733,11 @@
             }
         }
     },
-    "openChat": "Avaa Keskustelu",
-    "@openChat": {},
     "pinMessage": "Kiinnitä huoneeseen",
-    "@pinMessage": {},
     "confirmEventUnpin": "Haluatko varmasti irrottaa tapahtuman pysyvästi?",
-    "@confirmEventUnpin": {},
-    "widgetVideo": "Video",
-    "@widgetVideo": {},
-    "widgetJitsi": "Jitsi Meet",
-    "@widgetJitsi": {},
-    "widgetCustom": "Mukautettu",
-    "@widgetCustom": {},
-    "widgetName": "Nimi",
-    "@widgetName": {},
-    "widgetUrlError": "Epäkelvollinen URL.",
-    "@widgetUrlError": {},
-    "errorAddingWidget": "Virhe lisättäessä pienoissovellusta.",
-    "@errorAddingWidget": {},
-    "nextAccount": "Seuraava tili",
-    "@nextAccount": {},
-    "switchToAccount": "Siirry tilille {number}",
-    "@switchToAccount": {
-        "type": "number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
-    "experimentalVideoCalls": "Kokeelliset videopuhelut",
-    "@experimentalVideoCalls": {},
-    "emailOrUsername": "Sähköposti-osoite tai käyttäjätunnus",
-    "@emailOrUsername": {},
-    "previousAccount": "Edellinen tili",
-    "@previousAccount": {},
-    "widgetEtherpad": "Tekstimuotoinen muistiinpano",
-    "@widgetEtherpad": {},
-    "widgetNameError": "Syötä näyttönimi.",
-    "@widgetNameError": {},
-    "addWidget": "Lisää pienoissovellus",
-    "@addWidget": {},
     "youRejectedTheInvitation": "Kieltäydyit kutsusta",
-    "@youRejectedTheInvitation": {},
     "youJoinedTheChat": "Liityit keskusteluun",
-    "@youJoinedTheChat": {},
     "youAcceptedTheInvitation": "👍 Hyväksyit kutsun",
-    "@youAcceptedTheInvitation": {},
     "youBannedUser": "Annoit porttikiellon käyttäjälle {user}",
     "@youBannedUser": {
         "placeholders": {
@@ -2299,47 +1794,13 @@
             }
         }
     },
-    "separateChatTypes": "Erota yksityiskeskustelut ryhmistä",
-    "@separateChatTypes": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "dehydrateTor": "TOR-käyttäjät: vie istunto",
-    "@dehydrateTor": {},
-    "hydrateTor": "TOR-käyttäjät: tuo viety istunto",
-    "@hydrateTor": {},
-    "hydrateTorLong": "Veitkö edellisen istuntosi käyttäessäsi TORia? Tuo se nopeasti ja jatka jutustelua.",
-    "@hydrateTorLong": {},
-    "pleaseEnterRecoveryKey": "Syötä palautusavaimesi:",
-    "@pleaseEnterRecoveryKey": {},
-    "recoveryKey": "Palautusavain",
-    "@recoveryKey": {},
-    "recoveryKeyLost": "Kadonnut palautusavain?",
-    "@recoveryKeyLost": {},
-    "dehydrateTorLong": "Tor-käyttäjille suositellaan istunnon vientiä ennen ikkunan sulkemista.",
-    "@dehydrateTorLong": {},
     "hydrate": "Palauta varmuuskopiotiedostosta",
-    "@hydrate": {},
     "dehydrate": "Vie istunto ja tyhjennä laite",
-    "@dehydrate": {},
     "dehydrateWarning": "Tätä toimenpidettä ei voi kumota. Varmista varmuuskopiotiedoston turvallinen tallennus.",
-    "@dehydrateWarning": {},
     "users": "Käyttäjät",
-    "@users": {},
     "storeSecurlyOnThisDevice": "Tallenna turvallisesti tälle laitteelle",
-    "@storeSecurlyOnThisDevice": {},
-    "pleaseEnterRecoveryKeyDescription": "Avataksesi vanhojen viestiesi salauksen, syötä palautusavaimesi, joka luotiin edellisessä istunnossa. Palautusavaimesi EI OLE salasanasi.",
-    "@pleaseEnterRecoveryKeyDescription": {},
-    "unlockOldMessages": "Pura vanhojen viestien salaus",
-    "@unlockOldMessages": {},
-    "indexedDbErrorLong": "Viestivarasto ei ole käytössä yksityisselauksessa oletuksena.\nKäythän osoitteessa\n - about:config\n - Aseta dom.indexedDB.privateBrowsing.enabled arvoon true\nMuuten Hermesin käyttäminen ei ole mahdollista.",
-    "@indexedDbErrorLong": {},
-    "saveKeyManuallyDescription": "Tallenna tämä avain manuaalisesti käyttäen järjestelmän jakodialogia tai leikepöytää.",
-    "@saveKeyManuallyDescription": {},
     "storeInAndroidKeystore": "Tallenna Android KeyStoreen",
-    "@storeInAndroidKeystore": {},
     "storeInAppleKeyChain": "Tallenna Applen avainnippuun",
-    "@storeInAppleKeyChain": {},
     "countFiles": "{count} tiedostoa",
     "@countFiles": {
         "placeholders": {
@@ -2348,16 +1809,9 @@
             }
         }
     },
-    "storeInSecureStorageDescription": "Tallenna palautusavain tämän laitteen turvavarastoon.",
-    "@storeInSecureStorageDescription": {},
-    "indexedDbErrorTitle": "Yksityisen selauksen ongelmat",
-    "@indexedDbErrorTitle": {},
     "user": "Käyttäjä",
-    "@user": {},
     "custom": "Mukautettu",
-    "@custom": {},
     "confirmMatrixId": "Kirjoita Matrix IDsi uudelleen poistaaksesi tunnuksesi.",
-    "@confirmMatrixId": {},
     "supposedMxid": "Tämän pitäisi olla {mxid}",
     "@supposedMxid": {
         "type": "String",
@@ -2368,41 +1822,10 @@
         }
     },
     "commandHint_markasgroup": "Merkitse ryhmäksi",
-    "@commandHint_markasgroup": {},
     "whyIsThisMessageEncrypted": "Miksei tätä viestiä voida lukea?",
-    "@whyIsThisMessageEncrypted": {},
     "noKeyForThisMessage": "Tämä voi tapahtua mikäli viesti lähetettiin ennen sisäänkirjautumistasi tälle laitteelle.\n\nOn myös mahdollista, että lähettäjä on estänyt tämän laitteen tai jokin meni pieleen verkkoyhteyden kanssa.\n\nPystytkö lukemaan viestin toisella istunnolla? Siinä tapauksessa voit siirtää viestin siltä! Mene Asetukset > Laitteet ja varmista, että laitteesi ovat varmistaneet toisensa. Seuraavankerran avatessasi huoneen ja molempien istuntojen ollessa etualalla, avaimet siirretään automaattisesti.\n\nHaluatko varmistaa ettet menetä avaimia uloskirjautuessa tai laitteita vaihtaessa? Varmista avainvarmuuskopion käytössäolo asetuksista.",
-    "@noKeyForThisMessage": {},
     "commandHint_markasdm": "Merkitse yksityiskeskusteluksi syötetyn Matrix IDn kanssa",
-    "@commandHint_markasdm": {},
-    "foregroundServiceRunning": "Tämä ilmoitus näkyy etualapalvelun ollessa käynnissä.",
-    "@foregroundServiceRunning": {},
-    "callingPermissions": "Puheluoikeudet",
-    "@callingPermissions": {},
-    "callingAccount": "Soittamistunnus",
-    "@callingAccount": {},
-    "callingAccountDetails": "Sallii Hermesin käyttää Androidin omaa Puhelut-sovellusta.",
-    "@callingAccountDetails": {},
-    "appearOnTop": "Näy päällä",
-    "@appearOnTop": {},
-    "appearOnTopDetails": "Sallii sovelluksen näkyä muiden sovellusten päällä (tätä ei tarvita, mikäli olet jo määrittänyt Hermesin puhelin-tunnukseksi)",
-    "@appearOnTopDetails": {},
     "newSpace": "Uusi tila",
-    "@newSpace": {},
-    "enterSpace": "Siirry tilaan",
-    "@enterSpace": {},
-    "enterRoom": "Siirry huoneeseen",
-    "@enterRoom": {},
-    "allSpaces": "Kaikki tilat",
-    "@allSpaces": {},
-    "screenSharingTitle": "ruudunjako",
-    "@screenSharingTitle": {},
-    "otherCallingPermissions": "Mikrofoni, kamera ja muut Hermesin oikeudet",
-    "@otherCallingPermissions": {},
-    "newGroup": "Uusi ryhmä",
-    "@newGroup": {},
-    "screenSharingDetail": "Jaat ruutuasi Hermesissä",
-    "@screenSharingDetail": {},
     "hugContent": "{senderName} halaa sinua",
     "@hugContent": {
         "type": "String",
@@ -2422,7 +1845,6 @@
         }
     },
     "commandHint_hug": "Lähetä halaus",
-    "@commandHint_hug": {},
     "googlyEyesContent": "{senderName} lähettää askartelusilmiä",
     "@googlyEyesContent": {
         "type": "String",
@@ -2432,23 +1854,9 @@
             }
         }
     },
-    "numChats": "{number} keskustelua",
-    "@numChats": {
-        "type": "number",
-        "placeholders": {
-            "number": {
-                "type": "String"
-            }
-        }
-    },
     "commandHint_googly": "Lähetä askartelusilmiä",
-    "@commandHint_googly": {},
     "commandHint_cuddle": "Lähetä kokovartaluhalaus",
-    "@commandHint_cuddle": {},
-    "hideUnimportantStateEvents": "Piilota ei-niin-tärkeät tilatapahtumat",
-    "@hideUnimportantStateEvents": {},
     "doNotShowAgain": "Älä näytä uudelleen",
-    "@doNotShowAgain": {},
     "fileHasBeenSavedAt": "Tiedosto on tallennettu sijaintiin {path}",
     "@fileHasBeenSavedAt": {
         "type": "String",
@@ -2459,40 +1867,18 @@
         }
     },
     "disableEncryptionWarning": "Turvallisuuden vuoksi et voi poistaa salausta käytöstä huoneista, joissa se on aiemmin otettu käyttöön.",
-    "@disableEncryptionWarning": {},
-    "allRooms": "Kaikki ryhmäkeskustelut",
-    "@allRooms": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "startFirstChat": "Aloita ensimmäinen keskustelusi",
-    "@startFirstChat": {},
     "newSpaceDescription": "Tilat mahdollistavat keskusteluidesi keräämisen ja yksityisten tai julkisten yhteisöjen rakentamisen.",
-    "@newSpaceDescription": {},
-    "deviceKeys": "Laite-avaimet:",
-    "@deviceKeys": {},
     "reopenChat": "Avaa keskustelu uudelleen",
-    "@reopenChat": {},
     "noOtherDevicesFound": "Muita laitteita ei löytynyt",
-    "@noOtherDevicesFound": {},
     "jumpToLastReadMessage": "Hyppää viimeiseen luettuun viestiin",
-    "@jumpToLastReadMessage": {},
     "readUpToHere": "Luettu tähän asti",
-    "@readUpToHere": {},
     "jump": "Hyppää",
-    "@jump": {},
     "openLinkInBrowser": "Avaa linkki selaimessa",
-    "@openLinkInBrowser": {},
     "report": "ilmoita",
-    "@report": {},
     "encryptThisChat": "Salaa tämä keskustelu",
-    "@encryptThisChat": {},
     "noBackupWarning": "Varoitus! Ilman avainvarmuuskopion käyttöönottoa menetät pääsyn salattuihin viesteihisi. Suosittelemme ehdottomasti avainvarmuuskopion käyttöönottoa ennen uloskirjautumista.",
-    "@noBackupWarning": {},
     "fileIsTooBigForServer": "Ei voi lähettää! Palvelin tukee liitetiedostoja vain enintään {max}.",
-    "@fileIsTooBigForServer": {},
     "reportErrorDescription": "😭 Voi ei. Jokin meni pieleen. Halutessasi voit ilmoittaa ongelman kehittäjille.",
-    "@reportErrorDescription": {},
     "wasDirectChatDisplayName": "Tyhjä keskustelu (oli {oldDisplayName})",
     "@wasDirectChatDisplayName": {
         "type": "String",
@@ -2503,27 +1889,14 @@
         }
     },
     "sorryThatsNotPossible": "Anteeksi... se ei ole mahdollista",
-    "@sorryThatsNotPossible": {},
-    "signInWithPassword": "Kirjaudu sisään salasanalla",
-    "@signInWithPassword": {},
-    "pleaseTryAgainLaterOrChooseDifferentServer": "Yritä myöhemmin uudelleen tai valitse toinen palvelin.",
-    "@pleaseTryAgainLaterOrChooseDifferentServer": {},
     "setColorTheme": "Aseta väriteema:",
-    "@setColorTheme": {},
     "tryAgain": "Yritä uudelleen",
-    "@tryAgain": {},
     "messagesStyle": "Viestit:",
-    "@messagesStyle": {},
     "chatDescription": "Keskustelun kuvaus",
-    "@chatDescription": {},
     "invalidServerName": "Virheellinen palvelimen nimi",
-    "@invalidServerName": {},
     "chatPermissions": "Keskustelun oikeudet",
-    "@chatPermissions": {},
     "setChatDescription": "Asetti keskustelun kuvauksen",
-    "@setChatDescription": {},
     "importFromZipFile": "Tuo .zip -tiedostosta",
-    "@importFromZipFile": {},
     "redactedBy": "Poistanut {username}",
     "@redactedBy": {
         "type": "String",
@@ -2533,23 +1906,9 @@
             }
         }
     },
-    "signInWith": "Kirjaudu sisään palvelulla {provider}",
-    "@signInWith": {
-        "type": "String",
-        "placeholders": {
-            "provider": {
-                "type": "String"
-            }
-        }
-    },
     "optionalRedactReason": "(Vapaaehtoinen) Syy tämän viestin poistamiselle...",
-    "@optionalRedactReason": {},
     "archiveRoomDescription": "Keskustelu siirretään arkistoon. Muut käyttäjät näkevät sinun poistuneen keskustelusta.",
-    "@archiveRoomDescription": {},
     "exportEmotePack": "Vie emotepaketti .zip-tiedostona",
-    "@exportEmotePack": {},
-    "inviteContactToGroupQuestion": "Tahdotko kutsua yhteystiedon {contact} keskusteluun \"{groupName}\"?",
-    "@inviteContactToGroupQuestion": {},
     "redactedByBecause": "Poistanut {username} syystä: \"{reason}\"",
     "@redactedByBecause": {
         "type": "String",
@@ -2563,11 +1922,7 @@
         }
     },
     "redactMessageDescription": "Viesti poistetaan kaikilta keskustelun osallistujilta. Tätä ei voida kumota.",
-    "@redactMessageDescription": {},
     "invalidInput": "Virheellinen syöte!",
-    "@invalidInput": {},
-    "addChatDescription": "Lisää keskustelulle kuvaus...",
-    "@addChatDescription": {},
     "hasKnocked": "🚪 {user} on koputtanut",
     "@hasKnocked": {
         "placeholders": {
@@ -2576,8 +1931,6 @@
             }
         }
     },
-    "directChat": "Yksityiskeskustelu",
-    "@directChat": {},
     "wrongPinEntered": "Väärä pin-koodi! Yritä uudelleen {seconds} sekuntin kuluttua...",
     "@wrongPinEntered": {
         "type": "String",
@@ -2588,118 +1941,51 @@
         }
     },
     "sendTypingNotifications": "Lähetä kirjoitusilmoituksia",
-    "@sendTypingNotifications": {},
     "inviteGroupChat": "📨 Kutsu ryhmäkeskusteluun",
-    "@inviteGroupChat": {},
-    "invitePrivateChat": "📨 Kutsu yksityiskeskusteluun",
-    "@invitePrivateChat": {},
     "importEmojis": "Tuo emojit",
-    "@importEmojis": {},
     "noChatDescriptionYet": "Keskustelun kuvausta ei ole vielä luotu.",
-    "@noChatDescriptionYet": {},
     "notAnImage": "Tämä ei ole kuvatiedosto.",
-    "@notAnImage": {},
     "chatDescriptionHasBeenChanged": "Keskustelun kuvaus muutettu",
-    "@chatDescriptionHasBeenChanged": {},
     "roomUpgradeDescription": "Keskustelu luodaan uudelleen uudella huoneversiolla. Kaikille osallistujille ilmoitetaan, että heidän tulee siirtyä uuteen keskusteluun. Voit lukea lisää huoneversioista osoitteesta https://spec.matrix.org/latest/rooms/",
-    "@roomUpgradeDescription": {},
     "pleaseEnterANumber": "Syötä suurempi luku kuin 0",
-    "@pleaseEnterANumber": {},
-    "profileNotFound": "Käyttäjää ei löydy palvelimelta. Tämä voi olla yhteysongelma tai käyttäjä ei ole olemassa.",
-    "@profileNotFound": {},
     "shareInviteLink": "Jaa kutsulinkki",
-    "@shareInviteLink": {},
     "emoteKeyboardNoRecents": "Viimeaikoina käytetyt emotet tulevat näkymään täällä...",
     "@emoteKeyboardNoRecents": {
         "type": "String",
         "placeholders": {}
     },
-    "setTheme": "Aseta teema:",
-    "@setTheme": {},
     "replace": "Korvaa",
-    "@replace": {},
     "createGroup": "Luo ryhmä",
-    "@createGroup": {},
     "importNow": "Tuo nyt",
-    "@importNow": {},
     "invite": "Kutsu",
-    "@invite": {},
     "swipeRightToLeftToReply": "Vastaa pyyhkäisemällä oikealta vasemmalle",
-    "@swipeRightToLeftToReply": {},
     "accessAndVisibility": "Pääsy ja näkyvyys",
-    "@accessAndVisibility": {},
     "unread": "Lukemattomat",
-    "@unread": {},
     "noMoreChatsFound": "Lisää keskusteluja ei löytynyt...",
-    "@noMoreChatsFound": {},
-    "alwaysUse24HourFormat": "väärä",
-    "@alwaysUse24HourFormat": {
-        "description": "Set to true to always display time of day in 24 hour format."
-    },
     "select": "Valitse",
-    "@select": {},
     "searchForUsers": "Etsi @users...",
-    "@searchForUsers": {},
     "pleaseEnterYourCurrentPassword": "Anna nykyinen salasanasi",
-    "@pleaseEnterYourCurrentPassword": {},
     "newPassword": "Uusi salasana",
-    "@newPassword": {},
     "pleaseChooseAStrongPassword": "Valitse vahva salasana",
-    "@pleaseChooseAStrongPassword": {},
     "passwordsDoNotMatch": "Salasanat eivät täsmää",
-    "@passwordsDoNotMatch": {},
     "passwordIsWrong": "Salasanasi on väärä",
-    "@passwordIsWrong": {},
     "thisDevice": "Tämä laite:",
-    "@thisDevice": {},
     "gallery": "Galleria",
-    "@gallery": {},
     "files": "Tiedostot",
-    "@files": {},
     "changelog": "Muutosloki",
-    "@changelog": {},
     "continueText": "Jatka",
-    "@continueText": {},
-    "welcomeText": "Hei 👋, Tämä on FluffyChat. Voit kirjautua sisään mihin tahansa kotipalvelimeen, joka on yhteensopiva https:/matrix.org:in kanssa. Sitten jutellaan kenen kanssa tahansa. Se on hajautettu viestiverkosto!",
-    "@welcomeText": {},
     "serverInformation": "Palvelimen tiedot:",
-    "@serverInformation": {},
     "name": "Nimi",
-    "@name": {},
     "version": "Versio",
-    "@version": {},
     "website": "Verkkosivu",
-    "@website": {},
     "previous": "Edellinen",
-    "@previous": {},
     "open": "Avaa",
-    "@open": {},
     "more": "Lisää",
-    "@more": {},
     "allDevices": "Kaikki laitteet",
-    "@allDevices": {},
     "recordAVideo": "Nauhoita video",
-    "@recordAVideo": {},
     "approve": "Hyväksy",
-    "@approve": {},
     "pause": "Keskeytä",
-    "@pause": {},
     "resume": "Jatka",
-    "@resume": {},
-    "moveUp": "Siirrä ylös",
-    "@moveUp": {},
-    "moveDown": "Siirrä alas",
-    "@moveDown": {},
-    "poll": "Kysely",
-    "@poll": {},
-    "setCustomPermissionLevel": "Aseta mukautettu lupataso",
-    "@setCustomPermissionLevel": {},
-    "setPermissionsLevelDescription": "Valitse alla oleva ennalta määritetty rooli tai anna mukautettu lupataso väliltä 0–100.",
-    "@setPermissionsLevelDescription": {},
-    "ignoreUser": "Jätä huomiotta",
-    "@ignoreUser": {},
-    "normalUser": "Peruskäyttäjä",
-    "@normalUser": {},
     "aboutHomeserver": "Tietoja {homeserver}:sta",
     "@aboutHomeserver": {
         "type": "String",
@@ -2710,31 +1996,10 @@
         }
     },
     "commandHint_roomupgrade": "Päivitä tämä huone annettuun huoneversioon",
-    "@commandHint_roomupgrade": {},
     "appLockDescription": "Lukitse sovellus kun sitä ei käytetä PIN-koodin kanssa",
-    "@appLockDescription": {},
-    "countChatsAndCountParticipants": "{chats} pikakeskustelut ja {participants} osallistujat",
-    "@countChatsAndCountParticipants": {
-        "type": "String",
-        "placeholders": {
-            "chats": {
-                "type": "int"
-            },
-            "participants": {
-                "type": "int"
-            }
-        }
-    },
     "noChatsFoundHere": "Täältä ei löytynyt vielä pikakeskusteluja. Aloita uusi pikakeskustelu jonkun kanssa alla olevalla painikkeella. ⤵️",
-    "@noChatsFoundHere": {},
-    "joinedChats": "Liittyneet pikakeskustelut",
-    "@joinedChats": {},
     "space": "Tila",
-    "@space": {},
-    "spaces": "Tilat",
-    "@spaces": {},
     "checkList": "Tarkistuslista",
-    "@checkList": {},
     "countInvited": "{count} kutsuttu",
     "@countInvited": {
         "type": "String",
@@ -2745,35 +2010,16 @@
         }
     },
     "globalChatId": "Yleisesti pätevä keskustelutunnus",
-    "@globalChatId": {},
     "accessAndVisibilityDescription": "Kuka voi liittyä tähän pikakeskusteluun ja miten pikakeskustelun voi löytää.",
-    "@accessAndVisibilityDescription": {},
     "calls": "Puhelut",
-    "@calls": {},
     "customEmojisAndStickers": "Mukautetut emojit ja tarrat",
-    "@customEmojisAndStickers": {},
     "customEmojisAndStickersBody": "Lisää tai jaa mukautettuja emojeja tai tarroja, joita voidaan käyttää missä tahansa pikakeskustelussa.",
-    "@customEmojisAndStickersBody": {},
     "hideInvalidOrUnknownMessageFormats": "Piilota virheelliset tai tuntemattomat viestimuodot",
-    "@hideInvalidOrUnknownMessageFormats": {},
     "block": "Estä",
-    "@block": {},
     "blockedUsers": "Estetyt käyttäjät",
-    "@blockedUsers": {},
     "blockListDescription": "Voit estää sinua häiritsevät käyttäjät. Et voi vastaanottaa viestejä tai huonekutsuja henkilökohtaisella estolistallasi olevilta käyttäjiltä.",
-    "@blockListDescription": {},
-    "hideMemberChangesInPublicChats": "Piilota jäsenten muutokset julkisissa pikakeskusteluissa",
-    "@hideMemberChangesInPublicChats": {},
-    "hideMemberChangesInPublicChatsBody": "Älä näytä pikakeskustelun aikajanalla, jos joku liittyy julkiseen pikakeskusteluun tai poistuu siitä luettavuuden parantamiseksi.",
-    "@hideMemberChangesInPublicChatsBody": {},
     "blockUsername": "Jätä käyttäjänimi huomiotta",
-    "@blockUsername": {},
-    "overview": "Yleiskatsaus",
-    "@overview": {},
-    "notifyMeFor": "Ilmoita minulle",
-    "@notifyMeFor": {},
     "passwordRecoverySettings": "Salasanan palautusasetukset",
-    "@passwordRecoverySettings": {},
     "sendImages": "Lähetä {count} kuva",
     "@sendImages": {
         "type": "String",
@@ -2782,16 +2028,6 @@
                 "type": "int"
             }
         }
-    },
-    "presenceStyle": "Läsnäolo:",
-    "@presenceStyle": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "presencesToggle": "Näytä muiden käyttäjien tilaviestit",
-    "@presencesToggle": {
-        "type": "String",
-        "placeholders": {}
     },
     "synchronizingPleaseWaitCounter": " Synkronoidaan… ({percentage} %)",
     "@synchronizingPleaseWaitCounter": {
@@ -2802,56 +2038,17 @@
             }
         }
     },
-    "youInvitedToBy": "📩 Sinut on kutsuttu linkin kautta kohteeseen:\n{alias}",
-    "@youInvitedToBy": {
-        "placeholders": {
-            "alias": {
-                "type": "String"
-            }
-        }
-    },
-    "invitedBy": "📩 Kutsujana {user}",
-    "@invitedBy": {
-        "placeholders": {
-            "user": {
-                "type": "String"
-            }
-        }
-    },
     "usersMustKnock": "Käyttäjien on koputettava",
-    "@usersMustKnock": {},
     "noOneCanJoin": "Kukaan ei voi liittyä",
-    "@noOneCanJoin": {},
-    "userWouldLikeToChangeTheChat": "{user} haluaa liittyä pikakeskusteluun.",
-    "@userWouldLikeToChangeTheChat": {
-        "placeholders": {
-            "user": {
-                "type": "String"
-            }
-        }
-    },
-    "noPublicLinkHasBeenCreatedYet": "Julkista linkkiä ei ole vielä luotu",
-    "@noPublicLinkHasBeenCreatedYet": {},
     "knock": "Koputa",
-    "@knock": {},
-    "hidePresences": "Piilotetaanko tilaluettelo?",
-    "@hidePresences": {},
     "removeDevicesDescription": "Sinut kirjataan ulos tästä laitteesta, etkä voi enää vastaanottaa viestejä.",
-    "@removeDevicesDescription": {},
     "banUserDescription": "Käyttäjä kielletään pikakeskustelusta, eikä hän voi liittyä pikakeskusteluun uudelleen ennen kuin kielto kumotetaan.",
-    "@banUserDescription": {},
     "unbanUserDescription": "Käyttäjä voi liittyä pikakeskusteluun uudelleen, jos hän yrittää.",
-    "@unbanUserDescription": {},
     "kickUserDescription": "Käyttäjä potkitaan ulos pikakeskustelusta, mutta häntä ei porttikieltoa saada. Julkisissa pikakeskusteluissa käyttäjä voi liittyä takaisin milloin tahansa.",
-    "@kickUserDescription": {},
     "makeAdminDescription": "Kun olet tehnyt tästä käyttäjästä järjestelmänvalvojan, et ehkä voi perua tätä, koska hänellä on siitä hetkestä lähtien samat oikeudet kuin sinulla.",
-    "@makeAdminDescription": {},
     "pushNotificationsNotAvailable": "Työntöilmoitukset ei saatavilla",
-    "@pushNotificationsNotAvailable": {},
     "learnMore": "Opi lisää",
-    "@learnMore": {},
     "yourGlobalUserIdIs": "Yleisesti pätevä käyttäjätunnuksesi on: ",
-    "@yourGlobalUserIdIs": {},
     "noUsersFoundWithQuery": "Valitettavasti käyttäjää ei löytynyt haulla \"{query}\". Tarkistathan, onko kirjoitusvirhe.",
     "@noUsersFoundWithQuery": {
         "type": "String",
@@ -2862,7 +2059,6 @@
         }
     },
     "knocking": "Koputetaan",
-    "@knocking": {},
     "chatCanBeDiscoveredViaSearchOnServer": "Pikakeskustelu löytyy haulla {server}:lta",
     "@chatCanBeDiscoveredViaSearchOnServer": {
         "type": "String",
@@ -2873,56 +2069,21 @@
         }
     },
     "searchChatsRooms": "Hae #pikakeskustelut, @käyttäjät...",
-    "@searchChatsRooms": {},
     "nothingFound": "Mitään ei löytynyt...",
-    "@nothingFound": {},
     "groupName": "Ryhmän nimi",
-    "@groupName": {},
     "createGroupAndInviteUsers": "Luo ryhmä ja kutsu käyttäjiä",
-    "@createGroupAndInviteUsers": {},
     "groupCanBeFoundViaSearch": "Ryhmä löytyy haun kautta",
-    "@groupCanBeFoundViaSearch": {},
     "wrongRecoveryKey": "Pahoittelut... tämä ei vaikuta olevan oikea palautusavain.",
-    "@wrongRecoveryKey": {},
-    "startConversation": "Aloita keskustelu",
-    "@startConversation": {},
     "commandHint_sendraw": "Lähetä raaka JSON",
-    "@commandHint_sendraw": {},
     "databaseMigrationTitle": "Tietokanta on optimoitu",
-    "@databaseMigrationTitle": {},
     "databaseMigrationBody": "Odotathan hetki. Tämä voi kestää hetken.",
-    "@databaseMigrationBody": {},
     "leaveEmptyToClearStatus": "Jätä tyhjäksi tyhjentääksesi tilasi.",
-    "@leaveEmptyToClearStatus": {},
-    "publicLink": "Julkinen linkki",
-    "@publicLink": {},
     "publicChatAddresses": "Julkiset keskusteluosoitteet",
-    "@publicChatAddresses": {},
     "createNewAddress": "Luo uusi osoite",
-    "@createNewAddress": {},
     "joinSpace": "Liity tilaan",
-    "@joinSpace": {},
     "publicSpaces": "Julkiset tilat",
-    "@publicSpaces": {},
     "addChatOrSubSpace": "Lisää pikakeskustelu tai alitila",
-    "@addChatOrSubSpace": {},
-    "subspace": "Alitila",
-    "@subspace": {},
-    "decline": "Hylkää",
-    "@decline": {},
     "initAppError": "Sovelluksen alustamisessa tapahtui virhe",
-    "@initAppError": {},
-    "userRole": "Käyttäjärooli",
-    "@userRole": {},
-    "minimumPowerLevel": "{level} on pienin tehotaso.",
-    "@minimumPowerLevel": {
-        "type": "String",
-        "placeholders": {
-            "level": {
-                "type": "String"
-            }
-        }
-    },
     "searchIn": "Hae keskustelusta \"{chat}\"...",
     "@searchIn": {
         "type": "String",
@@ -2933,19 +2094,6 @@
         }
     },
     "searchMore": "Hae lisää...",
-    "@searchMore": {},
-    "databaseBuildErrorBody": "SQlite-tietokantaa ei voida rakentaa. Sovellus yrittää toistaiseksi käyttää vanhaa tietokantaa. Ilmoita tästä virheestä kehittäjille osoitteessa {url}. Virheviesti on: {error}",
-    "@databaseBuildErrorBody": {
-        "type": "String",
-        "placeholders": {
-            "url": {
-                "type": "String"
-            },
-            "error": {
-                "type": "String"
-            }
-        }
-    },
     "sessionLostBody": "Istuntosi on menetetty. Ilmoita tästä virheestä kehittäjille osoitteessa {url}. Virheviesti on: {error}",
     "@sessionLostBody": {
         "type": "String",
@@ -2970,33 +2118,15 @@
             }
         }
     },
-    "forwardMessageTo": "Lähetätkö viestin edelleen kohteeseen {roomName}?",
-    "@forwardMessageTo": {
-        "type": "String",
-        "placeholders": {
-            "roomName": {
-                "type": "String"
-            }
-        }
-    },
     "sendReadReceipts": "Lähetä lukukuittaukset",
-    "@sendReadReceipts": {},
     "sendTypingNotificationsDescription": "Muut keskustelun osallistujat näkevät, milloin olet kirjoittamassa uutta viestiä.",
-    "@sendTypingNotificationsDescription": {},
     "sendReadReceiptsDescription": "Muut keskustelun osallistujat näkevät, milloin olet lukenut viestin.",
-    "@sendReadReceiptsDescription": {},
     "formattedMessages": "Muotoillut viestit",
-    "@formattedMessages": {},
     "formattedMessagesDescription": "Näytä rikasta viestisisältöä, kuten lihavoitua tekstiä, käyttämällä Markdownia.",
-    "@formattedMessagesDescription": {},
     "verifyOtherUser": "🔐 Vahvista toinen käyttäjä",
-    "@verifyOtherUser": {},
     "verifyOtherUserDescription": "Jos vahvistat toisen käyttäjän, voit olla varma, että tiedät kenelle todella kirjoitat. 💪\n\nKun aloitat vahvistuksen, sinä ja toinen käyttäjä näette sovelluksessa ponnahdusikkunan. Siellä näette sitten sarjan emojeja tai numeroita, joita teidän on verrattava toisiinsa.\n\nParas tapa tehdä tämä on tavata heidät tai aloittaa videopuhelu. 👭",
-    "@verifyOtherUserDescription": {},
     "verifyOtherDevice": "🔐 Vahvista toinen laite",
-    "@verifyOtherDevice": {},
     "verifyOtherDeviceDescription": "Kun vahvistat toisen laitteen, kyseiset laitteet voivat vaihtaa avaimia, mikä lisää yleistä turvallisuuttasi. 💪 Kun aloitat vahvistuksen, molempien laitteiden sovellukseen ilmestyy ponnahdusikkuna. Siellä näet sitten sarjan emojeja tai numeroita, joita sinun on verrattava toisiinsa. On parasta pitää molemmat laitteet käsillä ennen vahvistuksen aloittamista. 🤳",
-    "@verifyOtherDeviceDescription": {},
     "acceptedKeyVerification": "{sender} hyväksyi avaimen vahvistuksen",
     "@acceptedKeyVerification": {
         "type": "String",
@@ -3051,18 +2181,11 @@
             }
         }
     },
-    "transparent": "Läpinäkyvä",
-    "@transparent": {},
     "incomingMessages": "Saapuvat viestit",
-    "@incomingMessages": {},
     "stickers": "Tarrat",
-    "@stickers": {},
     "discover": "Tutustu",
-    "@discover": {},
     "commandHint_ignore": "Jätä huomiotta annettu matrix-tunnus",
-    "@commandHint_ignore": {},
     "commandHint_unignore": "Kumoa annetun matrix-tunnuksen huomiottajätäminen",
-    "@commandHint_unignore": {},
     "unreadChatsInApp": "{appname}: {unread} lukematonta keskustelua",
     "@unreadChatsInApp": {
         "type": "String",
@@ -3076,23 +2199,17 @@
         }
     },
     "noDatabaseEncryption": "Tietokannan salausta ei tueta tällä alustalla",
-    "@noDatabaseEncryption": {},
     "thereAreCountUsersBlocked": "Tällä hetkellä {count} käyttäjää on estetty.",
     "@thereAreCountUsersBlocked": {
         "type": "String",
         "count": {}
     },
-    "restricted": "Rajoitettu",
-    "@restricted": {},
-    "knockRestricted": "Koputus rajoitettu",
-    "@knockRestricted": {},
     "goToSpace": "Siirry tilaan: {space}",
     "@goToSpace": {
         "type": "String",
         "space": {}
     },
     "markAsUnread": "Merkitse lukemattomaksi",
-    "@markAsUnread": {},
     "userLevel": "{level} - Käyttäjä",
     "@userLevel": {
         "type": "String",
@@ -3121,21 +2238,13 @@
         }
     },
     "changeGeneralChatSettings": "Muuta yleisiä keskusteluasetuksia",
-    "@changeGeneralChatSettings": {},
     "inviteOtherUsers": "Kutsu muita käyttäjiä tähän pikakeskusteluun",
-    "@inviteOtherUsers": {},
     "changeTheChatPermissions": "Muuta keskustelulupia",
-    "@changeTheChatPermissions": {},
     "changeTheVisibilityOfChatHistory": "Muuta pikakeskusteluhistorian näkyvyyttä",
-    "@changeTheVisibilityOfChatHistory": {},
     "changeTheCanonicalRoomAlias": "Vaihda julkisen pikakeskustelun pääosoite",
-    "@changeTheCanonicalRoomAlias": {},
     "sendRoomNotifications": "Lähetä @room-ilmoituksia",
-    "@sendRoomNotifications": {},
     "changeTheDescriptionOfTheGroup": "Muuta keskustelun kuvausta",
-    "@changeTheDescriptionOfTheGroup": {},
     "chatPermissionsDescription": "Määritä tarvittava tehotaso tietyille toiminnoille tässä pikakeskustelussa. Tehotasot 0, 50 ja 100 edustavat yleensä käyttäjiä, valvoja ja ylläpitäjiä, mutta mikä tahansa porrastus on mahdollinen.",
-    "@chatPermissionsDescription": {},
     "updateInstalled": "🎉 Päivitys {version} asennettu!",
     "@updateInstalled": {
         "type": "String",
@@ -3146,86 +2255,28 @@
         }
     },
     "sendCanceled": "Lähetys peruttu",
-    "@sendCanceled": {},
     "loginWithMatrixId": "Kirjaudu sisään Matrix-tunnuksella",
-    "@loginWithMatrixId": {},
-    "discoverHomeservers": "Tutustu kotipalvelimiin",
-    "@discoverHomeservers": {},
-    "whatIsAHomeserver": "Mikä on kotipalvelin?",
-    "@whatIsAHomeserver": {},
-    "homeserverDescription": "Kaikki tietosi tallennetaan kotipalvelimelle, aivan kuten sähköpostipalveluntarjoaja. Voit valita, mitä kotipalvelinta haluat käyttää, ja silti kommunikoida kaikkien kanssa. Lisätietoja osoitteessa https://matrix.org.",
-    "@homeserverDescription": {},
     "doesNotSeemToBeAValidHomeserver": "Ei näytä olevan yhteensopiva kotipalvelin. Väärä URL-osoite?",
-    "@doesNotSeemToBeAValidHomeserver": {},
     "calculatingFileSize": "Lasketaan tiedoston kokoa...",
-    "@calculatingFileSize": {},
-    "prepareSendingAttachment": "Valmistele lähetettävä liite...",
-    "@prepareSendingAttachment": {},
-    "sendingAttachment": "Lähetetään liitettä...",
-    "@sendingAttachment": {},
-    "generatingVideoThumbnail": "Videon pikkukuvan luominen...",
-    "@generatingVideoThumbnail": {},
-    "compressVideo": "Pakataan videota...",
-    "@compressVideo": {},
-    "sendingAttachmentCountOfCount": "Lähetetään {length} pituista liitettä {index}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "Palvelinraja saavutettu! Odotetaan {seconds} sekuntia...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Yhtä laitteistasi ei ole vahvistettu",
-    "@oneOfYourDevicesIsNotVerified": {},
     "noticeChatBackupDeviceVerification": "Huomautus: Kun yhdistät kaikki laitteesi keskustelun varmuuskopiointiin, ne vahvistetaan automaattisesti.",
-    "@noticeChatBackupDeviceVerification": {},
     "blur": "Sumeus:",
-    "@blur": {},
     "opacity": "Läpinäkymättömyys:",
-    "@opacity": {},
     "setWallpaper": "Aseta taustakuva",
-    "@setWallpaper": {},
     "manageAccount": "Hallinnoi tiliä",
-    "@manageAccount": {},
     "noContactInformationProvided": "Palvelin ei ilmoittaa mitään kelvollisia yhteystietoja",
-    "@noContactInformationProvided": {},
     "contactServerAdmin": "Ota yhteyttä palvelimen ylläpitäjään",
-    "@contactServerAdmin": {},
     "contactServerSecurity": "Ota yhteyttä palvelimen tietoturvaosastoon",
-    "@contactServerSecurity": {},
     "supportPage": "Tukisivu",
-    "@supportPage": {},
     "compress": "Pakkaa",
-    "@compress": {},
     "boldText": "Lihavoitu teksti",
-    "@boldText": {},
     "italicText": "Kursivoitu teksti",
-    "@italicText": {},
     "strikeThrough": "Yliviivaus",
-    "@strikeThrough": {},
     "pleaseFillOut": "Ole hyvä ja täytä",
-    "@pleaseFillOut": {},
     "invalidUrl": "Virheellinen URL-osoite",
-    "@invalidUrl": {},
     "addLink": "Lisää linkki",
-    "@addLink": {},
     "unableToJoinChat": "Pikakeskusteluun liittyminen ei onnistu. Toinen osapuoli on ehkä jo sulkenut keskustelun.",
-    "@unableToJoinChat": {},
     "otherPartyNotLoggedIn": "Toinen osapuoli ei ole tällä hetkellä kirjautuneena sisään, joten ei voi vastaanottaa viestejä!",
-    "@otherPartyNotLoggedIn": {},
     "appWantsToUseForLogin": "Kirjaudu sisään käyttämällä '{server}':ta",
     "@appWantsToUseForLogin": {
         "type": "String",
@@ -3236,101 +2287,52 @@
         }
     },
     "appWantsToUseForLoginDescription": "Annat täten sovellukselle ja verkkosivustolle luvan jakaa tietoja sinusta.",
-    "@appWantsToUseForLoginDescription": {},
     "waitingForServer": "Odotetaan palvelinta...",
-    "@waitingForServer": {},
-    "appIntroduction": "FluffyChatin avulla voit keskustella ystäviesi kanssa eri pikaviestimien kautta. Lue lisää osoitteesta https://matrix.org tai napauta *Jatka*.",
-    "@appIntroduction": {},
     "newChatRequest": "📩 Uusi pikakeskustelupyyntö",
-    "@newChatRequest": {},
     "contentNotificationSettings": "Sisältöilmoitusten asetukset",
-    "@contentNotificationSettings": {},
     "generalNotificationSettings": "Yleiset ilmoitusasetukset",
-    "@generalNotificationSettings": {},
     "roomNotificationSettings": "Huoneen ilmoitusten asetukset",
-    "@roomNotificationSettings": {},
     "userSpecificNotificationSettings": "Käyttäjäkohtaiset ilmoitusten asetukset",
-    "@userSpecificNotificationSettings": {},
     "otherNotificationSettings": "Muut ilmoitusten asetukset",
-    "@otherNotificationSettings": {},
     "notificationRuleContainsUserName": "Sisältää käyttäjän nimen",
-    "@notificationRuleContainsUserName": {},
     "notificationRuleContainsUserNameDescription": "Ilmoittaa käyttäjälle, kun viesti sisältää hänen käyttäjän nimensä.",
-    "@notificationRuleContainsUserNameDescription": {},
     "notificationRuleMaster": "Mykistä kaikki ilmoitukset",
-    "@notificationRuleMaster": {},
     "notificationRuleMasterDescription": "Ohittaa kaikki muut säännöt ja poistaa kaikki ilmoitukset käytöstä.",
-    "@notificationRuleMasterDescription": {},
     "notificationRuleSuppressNotices": "Poista kaikki automatisoidut viestit",
-    "@notificationRuleSuppressNotices": {},
     "notificationRuleSuppressNoticesDescription": "Poistaa ilmoitukset automatisoiduilta asiakkailta, kuten boteilta.",
-    "@notificationRuleSuppressNoticesDescription": {},
     "notificationRuleInviteForMe": "Kutsu minulle",
-    "@notificationRuleInviteForMe": {},
     "notificationRuleInviteForMeDescription": "Ilmoittaa käyttäjälle, kun hänet on kutsuttu huoneeseen.",
-    "@notificationRuleInviteForMeDescription": {},
     "notificationRuleMemberEvent": "Jäsentapahtuma",
-    "@notificationRuleMemberEvent": {},
     "notificationRuleMemberEventDescription": "Poistaa jäsenyystapahtumien ilmoitukset.",
-    "@notificationRuleMemberEventDescription": {},
     "notificationRuleIsUserMention": "Käyttäjän maininta",
-    "@notificationRuleIsUserMention": {},
     "notificationRuleIsUserMentionDescription": "Ilmoittaa käyttäjälle, kun hänet mainitaan suoraan viestissä.",
-    "@notificationRuleIsUserMentionDescription": {},
     "notificationRuleContainsDisplayName": "Sisältää näyttönimen",
-    "@notificationRuleContainsDisplayName": {},
     "notificationRuleContainsDisplayNameDescription": "Ilmoittaa käyttäjälle, kun viesti sisältää hänen näyttönimensä.",
-    "@notificationRuleContainsDisplayNameDescription": {},
     "notificationRuleIsRoomMention": "Huoneen maininta",
-    "@notificationRuleIsRoomMention": {},
     "notificationRuleIsRoomMentionDescription": "Ilmoittaa käyttäjälle, kun huoneesta on maininta.",
-    "@notificationRuleIsRoomMentionDescription": {},
     "notificationRuleRoomnotif": "Huoneilmoitus",
-    "@notificationRuleRoomnotif": {},
     "notificationRuleRoomnotifDescription": "Ilmoittaa käyttäjälle, kun viesti sisältää '@room'.",
-    "@notificationRuleRoomnotifDescription": {},
     "notificationRuleTombstone": "Hautakivi",
-    "@notificationRuleTombstone": {},
     "notificationRuleTombstoneDescription": "Ilmoittaa käyttäjälle huoneen deaktivointiviesteistä.",
-    "@notificationRuleTombstoneDescription": {},
     "notificationRuleReaction": "Reagointi",
-    "@notificationRuleReaction": {},
     "notificationRuleReactionDescription": "Poistaa ilmoitukset reaktioista.",
-    "@notificationRuleReactionDescription": {},
     "notificationRuleRoomServerAcl": "Huonepalvelimen pääsyluettelo",
-    "@notificationRuleRoomServerAcl": {},
     "notificationRuleRoomServerAclDescription": "Poistaa huonepalvelimen pääsyluetteloiden (ACL) ilmoitukset.",
-    "@notificationRuleRoomServerAclDescription": {},
     "notificationRuleSuppressEdits": "Poista muokkaukset",
-    "@notificationRuleSuppressEdits": {},
     "notificationRuleSuppressEditsDescription": "Poistaa ilmoitukset muokatuista viesteistä.",
-    "@notificationRuleSuppressEditsDescription": {},
     "notificationRuleCall": "Soita",
-    "@notificationRuleCall": {},
     "notificationRuleCallDescription": "Ilmoittaa käyttäjälle soitoista.",
-    "@notificationRuleCallDescription": {},
     "notificationRuleEncryptedRoomOneToOne": "Kahdenkeskinen salattu huone",
-    "@notificationRuleEncryptedRoomOneToOne": {},
     "notificationRuleEncryptedRoomOneToOneDescription": "Ilmoittaa käyttäjälle kahdenkeskisissä salatuissa huoneissa olevista viesteistä.",
-    "@notificationRuleEncryptedRoomOneToOneDescription": {},
     "notificationRuleRoomOneToOne": "Kahdenkeskinen huone",
-    "@notificationRuleRoomOneToOne": {},
     "notificationRuleRoomOneToOneDescription": "Ilmoittaa käyttäjälle kahdenkeskisissä huoneissa olevista viesteistä.",
-    "@notificationRuleRoomOneToOneDescription": {},
     "notificationRuleMessage": "Viesti",
-    "@notificationRuleMessage": {},
     "notificationRuleMessageDescription": "Ilmoittaa käyttäjälle yleisistä viesteistä.",
-    "@notificationRuleMessageDescription": {},
     "notificationRuleEncrypted": "Salattu",
-    "@notificationRuleEncrypted": {},
     "notificationRuleEncryptedDescription": "Ilmoittaa käyttäjälle salatuissa huoneissa olevista viesteistä.",
-    "@notificationRuleEncryptedDescription": {},
     "notificationRuleJitsiDescription": "Ilmoittaa käyttäjälle tapahtumista Jitsi-vimpaimesta.",
-    "@notificationRuleJitsiDescription": {},
     "notificationRuleServerAcl": "Poista tapahtumat palvelimen pääsyluettelosta",
-    "@notificationRuleServerAcl": {},
     "notificationRuleServerAclDescription": "Poistaa ilmoitukset palvelimen pääsyluettelosta.",
-    "@notificationRuleServerAclDescription": {},
     "unknownPushRule": "Tuntematon työntösääntö '{rule}'",
     "@unknownPushRule": {
         "type": "String",
@@ -3353,55 +2355,28 @@
         }
     },
     "deletePushRuleCanNotBeUndone": "Jos poistat tämän ilmoitusasetuksen, sitä ei voi kumota.",
-    "@deletePushRuleCanNotBeUndone": {},
     "shareKeysWith": "Jaa avaimet...",
-    "@shareKeysWith": {},
     "shareKeysWithDescription": "Mihin laitteisiin tulisi luottaa, jotta ne voivat lukea viestejäsi salatuissa keskusteluissa?",
-    "@shareKeysWithDescription": {},
     "crossVerifiedDevicesIfEnabled": "Ristiinvahvistetut laitteet, jos otettu käyttöön",
-    "@crossVerifiedDevicesIfEnabled": {},
     "crossVerifiedDevices": "Ristiinvahvistetut laitteet",
-    "@crossVerifiedDevices": {},
     "verifiedDevicesOnly": "Vain vahvistetut laitteet",
-    "@verifiedDevicesOnly": {},
     "takeAPhoto": "Ota valokuva",
-    "@takeAPhoto": {},
     "optionalMessage": "(Valinnainen) viesti...",
-    "@optionalMessage": {},
     "notSupportedOnThisDevice": "Ei tuettu tällä laitteella",
-    "@notSupportedOnThisDevice": {},
     "hideRedactedMessages": "Piilota valvojan toimesta poistetut viestit",
-    "@hideRedactedMessages": {},
     "hideRedactedMessagesBody": "Jos viesti jonkun toimesta poistetaan, se ei enää näy pikakeskustelussa.",
-    "@hideRedactedMessagesBody": {},
     "enterNewChat": "Aloita uusi pikakeskustelu",
-    "@enterNewChat": {},
     "youHaveKnocked": "Olet koputtanut",
-    "@youHaveKnocked": {},
     "pleaseWaitUntilInvited": "Odotathan nyt, kunnes joku huoneesta kutsuu sinut.",
-    "@pleaseWaitUntilInvited": {},
     "commandHint_logout": "Kirjaudu ulos nykyinen laitteesi",
-    "@commandHint_logout": {},
     "commandHint_logoutall": "Kirjaudu ulos kaikki aktiiviset laitteet",
-    "@commandHint_logoutall": {},
     "displayNavigationRail": "Näytä navigointipalkki mobiililaitteella",
-    "@displayNavigationRail": {},
     "customReaction": "Mukautettu reagointi",
-    "@customReaction": {},
     "moreEvents": "Lisää tapahtumia",
-    "@moreEvents": {},
     "declineInvitation": "Hylkää kutsu",
-    "@declineInvitation": {},
     "noMessagesYet": "Ei vielä viestejä",
-    "@noMessagesYet": {},
     "longPressToRecordVoiceMessage": "Pitkä painallus ääniviestin tallentamiseksi.",
-    "@longPressToRecordVoiceMessage": {},
-    "newSubSpace": "Uusi alitila",
-    "@newSubSpace": {},
-    "moveToDifferentSpace": "Siirry eri tilaan",
-    "@moveToDifferentSpace": {},
     "removeFromSpaceDescription": "Pikakeskustelu poistetaan tilasta, mutta se näkyy edelleen pikakeskusteluluettelossasi.",
-    "@removeFromSpaceDescription": {},
     "countChats": "{chats} pikakeskustelua",
     "@countChats": {
         "type": "String",
@@ -3429,39 +2404,16 @@
             }
         }
     },
-    "donate": "Lahjoita",
-    "@donate": {},
-    "startedAPoll": "{username} aloitti kyselyn.",
-    "@startedAPoll": {
-        "type": "String",
-        "placeholders": {
-            "username": {
-                "type": "String"
-            }
-        }
-    },
     "startPoll": "Aloita kysely",
-    "@startPoll": {},
     "endPoll": "Lopeta kysely",
-    "@endPoll": {},
     "answersVisible": "Vastaukset näkyvissä",
-    "@answersVisible": {},
-    "answersHidden": "Vastaukset piilotettu",
-    "@answersHidden": {},
     "pollQuestion": "Kyselykysymys",
-    "@pollQuestion": {},
     "answerOption": "Vastausvaihtoehto",
-    "@answerOption": {},
     "addAnswerOption": "Lisää vastausvaihtoehto",
-    "@addAnswerOption": {},
     "allowMultipleAnswers": "Salli useita vastauksia",
-    "@allowMultipleAnswers": {},
     "pollHasBeenEnded": "Kysely on päättynyt",
-    "@pollHasBeenEnded": {},
     "answersWillBeVisibleWhenPollHasEnded": "Vastaukset näkyvät, kun kysely on päättynyt",
-    "@answersWillBeVisibleWhenPollHasEnded": {},
     "replyInThread": "Vastaa ketjussa",
-    "@replyInThread": {},
     "countVotes": "{count, plural, =1{One vote} other{{count} ääntä}}",
     "@countVotes": {
         "type": "int",
@@ -3481,7 +2433,24 @@
         }
     },
     "thread": "Ketju",
-    "@thread": {},
     "backToMainChat": "Takaisin pääpikakeskusteluun",
-    "@backToMainChat": {}
+    "@versionWithNumber": {
+        "type": "String",
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "@mute": {
+        "description": "This should be a very short string because there is not much space in the button!"
+    },
+    "@chatSearchedUntil": {
+        "type": "String",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    }
 }

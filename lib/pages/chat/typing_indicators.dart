@@ -1,12 +1,15 @@
-import 'dart:async';
-
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/chat/chat.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:hermes/widgets/typing_animation.dart';
+import 'package:material_ui/material_ui.dart';
 
 class TypingIndicators extends StatelessWidget {
   final ChatController controller;
@@ -21,8 +24,9 @@ class TypingIndicators extends StatelessWidget {
     return StreamBuilder<Object>(
       stream: controller.room.client.onSync.stream.where(
         (syncUpdate) =>
-            syncUpdate.rooms?.join?[controller.room.id]?.ephemeral
-                ?.any((ephemeral) => ephemeral.type == 'm.typing') ??
+            syncUpdate.rooms?.join?[controller.room.id]?.ephemeral?.any(
+              (ephemeral) => ephemeral.type == 'm.typing',
+            ) ??
             false,
       ),
       builder: (context, _) {
@@ -33,22 +37,21 @@ class TypingIndicators extends StatelessWidget {
           width: double.infinity,
           alignment: Alignment.center,
           child: AnimatedContainer(
-            constraints:
-                const BoxConstraints(maxWidth: PantheonThemes.maxTimelineWidth),
+            constraints: const BoxConstraints(
+              maxWidth: PantheonThemes.maxTimelineWidth,
+            ),
             height: typingUsers.isEmpty ? 0 : avatarSize + 8,
             duration: PantheonThemes.animationDuration,
             curve: PantheonThemes.animationCurve,
-            alignment: controller.timeline!.events.isNotEmpty &&
+            alignment:
+                controller.timeline!.events.isNotEmpty &&
                     controller.timeline!.events.first.senderId ==
                         Matrix.of(context).client.userID
                 ? Alignment.topRight
                 : Alignment.topLeft,
             clipBehavior: Clip.hardEdge,
             decoration: const BoxDecoration(),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8.0,
-              vertical: 4.0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
             child: Row(
               children: [
                 Container(
@@ -87,7 +90,7 @@ class TypingIndicators extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: typingUsers.isEmpty ? null : const _TypingDots(),
+                    child: typingUsers.isEmpty ? null : const TypingAnimation(),
                   ),
                 ),
               ],
@@ -95,70 +98,6 @@ class TypingIndicators extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _TypingDots extends StatefulWidget {
-  const _TypingDots();
-
-  @override
-  State<_TypingDots> createState() => __TypingDotsState();
-}
-
-class __TypingDotsState extends State<_TypingDots> {
-  int _tick = 0;
-
-  late final Timer _timer;
-
-  static const Duration animationDuration = Duration(milliseconds: 300);
-
-  @override
-  void initState() {
-    _timer = Timer.periodic(
-      animationDuration,
-      (_) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _tick = (_tick + 1) % 4;
-        });
-      },
-    );
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    const size = 8.0;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 1; i <= 3; i++)
-          AnimatedContainer(
-            duration: animationDuration * 1.5,
-            curve: PantheonThemes.animationCurve,
-            width: size,
-            height: _tick == i ? size * 2 : size,
-            margin: EdgeInsets.symmetric(
-              horizontal: 2,
-              vertical: _tick == i ? 4 : 8,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(size * 2),
-              color: theme.colorScheme.secondary,
-            ),
-          ),
-      ],
     );
   }
 }

@@ -1,26 +1,23 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'package:matrix/matrix.dart';
 
 extension ApplicationAccountConfigExtension on Client {
-  static const String accountDataKey = 'im.hermes.account_config';
+  static const String accountDataKey = 'im.fluffychat.account_config';
 
   ApplicationAccountConfig get applicationAccountConfig =>
       ApplicationAccountConfig.fromJson(
         accountData[accountDataKey]?.content ?? {},
       );
 
-  Future<void> setApplicationAccountConfig(
-    ApplicationAccountConfig config,
-  ) =>
-      setAccountData(
-        userID!,
-        accountDataKey,
-        config.toJson(),
-      );
+  Future<void> setApplicationAccountConfig(ApplicationAccountConfig config) =>
+      setAccountData(userID!, accountDataKey, config.toJson());
 
   /// Only updates the specified values in ApplicationAccountConfig
-  Future<void> updateApplicationAccountConfig(
-    ApplicationAccountConfig config,
-  ) {
+  Future<void> updateApplicationAccountConfig(ApplicationAccountConfig config) {
     final currentConfig = applicationAccountConfig;
     return setAccountData(
       userID!,
@@ -57,14 +54,15 @@ class ApplicationAccountConfig {
         wallpaperUrl: json['wallpaper_url'] is String
             ? Uri.tryParse(json['wallpaper_url'])
             : null,
-        wallpaperOpacity:
-            _sanitizedOpacity(json.tryGet<double>('wallpaper_opacity')),
+        wallpaperOpacity: _sanitizedOpacity(
+          json.tryGet<double>('wallpaper_opacity'),
+        ),
         wallpaperBlur: json.tryGet<double>('wallpaper_blur'),
       );
 
   Map<String, dynamic> toJson() => {
-        'wallpaper_url': wallpaperUrl?.toString(),
-        'wallpaper_opacity': wallpaperOpacity,
-        'wallpaper_blur': wallpaperBlur,
-      };
+    'wallpaper_url': wallpaperUrl?.toString(),
+    'wallpaper_opacity': wallpaperOpacity,
+    'wallpaper_blur': wallpaperBlur,
+  };
 }

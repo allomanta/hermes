@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+# SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Generates some glue code for translation of /command hints.
 
 # How to use this:
@@ -9,7 +15,7 @@
 
 # Looking to add descriptions for a new command, but don't know what it does?
 # It is likely defined here (in registerDefaultCommands()):
-# https://gitlab.com/famedly/company/frontend/famedlysdk/-/blob/main/lib/src/utils/commands_extension.dart
+# https://github.com/famedly/matrix-dart-sdk/tree/main/lib/src/utils/commands_extension.dart
 
 echo "\
 // This file is auto-generated using scripts/generate_command_hints_glue.sh.

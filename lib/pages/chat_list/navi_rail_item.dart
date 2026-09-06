@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:badges/badges.dart';
 import 'package:matrix/matrix.dart';
@@ -6,6 +9,8 @@ import 'package:matrix/matrix.dart';
 import 'package:hermes/widgets/hover_builder.dart';
 import 'package:hermes/widgets/unread_rooms_badge.dart';
 import '../../config/themes.dart';
+import 'package:hermes/config/app_config.dart';
+import 'package:material_ui/material_ui.dart';
 
 class NaviRailItem extends StatelessWidget {
   final String toolTip;
@@ -45,8 +50,8 @@ class NaviRailItem extends StatelessWidget {
                 child: AnimatedContainer(
                   width: isSelected && selectedIcon == null
                       ? PantheonThemes.isColumnMode(context)
-                          ? 8
-                          : 4
+                            ? 8
+                            : 4
                       : 0,
                   duration: PantheonThemes.animationDuration,
                   curve: PantheonThemes.animationCurve,

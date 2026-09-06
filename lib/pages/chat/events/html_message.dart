@@ -1,18 +1,25 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:collection/collection.dart';
-import 'package:flutter_highlighter/flutter_highlighter.dart';
-import 'package:flutter_highlighter/themes/shades-of-purple.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as parser;
-import 'package:matrix/matrix.dart';
-
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:hermes/config/setting_keys.dart';
+import 'package:hermes/config/themes.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/code_highlight_theme.dart';
 import 'package:hermes/utils/event_checkbox_extension.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/mxc_image.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:highlight/highlight.dart' show highlight;
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart' as parser;
+import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../../utils/url_launcher.dart';
 
 class HtmlMessage extends StatelessWidget {
@@ -24,7 +31,6 @@ class HtmlMessage extends StatelessWidget {
   final void Function(LinkableElement) onOpen;
   final String? eventId;
   final Set<Event>? checkboxCheckedEvents;
-  final bool limitHeight;
 
   const HtmlMessage({
     super.key,
@@ -36,7 +42,6 @@ class HtmlMessage extends StatelessWidget {
     required this.onOpen,
     this.eventId,
     this.checkboxCheckedEvents,
-    this.limitHeight = true,
   });
 
   /// Keep in sync with: https://spec.matrix.org/latest/client-server-api/#mroommessage-msgtypes
@@ -86,9 +91,9 @@ class HtmlMessage extends StatelessWidget {
     'rt',
     'html',
     'body',
-    // Workaround for https://github.com/allomanta/hermes/issues/507
-    'tg-forward',
   };
+
+  static const Set<String> ignoredHtmlTags = {'mx-reply'};
 
   /// We add line breaks before these tags:
   static const Set<String> blockHtmlTags = {
@@ -137,17 +142,32 @@ class HtmlMessage extends StatelessWidget {
     ];
   }
 
+  InlineSpan _renderCodeBlockNode(dom.Node node) {
+    if (node is! dom.Element) {
+      return TextSpan(text: node.text);
+    }
+    final style =
+        atomOneDarkTheme[node.className.split('-').last] ??
+        atomOneDarkTheme['root'];
+
+    return TextSpan(
+      children: node.nodes.map(_renderCodeBlockNode).toList(),
+      style: style,
+    );
+  }
+
   /// Transforms a Node to an InlineSpan.
-  InlineSpan _renderHtml(
-    dom.Node node,
-    BuildContext context, {
-    int depth = 1,
-  }) {
+  InlineSpan _renderHtml(dom.Node node, BuildContext context, {int depth = 1}) {
     // We must not render elements nested more than 100 elements deep:
     if (depth >= 100) return const TextSpan();
 
-    // This is a text node, so we render it as text:
-    if (node is! dom.Element) {
+    if (node is dom.Element &&
+        ignoredHtmlTags.contains(node.localName?.toLowerCase())) {
+      return const TextSpan();
+    }
+
+    // This is a text node or not permitted node, so we render it as text:
+    if (node is! dom.Element || !allowedHtmlTags.contains(node.localName)) {
       var text = node.text ?? '';
       // Single linebreak nodes between Elements are ignored:
       if (text == '\n') text = '';
@@ -159,9 +179,6 @@ class HtmlMessage extends StatelessWidget {
         onOpen: onOpen,
       );
     }
-
-    // We must not render tags which are not in the allow list:
-    if (!allowedHtmlTags.contains(node.localName)) return const TextSpan();
 
     switch (node.localName) {
       case 'br':
@@ -232,18 +249,17 @@ class HtmlMessage extends StatelessWidget {
         final isCheckbox = node.className == 'task-list-item';
         final checkboxIndex = isCheckbox
             ? node.rootElement
-                    .getElementsByClassName('task-list-item')
-                    .indexOf(node) +
-                1
+                      .getElementsByClassName('task-list-item')
+                      .indexOf(node) +
+                  1
             : null;
         final checkedByReaction = !isCheckbox
             ? null
             : checkboxCheckedEvents?.firstWhereOrNull(
                 (event) => event.checkedCheckboxId == checkboxIndex,
               );
-        final staticallyChecked = !isCheckbox
-            ? false
-            : node.children.first.attributes['checked'] == 'true';
+        final staticallyChecked =
+            isCheckbox && node.children.first.attributes['checked'] == 'true';
 
         return WidgetSpan(
           child: Padding(
@@ -251,13 +267,15 @@ class HtmlMessage extends StatelessWidget {
             child: Text.rich(
               TextSpan(
                 children: [
-                  if (node.parent?.localName == 'ul')
-                    const TextSpan(text: '• '),
-                  if (node.parent?.localName == 'ol')
-                    TextSpan(
-                      text:
-                          '${(node.parent?.nodes.whereType<dom.Element>().toList().indexOf(node) ?? 0) + (int.tryParse(node.parent?.attributes['start'] ?? '1') ?? 1)}. ',
-                    ),
+                  if (!isCheckbox) ...[
+                    if (node.parent?.localName == 'ul')
+                      const TextSpan(text: '• '),
+                    if (node.parent?.localName == 'ol')
+                      TextSpan(
+                        text:
+                            '${(node.parent?.nodes.whereType<dom.Element>().toList().indexOf(node) ?? 0) + (int.tryParse(node.parent?.attributes['start'] ?? '1') ?? 1)}. ',
+                      ),
+                  ],
                   if (node.className == 'task-list-item')
                     WidgetSpan(
                       child: Padding(
@@ -270,7 +288,8 @@ class HtmlMessage extends StatelessWidget {
                             activeColor: textColor.withAlpha(64),
                             value:
                                 staticallyChecked || checkedByReaction != null,
-                            onChanged: eventId == null ||
+                            onChanged:
+                                eventId == null ||
                                     checkboxIndex == null ||
                                     staticallyChecked ||
                                     !room.canSendDefaultMessages ||
@@ -279,25 +298,21 @@ class HtmlMessage extends StatelessWidget {
                                             room.client.userID)
                                 ? null
                                 : (_) => showFutureLoadingDialog(
-                                      context: context,
-                                      future: () => checkedByReaction != null
-                                          ? room.redactEvent(
-                                              checkedByReaction.eventId,
-                                            )
-                                          : room.checkCheckbox(
-                                              eventId,
-                                              checkboxIndex,
-                                            ),
-                                    ),
+                                    context: context,
+                                    future: () => checkedByReaction != null
+                                        ? room.redactEvent(
+                                            checkedByReaction.eventId,
+                                          )
+                                        : room.checkCheckbox(
+                                            eventId,
+                                            checkboxIndex,
+                                          ),
+                                  ),
                           ),
                         ),
                       ),
                     ),
-                  ..._renderWithLineBreaks(
-                    node.nodes,
-                    context,
-                    depth: depth,
-                  ),
+                  ..._renderWithLineBreaks(node.nodes, context, depth: depth),
                 ],
                 style: TextStyle(fontSize: fontSize, color: textColor),
               ),
@@ -309,12 +324,7 @@ class HtmlMessage extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.only(left: 8.0),
             decoration: BoxDecoration(
-              border: Border(
-                left: BorderSide(
-                  color: textColor,
-                  width: 5,
-                ),
-              ),
+              border: Border(left: BorderSide(color: textColor, width: 5)),
             ),
             child: Text.rich(
               TextSpan(
@@ -334,31 +344,37 @@ class HtmlMessage extends StatelessWidget {
         );
       case 'code':
         final isInline = node.parent?.localName != 'pre';
+        final lang =
+            node.className
+                .split(' ')
+                .singleWhereOrNull(
+                  (className) => className.startsWith('language-'),
+                )
+                ?.split('language-')
+                .last ??
+            'md';
+        final highlightedHtml = highlight
+            .parse(node.text, language: lang)
+            .toHtml();
+        final element = parser.parse(highlightedHtml).body;
+        if (element == null) {
+          return const TextSpan(text: 'Unable to render code block!');
+        }
+
         return WidgetSpan(
           child: Material(
-            clipBehavior: Clip.hardEdge,
-            borderRadius: BorderRadius.circular(4),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: HighlightView(
-                node.text,
-                language: node.className
-                        .split(' ')
-                        .singleWhereOrNull(
-                          (className) => className.startsWith('language-'),
-                        )
-                        ?.split('language-')
-                        .last ??
-                    'md',
-                theme: shadesOfPurpleTheme,
-                padding: EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: isInline ? 0 : 8,
-                ),
-                textStyle: TextStyle(
-                  fontSize: fontSize,
-                  fontFamily: 'RobotoMono',
-                ),
+            color: atomOneBackgroundColor,
+            shape: RoundedRectangleBorder(
+              side: const BorderSide(color: hightlightTextColor),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Padding(
+              padding: isInline
+                  ? const EdgeInsets.symmetric(horizontal: 4.0)
+                  : const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              child: Text.rich(
+                TextSpan(children: [_renderCodeBlockNode(element)]),
+                selectionColor: hightlightTextColor.withAlpha(128),
               ),
             ),
           ),
@@ -386,6 +402,76 @@ class HtmlMessage extends StatelessWidget {
               isThumbnail: (actualWidth * actualHeight) > (256 * 256),
             ),
           ),
+        );
+      case 'table':
+        return WidgetSpan(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Table(
+              defaultColumnWidth: const IntrinsicColumnWidth(),
+              border: TableBorder.all(color: textColor.withAlpha(100)),
+              children: node.nodes
+                  .whereType<dom.Element>()
+                  .expand(
+                    (e) =>
+                        e.localName == 'thead' ||
+                            e.localName == 'tbody' ||
+                            e.localName == 'tfoot'
+                        ? e.nodes.whereType<dom.Element>()
+                        : [e],
+                  )
+                  .where((e) => e.localName == 'tr')
+                  .map(
+                    (tr) => TableRow(
+                      children: tr.nodes
+                          .whereType<dom.Element>()
+                          .where(
+                            (e) => e.localName == 'td' || e.localName == 'th',
+                          )
+                          .map(
+                            (cell) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              child: Text.rich(
+                                TextSpan(
+                                  children: _renderWithLineBreaks(
+                                    cell.nodes,
+                                    context,
+                                    depth: depth,
+                                  ),
+                                  style: cell.localName == 'th'
+                                      ? const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        )
+                                      : null,
+                                ),
+                                style: TextStyle(
+                                  fontSize: fontSize,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        );
+      case 'thead':
+      case 'tbody':
+      case 'tfoot':
+      case 'tr':
+      case 'th':
+      case 'td':
+      case 'caption':
+        // These are handled by the 'table' case above; if encountered
+        // outside a table, render children inline as fallback.
+        return TextSpan(
+          children: _renderWithLineBreaks(node.nodes, context, depth: depth),
         );
       case 'hr':
         return const WidgetSpan(child: Divider());
@@ -426,10 +512,7 @@ class HtmlMessage extends StatelessWidget {
                       ),
                   ],
                 ),
-                style: TextStyle(
-                  fontSize: fontSize,
-                  color: textColor,
-                ),
+                style: TextStyle(fontSize: fontSize, color: textColor),
               ),
             ),
           ),
@@ -467,17 +550,13 @@ class HtmlMessage extends StatelessWidget {
       default:
         return TextSpan(
           style: switch (node.localName) {
-            'body' => TextStyle(
-                fontSize: fontSize,
-                color: textColor,
-              ),
+            'body' => TextStyle(fontSize: fontSize, color: textColor),
             'a' => linkStyle,
             'strong' => const TextStyle(fontWeight: FontWeight.bold),
             'em' || 'i' => const TextStyle(fontStyle: FontStyle.italic),
-            'del' ||
-            's' ||
-            'strikethrough' =>
-              const TextStyle(decoration: TextDecoration.lineThrough),
+            'del' || 's' || 'strikethrough' => const TextStyle(
+              decoration: TextDecoration.lineThrough,
+            ),
             'u' => const TextStyle(decoration: TextDecoration.underline),
             'h1' => TextStyle(fontSize: fontSize * 1.6, height: 2),
             'h2' => TextStyle(fontSize: fontSize * 1.5, height: 2),
@@ -486,22 +565,19 @@ class HtmlMessage extends StatelessWidget {
             'h5' => TextStyle(fontSize: fontSize * 1.2, height: 1.75),
             'h6' => TextStyle(fontSize: fontSize * 1.1, height: 1.5),
             'span' => TextStyle(
-                color: node.attributes['color']?.hexToColor ??
-                    node.attributes['data-mx-color']?.hexToColor ??
-                    textColor,
-                backgroundColor:
-                    node.attributes['data-mx-bg-color']?.hexToColor,
-              ),
-            'sup' =>
-              const TextStyle(fontFeatures: [FontFeature.superscripts()]),
+              color:
+                  node.attributes['color']?.hexToColor ??
+                  node.attributes['data-mx-color']?.hexToColor ??
+                  textColor,
+              backgroundColor: node.attributes['data-mx-bg-color']?.hexToColor,
+            ),
+            'sup' => const TextStyle(
+              fontFeatures: [FontFeature.superscripts()],
+            ),
             'sub' => const TextStyle(fontFeatures: [FontFeature.subscripts()]),
             _ => null,
           },
-          children: _renderWithLineBreaks(
-            node.nodes,
-            context,
-            depth: depth,
-          ),
+          children: _renderWithLineBreaks(node.nodes, context, depth: depth),
         );
     }
   }
@@ -509,14 +585,96 @@ class HtmlMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final element = parser.parse(html).body ?? dom.Element.html('');
-    return Text.rich(
-      _renderHtml(element, context),
-      style: TextStyle(
-        fontSize: fontSize,
-        color: textColor,
-      ),
-      maxLines: limitHeight ? 64 : null,
-      overflow: TextOverflow.fade,
+    final configuredMaxLines = AppSettings.messagePreviewMaxLines.value;
+    final maxLines = configuredMaxLines <= 0 ? null : configuredMaxLines;
+    final span = _renderHtml(element, context);
+    final style = TextStyle(fontSize: fontSize, color: textColor);
+
+    if (maxLines == null) {
+      return Text.rich(
+        span,
+        style: style,
+        selectionColor: textColor.withAlpha(128),
+      );
+    }
+
+    // Heuristic: if plain text has enough newlines or length, it will overflow.
+    final plainText = element.text;
+    final lineCount = '\n'.allMatches(plainText).length + 1;
+    final likelyOverflows =
+        lineCount > maxLines || plainText.length > maxLines * 50;
+
+    if (!likelyOverflows) {
+      return Text.rich(
+        span,
+        style: style,
+        selectionColor: textColor.withAlpha(128),
+      );
+    }
+
+    return _CollapsibleText(
+      span: span,
+      style: style,
+      maxLines: maxLines,
+      textColor: textColor,
+      linkColor: linkStyle.color ?? textColor,
+      fontSize: fontSize,
+    );
+  }
+}
+
+class _CollapsibleText extends StatefulWidget {
+  final InlineSpan span;
+  final TextStyle style;
+  final int maxLines;
+  final Color textColor;
+  final Color linkColor;
+  final double fontSize;
+
+  const _CollapsibleText({
+    required this.span,
+    required this.style,
+    required this.maxLines,
+    required this.textColor,
+    required this.linkColor,
+    required this.fontSize,
+  });
+
+  @override
+  State<_CollapsibleText> createState() => _CollapsibleTextState();
+}
+
+class _CollapsibleTextState extends State<_CollapsibleText> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedSize(
+          duration: PantheonThemes.animationDuration,
+          curve: PantheonThemes.animationCurve,
+          alignment: Alignment.topLeft,
+          child: Text.rich(
+            widget.span,
+            style: widget.style,
+            maxLines: _expanded ? null : widget.maxLines,
+            overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            selectionColor: widget.textColor.withAlpha(128),
+          ),
+        ),
+        Center(
+          child: TextButton.icon(
+            onPressed: () => setState(() => _expanded = !_expanded),
+            style: TextButton.styleFrom(foregroundColor: widget.linkColor),
+            icon: Icon(_expanded ? Icons.arrow_drop_up : Icons.arrow_drop_down),
+            label: Text(_expanded ? l10n.showLess : l10n.showMore),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -544,26 +702,27 @@ class MatrixPill extends StatelessWidget {
     return InkWell(
       splashColor: Colors.transparent,
       onTap: UrlLauncher(outerContext, uri).launchUrl,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Avatar(
-            mxContent: avatar,
-            name: name,
-            size: 16,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            name,
-            style: TextStyle(
-              color: color,
-              decorationColor: color,
-              decoration: TextDecoration.underline,
-              fontSize: fontSize,
-              height: 1.25,
+      child: Text.rich(
+        TextSpan(
+          children: [
+            WidgetSpan(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4.0),
+                child: Avatar(mxContent: avatar, name: name, size: 16),
+              ),
             ),
-          ),
-        ],
+            TextSpan(
+              text: name,
+              style: TextStyle(
+                color: color,
+                decorationColor: color,
+                decoration: TextDecoration.underline,
+                fontSize: fontSize,
+                height: 1.25,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
