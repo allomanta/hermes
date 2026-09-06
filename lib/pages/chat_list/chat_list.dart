@@ -355,7 +355,8 @@ class ChatListController extends State<ChatList>
   List<Room> get spaces =>
       Matrix.of(context).client.rooms.where((r) => r.isSpace).toList();
 
-  String? get activeChat => widget.activeChat;
+  String? get activeChat =>
+      PantheonThemes.isColumnMode(context) ? widget.activeChat : null;
 
   void _processIncomingSharedMedia(List<SharedMediaFile> files) {
     unawaited(_handleIncomingSharedMedia(files));

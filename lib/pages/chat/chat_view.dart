@@ -368,9 +368,19 @@ class ChatView extends StatelessWidget {
                               ),
                             ),
                           ),
-                        GestureDetector(
-                          onTap: controller.clearSingleSelectedEvent,
-                          child: ChatEventList(controller: controller),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom:
+                                controller.inputBarHeight ??
+                                (72 +
+                                    (PantheonThemes.isColumnMode(context)
+                                        ? 16
+                                        : 0)),
+                          ),
+                          child: GestureDetector(
+                            onTap: controller.clearSingleSelectedEvent,
+                            child: ChatEventList(controller: controller),
+                          ),
                         ),
                         Positioned(
                           bottom: 0,
