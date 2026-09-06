@@ -123,7 +123,7 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
       );
       useBiometrics =
           (await const FlutterSecureStorage().read(
-            key: 'chat.fluffy.use_biometrics',
+            key: 'chat.pantheon.use_biometrics',
           )) ==
           'true';
     } catch (e, s) {

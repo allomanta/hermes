@@ -215,45 +215,35 @@ class BackgroundPush {
       return;
     }
 
-    if (pushers.any(
-      (currentPusher) =>
-          currentPusher.pushkey == token &&
-          currentPusher.data.additionalProperties['client_name'] ==
-              client.clientName &&
-          currentPusher.kind == 'http' &&
-          currentPusher.appId == thisAppId &&
-          currentPusher.appDisplayName == appDisplayName &&
-          currentPusher.deviceDisplayName == client.deviceName &&
-          currentPusher.lang == 'en' &&
-          currentPusher.data.url.toString() == gatewayUrl &&
-          currentPusher.data.format ==
-              AppSettings.pushNotificationsPusherFormat.value &&
-          currentPusher.data.additionalProperties['data_message'] ==
-              pusherDataMessageFormat,
-    )) {
+    final existingPushers = pushers
+        .where((pusher) => pusher.pushkey == token)
+        .toList();
+    if (existingPushers.length == 1 &&
+        existingPushers.single.data.additionalProperties['client_name'] ==
+            client.clientName &&
+        existingPushers.single.kind == 'http' &&
+        existingPushers.single.appId == thisAppId &&
+        existingPushers.single.appDisplayName == appDisplayName &&
+        existingPushers.single.deviceDisplayName == client.deviceName &&
+        existingPushers.single.lang == 'en' &&
+        existingPushers.single.data.url.toString() == gatewayUrl &&
+        existingPushers.single.data.format ==
+            AppSettings.pushNotificationsPusherFormat.value &&
+        existingPushers.single.data.additionalProperties['data_message'] ==
+            pusherDataMessageFormat) {
       Logs().i('[Push] Pusher already set for ${client.deviceID}');
       return;
     }
 
     if (!client.isLogged()) return;
 
-    final legacyPushers = pushers.where(
-      (pusher) =>
-          pusher.appId == thisAppId ||
-          (pusher.appId.startsWith('$thisAppId.') &&
-              pusher.pushkey == token) ||
-          // To migrate older FluffyChat app IDs:
-          ((pusher.appId == 'chat.fluffy.fluffychat.data_message' ||
-                  pusher.appId == 'chat.fluffy.fluffychat') &&
-              pusher.pushkey == token),
-    );
-    for (final pusher in legacyPushers) {
+    for (final pusher in existingPushers) {
       try {
         await client.deletePusher(pusher);
-        Logs().i('[Push] Removed legacy pusher for ${client.deviceID}');
+        Logs().i('[Push] Removed existing pusher for ${client.deviceID}');
       } catch (err) {
         Logs().w(
-          '[Push] Failed to remove old pusher for ${client.deviceID}',
+          '[Push] Failed to remove existing pusher for ${client.deviceID}',
           err,
         );
       }

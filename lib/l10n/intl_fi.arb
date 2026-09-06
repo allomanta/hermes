@@ -776,7 +776,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "newMessageInHermes": "💬 Uusi viesti FluffyChätissä",
+    "newMessageInHermes": "💬 Uusi viesti Hermesissä",
     "@newMessageInHermes": {
         "type": "String",
         "placeholders": {}

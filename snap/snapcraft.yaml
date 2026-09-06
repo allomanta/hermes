@@ -11,7 +11,7 @@ description: |
 
   ### Messaging how it should be
 
-  Whether for your friends, your company or local community, FluffyChat supports a variety of features to cover all your daily needs.
+  Whether for your friends, your company or local community, Hermes supports a variety of features to cover all your daily needs.
 
   #### Easy to use
 
@@ -19,13 +19,12 @@ description: |
 
   #### Secure
 
-  With olm/megolm end-to-end encryption, encrypted message backups and an automated key trust system, FluffyChat is among the most secure messengers available.
+  With olm/megolm end-to-end encryption, encrypted message backups and an automated key trust system, Hermes is among the most secure messengers available.
 
   #### Decentral
 
   Join the community: https://matrix.to/#/#hermes:matrix.org
   Website: http://hermes.im
-  Microblog: https://mastodon.art/@krille
 
 grade: stable
 confinement: strict

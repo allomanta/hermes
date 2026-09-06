@@ -18,7 +18,7 @@ Hotfix for iOS only where iOS notifications display error messages.
 Revert cronet for http3.
 
 ## v2.9.0
-FluffyChat 2.9.0 updates underlying libraries, fixed a lot of bugs and improves the UX.
+Hermes 2.9.0 updates underlying libraries, fixed a lot of bugs and improves the UX.
 It also adds double tap to react and better notifications for iOS.
 
 - build: (deps): bump dynamic_color from 1.8.1 to 1.9.0 (dependabot[bot])
@@ -145,7 +145,7 @@ Improved timeline design, implement biometrics for app lock and a lot of bug fix
 - chore(translations): Translated using Weblate (Russian) (alexander kozlev)
 - chore(translations): Translated using Weblate (Tamil) (தமிழ்நேரம்)
 - chore: Improve message bubble design (Christian Kußowski)
-- chore: switch out fluffy.chat with fluffychat.im url (Christian Kußowski)
+- chore: update the website URL (Christian Kußowski)
 - fix: scrolling in tofu dialog (Christian Kußowski)
 - fix: send videos crashed duo type error (Christian Kußowski)
 - fix: sharing images sometimes break them (Christian Kußowski)
@@ -299,7 +299,7 @@ a little bit messed up and I don't have a full changelog this time.
 Update to latest version of fcm_shared_isolate to fix push on iOS.
 
 ## v2.5.0
-FluffyChat 2.5.0 introduces a new homeserver picker for onboarding, better image compression performance and several smaller new features, design adjustments and bug fixes.
+Hermes 2.5.0 introduces a new homeserver picker for onboarding, better image compression performance and several smaller new features, design adjustments and bug fixes.
 
 - feat: Add mute notification action (Christian Kußowski)
 - feat: Add presetHomeserver config to enforce a homeserver for web (Christian Kußowski)
@@ -401,7 +401,7 @@ FluffyChat 2.5.0 introduces a new homeserver picker for onboarding, better image
 - chore: Make unread bubble full round (Christian Kußowski)
 - chore: Move file cache to subdirectory (Christian Kußowski)
 - chore: Move show image viewer one step up (Christian Kußowski)
-- chore: Move website back to fluffychat.im (Christian Kußowski)
+- chore: Move website back to hermes.im (Christian Kußowski)
 - chore: Only show confirm dialog once (Christian Kußowski)
 - chore: Put oidc behind a feature flag until fixed (Christian Kußowski)
 - chore: Remove converser from recommended homeservers as it doesn't have open registration (Christian Kußowski)
@@ -458,7 +458,7 @@ FluffyChat 2.5.0 introduces a new homeserver picker for onboarding, better image
 - refactor: Use native uri data from bytes instead of html (Christian Kußowski)
 
 ## v2.4.0
-FluffyChat 2.4.0 adds a new improved GUI for managing stickers with tutorials how to
+Hermes 2.4.0 adds a new improved GUI for managing stickers with tutorials how to
 easily add your own sticker packs.
 It also improves the search and image gallery in chats, especially encrypted chats.
 Besides that this update comes with a lot of fixes and improvements under the hood.
@@ -1656,7 +1656,7 @@ to store the messages locally and improves the performance and app stability.
 - feat: Hovermenu for messages for mouse (krille-chan)
 - feat: New change password page with server capabilities check (krille-chan)
 - feat: Search for public spaces (krille-chan)
-- feat: Try out FluffyBox 2 database (Krille)
+- feat: Try out the new database backend (Krille)
 - fix: Add 3pid email for password reset (krille-chan)
 - fix: Audiomessage break app (Krille)
 - fix: Cannot change send on enter on desktop (krille-chan)
@@ -2581,7 +2581,7 @@ the space hierarchy and session dump have been implemented.
 - fix: Open room from notification click produces errors (Krille Fear)
 - fix: SSO on Android 12 (Krille Fear)
 - fix: Send read receipts on all taps (Krille Fear)
-- fix: make fluffy usable at 720 px wide (Raatty)
+- fix: make Hermes usable at 720 px wide (Raatty)
 - fix: Add forgotten sendOnEnter (Krille Fear)
 - refactor: Switch to just audio for playing sounds (Krille Fear)
 
@@ -2737,7 +2737,7 @@ voice messages.
 - design: Remove cupertino icons
 - feat: Display typing indicators with gif
 - feat: Fancy chat list loading animation
-- feat: New database backend with FluffyBox
+- feat: New database backend
 - feat: Make the main color editable for users
 - feat: Move styles one settings level up
 - feat: Multiple mute, pin and mark unread

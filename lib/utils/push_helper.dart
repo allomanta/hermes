@@ -530,7 +530,7 @@ Future<void> _showIncomingCall(Event event, L10n l10n) async {
   final timeout =
       event.tryParseRtcNotificationContent()?.lifetime ??
       RtcNotificationContent.defaultLifetime;
-  final params = await buildFluffyChatCallKitParams(
+  final params = await buildHermesCallKitParams(
     event.room,
     l10n: l10n,
     intent: intent,

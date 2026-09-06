@@ -76,7 +76,7 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
 
   Future<void> changeUseBiometrics(bool useBiometrics) async {
     await const FlutterSecureStorage().write(
-      key: 'chat.fluffy.use_biometrics',
+      key: 'chat.pantheon.use_biometrics',
       value: useBiometrics.toString(),
     );
     _useBiometrics = useBiometrics;

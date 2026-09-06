@@ -393,10 +393,7 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
             )
             ?.id;
         if (callKitId == null) {
-          final params = await buildFluffyChatCallKitParams(
-            room,
-            intent: intent,
-          );
+          final params = await buildHermesCallKitParams(room, intent: intent);
           await FlutterCallkitIncoming.startCall(params);
           callKitId = params.id;
         }

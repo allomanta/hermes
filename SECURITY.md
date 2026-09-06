@@ -11,7 +11,7 @@ If you believe you have discovered a security vulnerability in this project, **d
 
 To report a security issue responsibly, please go to the Security tab or visit:
 
-https://github.com/krille-chan/fluffychat/security/advisories/new
+https://github.com/allomanta/hermes/security/advisories/new
 
 The following information can help us address the issue:
 

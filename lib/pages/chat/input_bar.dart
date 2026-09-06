@@ -404,7 +404,7 @@ class InputBar extends StatelessWidget {
           readOnly: readOnly,
           onEditingComplete: () {
             // To not lose focus on iOS:
-            // https://github.com/krille-chan/fluffychat/issues/2784
+            // https://github.com/allomanta/hermes/issues/2784
           },
           contextMenuBuilder: (c, e) => MarkdownContextBuilder(
             editableTextState: e,

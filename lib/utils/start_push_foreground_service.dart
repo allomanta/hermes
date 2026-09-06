@@ -45,7 +45,7 @@ abstract class ForegroundServices {
         );
         FlutterForegroundTask.init(
           androidNotificationOptions: AndroidNotificationOptions(
-            channelId: 'fluffychat_sync',
+            channelId: 'hermes_sync',
             channelName: l10n.loadingMessages,
             channelDescription: l10n.loadingMessages,
             onlyAlertOnce: true,
@@ -68,7 +68,7 @@ abstract class ForegroundServices {
         }
         final result = await FlutterForegroundTask.startService(
           serviceTypes: [ForegroundServiceTypes.shortService],
-          notificationTitle: 'FluffyChat',
+          notificationTitle: 'Hermes',
           notificationText: l10n.loadingMessages,
           notificationIcon: NotificationIcon(metaDataName: 'ic_launcher'),
         );

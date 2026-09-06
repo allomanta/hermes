@@ -37,7 +37,6 @@ abstract class AppConfig {
   static const String supportUrl = 'https://github.com/allomanta/hermes/issues';
   static const String changelogUrl =
       'https://github.com/allomanta/hermes/blob/main/CHANGELOG.md';
-  static const String donationUrl = 'https://ko-fi.com/krille';
   static const String helpUrl = supportUrl;
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
   static final Uri newIssueUrl = Uri(
@@ -48,7 +47,7 @@ abstract class AppConfig {
   static final Uri homeserverList = Uri(
     scheme: 'https',
     host: 'raw.githubusercontent.com',
-    path: 'krille-chan/fluffychat/refs/heads/main/recommended_homeservers.json',
+    path: 'allomanta/hermes/refs/heads/main/recommended_homeservers.json',
   );
 
   // static bool swipePopEnableFullScreenDrag = true;
@@ -63,11 +62,6 @@ abstract class AppConfig {
     host: 'github.com',
     path: '/allomanta/hermes/blob/main/PRIVACY.md',
   );
-  static final Uri crashReportEndpoint = Uri(
-    scheme: 'https',
-    host: 'crash.fluffy.chat',
-  );
-
   static const String mainIsolatePortName = 'main_isolate';
   static const String pushIsolatePortName = 'push_isolate';
   static const String pushHelperCrashReportKey = 'push_helper_crash_report';

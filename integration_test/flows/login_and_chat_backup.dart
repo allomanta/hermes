@@ -3,19 +3,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:hermes/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hermes/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../data/environment_constants.dart';
-import '../utils/fluffy_chat_tester.dart';
+import '../utils/hermes_tester.dart';
 import 'auth_flows.dart';
 
 Future<void> loginAndChatBackup(WidgetTester widgetTester) => widgetTester
-    .startFluffyChatTest()
+    .startHermesTest()
     .then((tester) => tester._loginAndChatBackup());
 
-extension on FluffyChatTester {
+extension on HermesTester {
   Future<void> _loginAndChatBackup() async {
     // Set up with only recovery key:
     await login();

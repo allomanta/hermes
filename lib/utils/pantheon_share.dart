@@ -46,7 +46,7 @@ abstract class PantheonShare {
     await PantheonShare.share(
       l10n.inviteText(
         ownProfile.displayName ?? client.userID!,
-        'https://matrix.to/#/${client.userID}?client=im.fluffychat',
+        'https://matrix.to/#/${client.userID}',
       ),
       context,
     );

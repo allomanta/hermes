@@ -13,7 +13,7 @@ import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:matrix/matrix.dart';
 import 'package:uuid/uuid.dart';
 
-Future<CallKitParams> buildFluffyChatCallKitParams(
+Future<CallKitParams> buildHermesCallKitParams(
   Room room, {
   L10n? l10n,
   MatrixRtcCallIntent intent = .video,

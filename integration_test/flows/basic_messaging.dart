@@ -6,15 +6,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../utils/fluffy_chat_tester.dart';
+import '../utils/hermes_tester.dart';
 import 'auth_flows.dart';
 import 'chat_flows.dart';
 
-Future<void> basicMessaging(WidgetTester widgetTester) => widgetTester
-    .startFluffyChatTest()
-    .then((tester) => tester._basicMessaging());
+Future<void> basicMessaging(WidgetTester widgetTester) =>
+    widgetTester.startHermesTest().then((tester) => tester._basicMessaging());
 
-extension on FluffyChatTester {
+extension on HermesTester {
   Future<void> _basicMessaging() async {
     await ensureLoggedIn();
     await ensureGroupChatCreated();

@@ -3,18 +3,18 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:hermes/pages/chat_list/chat_list.dart';
 import 'package:hermes/widgets/chat_settings_popup_menu.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../utils/fluffy_chat_tester.dart';
+import '../utils/hermes_tester.dart';
 import 'auth_flows.dart';
 
 Future<void> archiveChats(WidgetTester widgetTester) =>
-    widgetTester.startFluffyChatTest().then((tester) => tester._archiveChats());
+    widgetTester.startHermesTest().then((tester) => tester._archiveChats());
 
-extension ChatFlows on FluffyChatTester {
+extension ChatFlows on HermesTester {
   static const String groupChatName = 'Test Group 01';
 
   Future<void> ensureGroupChatCreated() async {
