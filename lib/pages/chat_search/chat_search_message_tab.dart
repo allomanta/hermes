@@ -11,7 +11,6 @@ import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/pages/chat_search/search_footer.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -112,11 +111,17 @@ class _MessageSearchResultListTile extends StatelessWidget {
         children: [
           Avatar(mxContent: sender.avatarUrl, name: displayname, size: 16),
           const SizedBox(width: 8),
-          Text(displayname),
+          Text(
+            displayname,
+            style: TextStyle(color: theme.colorScheme.onSurface),
+          ),
           Expanded(
             child: Text(
               ' | ${event.originServerTs.localizedTimeShort(context)}',
-              style: const TextStyle(fontSize: 12),
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontSize: 12,
+              ),
             ),
           ),
         ],
@@ -124,6 +129,7 @@ class _MessageSearchResultListTile extends StatelessWidget {
       subtitle: Linkify(
         textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
         options: const LinkifyOptions(humanize: false),
+        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
         linkStyle: TextStyle(
           color: theme.colorScheme.primary,
           decoration: TextDecoration.underline,
