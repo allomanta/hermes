@@ -188,8 +188,8 @@ rust
 
 libcrypto.3.dylib
 android/app/src/main/jniLibs/**
-android/app/google-services.json
 google-services.json*
+!android/app/google-services.json
 *jks.b64
 web/pkg/package.json
 web/pkg/vodozemac_bindings_dart_bg.wasm
@@ -206,8 +206,6 @@ android/key.properties
 android/key.jks
 android/keys.json
 android/Gemfile.lock
-android/app/google-services.json
-
 # iOS
 ios/Runner.ipa
 ios/Runner/GoogleServices-Info.plist

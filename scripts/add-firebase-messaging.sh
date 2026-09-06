@@ -5,8 +5,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-flutter pub add fcm_shared_isolate
-flutter pub get
+set -euo pipefail
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   sed -i '' 's,//<GOOGLE_SERVICES>,,g' lib/utils/background_push.dart
