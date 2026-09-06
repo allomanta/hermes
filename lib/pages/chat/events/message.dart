@@ -587,6 +587,12 @@ class Message extends StatelessWidget {
                               alignment: alignment,
                               padding: const EdgeInsets.only(left: 8),
                               child: GestureDetector(
+                                onTapUp: longPressSelect
+                                    ? (_) => onSelect(event)
+                                    : (details) => _showContextMenu(
+                                        context,
+                                        details.globalPosition,
+                                      ),
                                 onDoubleTap:
                                     AppSettings.doubleTapToReact.value &&
                                         event.room.canSendDefaultMessages
