@@ -54,6 +54,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Verify Firebase Android config
+        run: |
+          jq -e '.client | any(.client_info.android_client_info.package_name == "chat.pantheon.hermes")' \
+            android/app/google-services.json >/dev/null
       - uses: subosito/flutter-action@v2
         with:
           flutter-version-file: .tool_versions.yaml

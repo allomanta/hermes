@@ -27,6 +27,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify Firebase Android config
+        run: |
+          jq -e '.client | any(.client_info.android_client_info.package_name == "chat.pantheon.hermes")' \
+            android/app/google-services.json >/dev/null
+
       - uses: ./.github/actions/free_up_space
         with:
           target: android
