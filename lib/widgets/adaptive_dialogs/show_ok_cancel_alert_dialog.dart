@@ -25,7 +25,10 @@ Future<OkCancelResult?> showOkCancelAlertDialog({
   builder: (context) => AlertDialog.adaptive(
     title: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 256),
-      child: Text(title),
+      child: Text(
+        title,
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+      ),
     ),
     content: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 256),
@@ -33,6 +36,9 @@ Future<OkCancelResult?> showOkCancelAlertDialog({
           ? null
           : SelectableLinkify(
               text: message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
               linkStyle: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
@@ -77,7 +83,10 @@ Future<OkCancelResult?> showOkAlertDialog({
   builder: (context) => AlertDialog.adaptive(
     title: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 256),
-      child: Text(title),
+      child: Text(
+        title,
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+      ),
     ),
     content: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 256),
@@ -85,6 +94,9 @@ Future<OkCancelResult?> showOkAlertDialog({
           ? null
           : SelectableLinkify(
               text: message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
               linkStyle: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
