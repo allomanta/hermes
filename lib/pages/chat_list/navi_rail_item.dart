@@ -9,7 +9,6 @@ import 'package:matrix/matrix.dart';
 import 'package:hermes/widgets/hover_builder.dart';
 import 'package:hermes/widgets/unread_rooms_badge.dart';
 import '../../config/themes.dart';
-import 'package:hermes/config/app_config.dart';
 import 'package:material_ui/material_ui.dart';
 
 class NaviRailItem extends StatelessWidget {
@@ -39,7 +38,7 @@ class NaviRailItem extends StatelessWidget {
     return HoverBuilder(
       builder: (context, hovered) {
         return SizedBox(
-          height: 65,
+          height: 72,
           width: PantheonThemes.navRailWidth,
           child: Stack(
             children: [
