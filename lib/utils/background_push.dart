@@ -275,7 +275,11 @@ class BackgroundPush {
     }
   }
 
-  final pusherDataMessageFormat = Platform.isAndroid;
+  final String? pusherDataMessageFormat = Platform.isAndroid
+      ? 'android'
+      : Platform.isIOS
+      ? 'ios'
+      : null;
 
   static bool _wentToRoomOnStartup = false;
 
