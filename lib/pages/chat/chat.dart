@@ -1435,7 +1435,14 @@ class ChatController extends State<ChatPageWithRoom>
       });
       await loadTimelineFuture;
     }
-    scrollController.jumpTo(0);
+    if (!mounted) return;
+    if (_scrolledUp) {
+      setState(() => _scrolledUp = false);
+    }
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(scrollController.position.minScrollExtent);
+    }
+    setReadMarker();
   }
 
   void onEmojiSelected(_, Emoji? emoji) {
