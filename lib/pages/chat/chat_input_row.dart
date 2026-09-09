@@ -30,6 +30,7 @@ class ChatInputRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final openStickersByDefault = AppSettings.openStickersByDefault.value;
     final textMessageOnly =
         controller.sendController.text.isNotEmpty ||
         controller.replyEvent != null ||
@@ -244,31 +245,21 @@ class ChatInputRow extends StatelessWidget {
                     width: 48,
                     alignment: Alignment.center,
                     child: IconButton(
-                      tooltip: L10n.of(context).emojis,
+                      tooltip: openStickersByDefault
+                          ? L10n.of(context).stickers
+                          : L10n.of(context).emojis,
                       color: theme.colorScheme.onPrimaryContainer,
                       icon: Icon(
                         controller.showEmojiPicker
                             ? Icons.keyboard
+                            : openStickersByDefault
+                            ? Icons.settings_system_daydream_outlined
                             : Icons.add_reaction_outlined,
                         key: ValueKey(controller.showEmojiPicker),
                       ),
                       onPressed: controller.emojiPickerAction,
                     ),
                   ),
-                  if (!controller.showEmojiPicker)
-                    Container(
-                      height: height,
-                      width: 48,
-                      alignment: Alignment.center,
-                      child: IconButton(
-                        tooltip: L10n.of(context).stickers,
-                        color: theme.colorScheme.onPrimaryContainer,
-                        icon: const Icon(
-                          Icons.settings_system_daydream_outlined,
-                        ),
-                        onPressed: controller.stickerPickerAction,
-                      ),
-                    ),
                   if (Matrix.of(context).isMultiAccount &&
                       Matrix.of(context).hasComplexBundles &&
                       Matrix.of(context).currentBundle!.length > 1)

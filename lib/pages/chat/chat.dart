@@ -1058,19 +1058,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
     setState(() {
       showEmojiPicker = !showEmojiPicker;
-      emojiPickerIndex = 0;
-    });
-  }
-
-  void stickerPickerAction() {
-    if (showEmojiPicker) {
-      inputFocus.requestFocus();
-    } else {
-      inputFocus.unfocus();
-    }
-    setState(() {
-      showEmojiPicker = !showEmojiPicker;
-      emojiPickerIndex = 1;
+      emojiPickerIndex = AppSettings.openStickersByDefault.value ? 1 : 0;
     });
   }
 

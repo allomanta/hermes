@@ -1936,6 +1936,8 @@
     "pinMessage": "Pin to room",
     "confirmEventUnpin": "Are you sure to permanently unpin the event?",
     "emojis": "Emojis",
+    "openStickersByDefault": "Open stickers by default",
+    "openStickersByDefaultDescription": "Open stickers instead of emojis when tapping the picker button.",
     "unsupportedAndroidVersion": "Unsupported Android version",
     "unsupportedAndroidVersionLong": "This feature requires a newer Android version. Please check for updates or Lineage OS support.",
     "youRejectedTheInvitation": "You rejected the invitation",

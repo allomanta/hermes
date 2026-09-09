@@ -114,6 +114,7 @@ enum AppSettings<T> {
   // colorSchemeSeed stored as ARGB int
   colorSchemeSeedInt<int>('chat.pantheon.color_scheme_seed', 0xFF5625BA),
   emojiSuggestionLocale<String>('emoji_suggestion_locale', ''),
+  openStickersByDefault<bool>('chat.pantheon.open_stickers_by_default', false),
   enableSoftLogout<bool>('chat.pantheon.enable_soft_logout', false),
   enableMatrixNativeOIDC<bool>('chat.pantheon.enable_matrix_native_oidc', true),
   presetHomeserver<String>('chat.pantheon.preset_homeserver', ''),

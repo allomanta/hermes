@@ -259,6 +259,11 @@ class SettingsChatView extends StatelessWidget {
                   child: Icon(Icons.chevron_right_outlined),
                 ),
               ),
+              SettingsSwitchListTile.adaptive(
+                title: L10n.of(context).openStickersByDefault,
+                subtitle: L10n.of(context).openStickersByDefaultDescription,
+                setting: AppSettings.openStickersByDefault,
+              ),
               Divider(color: theme.dividerColor),
               ListTile(
                 title: Text(
