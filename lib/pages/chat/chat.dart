@@ -244,7 +244,11 @@ class ChatController extends State<ChatPageWithRoom>
 
   Future<void> requestFuture() async {
     final timeline = this.timeline;
-    if (timeline == null) return;
+    if (timeline == null ||
+        !timeline.canRequestFuture ||
+        timeline.isRequestingFuture) {
+      return;
+    }
     Logs().v('Requesting future...');
 
     final mostRecentEvent = timeline.events.filterByVisibleInGui().firstOrNull;
@@ -272,16 +276,15 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
     if (!scrollController.hasClients) return;
-    if (timeline?.allowNewEvent == false ||
-        scrollController.position.pixels > 0 && _scrolledUp == false) {
-      setState(() => _scrolledUp = true);
-    } else if (scrollController.position.pixels <= 0 && _scrolledUp == true) {
-      setState(() => _scrolledUp = false);
-      setReadMarker();
+    // The list is reversed, so the newest messages are at its minimum extent.
+    final distanceFromBottom = scrollController.position.extentBefore;
+    final scrolledUp =
+        timeline?.allowNewEvent == false || distanceFromBottom > 1;
+    if (scrolledUp != _scrolledUp) {
+      setState(() => _scrolledUp = scrolledUp);
+      if (!scrolledUp) setReadMarker();
     }
-    if (timeline?.allowNewEvent != false &&
-        (scrollController.position.pixels == 0 ||
-            scrollController.position.pixels == 64)) {
+    if (timeline?.canRequestFuture == true && distanceFromBottom <= 64) {
       requestFuture();
     }
   }
