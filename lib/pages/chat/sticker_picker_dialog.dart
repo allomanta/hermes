@@ -102,6 +102,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
             ),
           const SizedBox(height: 6),
           GridView.builder(
+            padding: EdgeInsets.zero,
             itemCount: imageKeys.length,
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 128,
