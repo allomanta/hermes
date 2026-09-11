@@ -5,6 +5,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:badges/badges.dart' as b;
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
@@ -22,6 +23,7 @@ import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/mxc_image.dart';
 import 'package:hermes/widgets/pulsating_widget.dart';
+import 'package:hermes/widgets/unread_rooms_badge.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -124,7 +126,16 @@ class ChatView extends StatelessWidget {
                       )
                     : PantheonThemes.isColumnMode(context)
                     ? null
-                    : const Center(child: BackButton()),
+                    : StreamBuilder<Object>(
+                        stream: Matrix.of(context).client.onSync.stream.where(
+                          (syncUpdate) => syncUpdate.hasRoomUpdate,
+                        ),
+                        builder: (context, _) => UnreadRoomsBadge(
+                          filter: (room) => room.id != controller.roomId,
+                          badgePosition: b.BadgePosition.topEnd(end: 6, top: 6),
+                          child: const Center(child: BackButton()),
+                        ),
+                      ),
                 titleSpacing: PantheonThemes.isColumnMode(context) ? 24 : 0,
                 title: ChatAppBarTitle(controller),
                 actions: [
