@@ -38,7 +38,7 @@ class NaviRailItem extends StatelessWidget {
     return HoverBuilder(
       builder: (context, hovered) {
         return SizedBox(
-          height: 72,
+          height: 60,
           width: PantheonThemes.navRailWidth,
           child: Stack(
             children: [
@@ -79,8 +79,8 @@ class NaviRailItem extends StatelessWidget {
                           : UnreadRoomsBadge(
                               filter: unreadBadgeFilter,
                               badgePosition: BadgePosition.topEnd(
-                                top: -12,
-                                end: -8,
+                                top: -10,
+                                end: -6,
                               ),
                               child: icon,
                             ),

@@ -37,7 +37,7 @@ class UnreadRoomsBadge extends StatelessWidget {
       ),
       badgeContent: Text(
         unreadCount.toString(),
-        style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 12),
+        style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 10),
       ),
       showBadge: unreadCount != 0,
       badgeAnimation: const b.BadgeAnimation.scale(),
