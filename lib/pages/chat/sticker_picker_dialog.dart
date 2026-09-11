@@ -164,6 +164,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
             child: CustomScrollView(
               slivers: <Widget>[
                 SliverAppBar(
+                  primary: false,
                   floating: true,
                   pinned: true,
                   scrolledUnderElevation: 0,
