@@ -852,7 +852,8 @@ class Message extends StatelessWidget {
                                     shadows: wallpaperTextShadow,
                                   ),
                                 ],
-                                if (event.status == EventStatus.sending) ...[
+                                if (event.status == EventStatus.sending &&
+                                    (!previousEventSameSender || selected)) ...[
                                   Text(
                                     switch (event.fileSendingStatus) {
                                       null => L10n.of(context).sending,
