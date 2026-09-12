@@ -8,7 +8,6 @@ import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/client_download_content_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/notification_background_handler.dart';
-import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/utils/push_helper.dart';
 import 'package:hermes/widgets/hermes_app.dart';
 import 'package:hermes/widgets/incoming_call_dialog.dart';
@@ -49,7 +48,6 @@ extension LocalNotificationsExtension on MatrixState {
     if (activeRoomId == roomId) {
       if (kIsWeb && webHasFocus) return;
       if (!kIsWeb &&
-          !PlatformInfos.isMacOS &&
           WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
         return;
       }
@@ -89,6 +87,8 @@ extension LocalNotificationsExtension on MatrixState {
       }
     }
 
+    final notificationClient = event.room.client;
+    final notificationId = '${notificationClient.clientName}_$roomId'.hashCode;
     if (kIsWeb) {
       final thumbnailUri = await avatarUrl?.getThumbnailUri(
         client,
@@ -99,17 +99,23 @@ extension LocalNotificationsExtension on MatrixState {
 
       if (AppSettings.webNotificationSound.value) _audioPlayer.play();
 
-      html.Notification(
+      trackedRoomNotifications[notificationId]?.close?.call();
+      final notification = html.Notification(
         title,
         body: body,
         icon: thumbnailUri?.toString(),
-        tag: event.room.id,
+        tag: '${notificationClient.clientName}_$roomId',
+      );
+      trackedRoomNotifications[notificationId] = (
+        clientName: notificationClient.clientName,
+        roomId: roomId,
+        close: notification.close,
       );
       return;
     }
 
-    FlutterLocalNotificationsPlugin().show(
-      id: event.room.id.hashCode,
+    await FlutterLocalNotificationsPlugin().show(
+      id: notificationId,
       title: title,
       body: body,
       notificationDetails: NotificationDetails(
@@ -145,10 +151,15 @@ extension LocalNotificationsExtension on MatrixState {
         ),
       ),
       payload: HermesPushPayload(
-        client.clientName,
+        notificationClient.clientName,
         event.room.id,
         event.eventId,
       ).toString(),
+    );
+    trackedRoomNotifications[notificationId] = (
+      clientName: notificationClient.clientName,
+      roomId: roomId,
+      close: null,
     );
   }
 }

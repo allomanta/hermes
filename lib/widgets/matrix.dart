@@ -14,6 +14,7 @@ import 'package:hermes/utils/init_with_restore.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:hermes/utils/notification_background_handler.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:hermes/utils/push_helper.dart';
 import 'package:hermes/utils/uia_request_manager.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:hermes/widgets/hermes_app.dart';
@@ -209,6 +210,7 @@ class MatrixState extends State<Matrix> {
   final onRoomKeyRequestSub = <String, StreamSubscription>{};
   final onKeyVerificationRequestSub = <String, StreamSubscription>{};
   final onNotification = <String, StreamSubscription>{};
+  final onReadNotifications = <String, StreamSubscription<SyncUpdate>>{};
   final onLogoutSub = <String, StreamSubscription<LoginState>>{};
   final onUiaRequest = <String, StreamSubscription<UiaRequest>>{};
 
@@ -314,6 +316,17 @@ class MatrixState extends State<Matrix> {
           HermesApp.router.go('/');
         });
     onUiaRequest[name] ??= c.onUiaRequest.stream.listen(uiaRequestHandler);
+    onReadNotifications[name] ??= c.onSync.stream
+        .where((sync) => sync.hasRoomUpdate)
+        .listen((_) {
+          unawaited(
+            clearReadNotifications(
+              client: c,
+              flutterLocalNotificationsPlugin:
+                  FlutterLocalNotificationsPlugin(),
+            ),
+          );
+        });
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
       FlutterLocalNotificationsPlugin().initialize(
         settings: InitializationSettings(
@@ -346,6 +359,7 @@ class MatrixState extends State<Matrix> {
     onLogoutSub.remove(name);
     onNotification[name]?.cancel();
     onNotification.remove(name);
+    onReadNotifications.remove(name)?.cancel();
   }
 
   void initMatrix() {
@@ -418,6 +432,9 @@ class MatrixState extends State<Matrix> {
     for (final sub in onNotification.values) {
       sub.cancel();
     }
+    for (final sub in onReadNotifications.values) {
+      sub.cancel();
+    }
     for (final sub in onUiaRequest.values) {
       sub.cancel();
     }
@@ -425,6 +442,7 @@ class MatrixState extends State<Matrix> {
     onKeyVerificationRequestSub.clear();
     onLogoutSub.clear();
     onNotification.clear();
+    onReadNotifications.clear();
     onUiaRequest.clear();
 
     voiceMessageEventId.dispose();

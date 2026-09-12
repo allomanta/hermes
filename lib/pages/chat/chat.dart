@@ -12,6 +12,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
@@ -36,6 +37,7 @@ import 'package:hermes/utils/matrix_sdk_extensions/filtered_timeline_extension.d
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/other_party_can_receive.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:hermes/utils/push_helper.dart';
 import 'package:hermes/utils/show_scaffold_dialog.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -410,6 +412,17 @@ class ChatController extends State<ChatPageWithRoom>
 
     _loadDraft();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final matrix = Matrix.of(context);
+      if (matrix.activeRoomId == roomId) {
+        unawaited(
+          clearReadNotifications(
+            client: room.client,
+            openedRoomId: roomId,
+            flutterLocalNotificationsPlugin: FlutterLocalNotificationsPlugin(),
+          ),
+        );
+      }
       _shareItems();
       _checkMatrixRtcCallSupport();
       if (widget.action == 'call') {
@@ -662,6 +675,16 @@ class ChatController extends State<ChatPageWithRoom>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
     if (!mounted) return;
+    final matrix = Matrix.of(context);
+    if (matrix.activeRoomId == roomId) {
+      unawaited(
+        clearReadNotifications(
+          client: room.client,
+          openedRoomId: roomId,
+          flutterLocalNotificationsPlugin: FlutterLocalNotificationsPlugin(),
+        ),
+      );
+    }
     setReadMarker();
   }
 

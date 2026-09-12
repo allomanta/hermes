@@ -21,6 +21,7 @@ import 'package:hermes/utils/notification_background_handler.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/utils/start_push_foreground_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_new_badger/flutter_new_badger.dart';
@@ -31,6 +32,10 @@ import 'package:matrix/matrix.dart' hide Result;
 import 'package:shared_preferences/shared_preferences.dart';
 
 final Map<String, DateTime> lastReceivedPushNotification = {};
+
+// Linux cannot enumerate delivered notifications; web needs their close handles.
+final trackedRoomNotifications =
+    <int, ({String clientName, String roomId, void Function()? close})>{};
 
 Future<void> pushHelper(
   PushNotification notification, {
@@ -155,30 +160,11 @@ Future<void> _tryPushHelper(
           .timeout(const Duration(seconds: 8))
           .catchError((_) => null);
 
-      final activeNotifications = await flutterLocalNotificationsPlugin
-          .getActiveNotifications();
-      activeNotifications.removeWhere(
-        (notification) => notification.groupKey != client.clientName,
+      await clearReadNotifications(
+        client: client,
+        l10n: l10n,
+        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
       );
-      var needsUpdateForSummaryNotification = false;
-      for (final activeNotification in activeNotifications) {
-        final room = client.rooms.singleWhereOrNull(
-          (room) =>
-              '${client.clientName}_${room.id}'.hashCode ==
-              activeNotification.id,
-        );
-        if (room != null && !room.isUnreadOrInvited) {
-          flutterLocalNotificationsPlugin.cancel(id: activeNotification.id!);
-          if (PlatformInfos.isAndroid) needsUpdateForSummaryNotification = true;
-        }
-      }
-      if (needsUpdateForSummaryNotification) {
-        await updateSummaryNotification(
-          clientName: client.clientName,
-          l10n: l10n,
-          flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-        );
-      }
     }
     return;
   }
@@ -417,6 +403,104 @@ void updateAppBadge(int unreadCount) {
   }
 }
 
+Future<void> clearReadNotifications({
+  required Client client,
+  required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+  String? openedRoomId,
+  L10n? l10n,
+}) async {
+  try {
+    final roomIds = client.rooms
+        .where(
+          (room) => openedRoomId != null
+              ? room.id == openedRoomId
+              : !room.isUnreadOrInvited,
+        )
+        .map((room) => room.id)
+        .toSet();
+    if (roomIds.isEmpty) return;
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      await const MethodChannel('im.hermes/notifications').invokeMethod<void>(
+        'clearRoomNotifications',
+        {'clientName': client.clientName, 'roomIds': roomIds.toList()},
+      );
+      return;
+    }
+    final notifications = <int, ActiveNotification>{
+      for (final entry in trackedRoomNotifications.entries)
+        if (entry.value.clientName == client.clientName)
+          entry.key: ActiveNotification(
+            id: entry.key,
+            payload: HermesPushPayload(
+              entry.value.clientName,
+              entry.value.roomId,
+              null,
+            ).toString(),
+          ),
+    };
+    if (!kIsWeb &&
+        defaultTargetPlatform == TargetPlatform.windows &&
+        notifications.isEmpty) {
+      return;
+    }
+    if (!kIsWeb && defaultTargetPlatform != TargetPlatform.linux) {
+      try {
+        for (final notification
+            in await flutterLocalNotificationsPlugin.getActiveNotifications()) {
+          final id = notification.id;
+          if (id != null) notifications.putIfAbsent(id, () => notification);
+        }
+      } on UnimplementedError {
+        // Use tracked IDs on platforms without notification enumeration.
+      }
+    }
+    var removedNotification = false;
+    for (final notification in notifications.values) {
+      if (notification.id == null) continue;
+      final payload = HermesPushPayload.fromString(notification.payload ?? '');
+      if (payload.clientName != null
+          ? payload.clientName != client.clientName
+          : notification.groupKey != client.clientName) {
+        continue;
+      }
+      final room = payload.roomId != null
+          ? client.getRoomById(payload.roomId!)
+          : client.rooms.firstWhereOrNull(
+              (room) =>
+                  notification.id ==
+                      '${client.clientName}_${room.id}'.hashCode ||
+                  notification.id == room.id.hashCode,
+            );
+      if (room == null) continue;
+      if (!roomIds.contains(room.id)) continue;
+      if (openedRoomId == null && room.isUnreadOrInvited) continue;
+      final tracked = trackedRoomNotifications[notification.id];
+      final close = tracked?.close;
+      if (close != null) {
+        close();
+      } else {
+        await flutterLocalNotificationsPlugin.cancel(
+          id: notification.id!,
+          tag: notification.tag,
+        );
+      }
+      if (trackedRoomNotifications[notification.id] == tracked) {
+        trackedRoomNotifications.remove(notification.id);
+      }
+      removedNotification = true;
+    }
+    if (removedNotification && PlatformInfos.isAndroid) {
+      await updateSummaryNotification(
+        clientName: client.clientName,
+        l10n: l10n ?? await lookupL10n(PlatformDispatcher.instance.locale),
+        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+      );
+    }
+  } catch (e, s) {
+    Logs().w('Unable to clear read notifications', e, s);
+  }
+}
+
 Future<void> updateSummaryNotification({
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   required String clientName,
@@ -424,18 +508,11 @@ Future<void> updateSummaryNotification({
 }) async {
   final activeNotifications =
       (await flutterLocalNotificationsPlugin.getActiveNotifications())
-          .where((n) => n.groupKey == clientName)
+          .where((n) => n.groupKey == clientName && n.id != clientName.hashCode)
           .toList();
 
   if (activeNotifications.length <= 1) {
     await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
-    return;
-  }
-
-  if (activeNotifications.any(
-    (notification) => notification.id == clientName.hashCode,
-  )) {
-    // Already have a visible summary notification!
     return;
   }
 
@@ -447,6 +524,7 @@ Future<void> updateSummaryNotification({
         l10n.incomingMessages,
         groupKey: clientName,
         setAsGroupSummary: true,
+        onlyAlertOnce: true,
         styleInformation: InboxStyleInformation(
           activeNotifications.map((n) => n.body ?? '').toList(),
         ),
