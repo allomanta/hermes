@@ -42,11 +42,61 @@ class ChatDetails extends StatefulWidget {
 
 class ChatDetailsController extends State<ChatDetails> {
   bool displaySettings = false;
+  bool changingChatType = false;
 
   void toggleDisplaySettings() =>
       setState(() => displaySettings = !displaySettings);
 
   String? get roomId => widget.roomId;
+
+  Future<void> setDirectChat(bool direct) async {
+    final room = Matrix.of(context).client.getRoomById(roomId!);
+    if (room == null || room.isSpace || changingChatType) return;
+    final l10n = L10n.of(context);
+    setState(() => changingChatType = true);
+    try {
+      String? userId;
+      if (direct) {
+        final result = await showFutureLoadingDialog(
+          context: context,
+          future: () =>
+              room.requestParticipants([Membership.join, Membership.invite]),
+        );
+        if (!mounted || result.error != null) return;
+        final users = result.result!
+            .where((user) => user.senderId != room.client.userID)
+            .toList();
+        if (users.length <= 1) {
+          userId = users.firstOrNull?.senderId ?? room.client.userID;
+        } else {
+          userId = await showModalActionPopup<String>(
+            context: context,
+            title: l10n.chooseDirectChatUser,
+            message: l10n.chooseDirectChatUserDescription,
+            cancelLabel: l10n.cancel,
+            actions: users
+                .map(
+                  (user) => AdaptiveModalAction(
+                    label: '${user.calcDisplayname()} (${user.senderId})',
+                    value: user.senderId,
+                    icon: const Icon(Icons.person_outlined),
+                  ),
+                )
+                .toList(),
+          );
+        }
+        if (!mounted || userId == null) return;
+      }
+      await showFutureLoadingDialog(
+        context: context,
+        future: () => direct
+            ? room.addToDirectChat(userId!)
+            : room.removeFromDirectChat(),
+      );
+    } finally {
+      if (mounted) setState(() => changingChatType = false);
+    }
+  }
 
   Future<void> setDisplaynameAction() async {
     final l10n = L10n.of(context);

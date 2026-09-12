@@ -732,6 +732,10 @@
         "placeholders": {}
     },
     "directChats": "Direct Chats",
+    "directChat": "Direct chat",
+    "directChatDescription": "Show this room as a direct chat for your account. Turn off to show it as a group.",
+    "chooseDirectChatUser": "Choose a person",
+    "chooseDirectChatUserDescription": "Choose the person this direct chat is with.",
     "@directChats": {
         "type": "String",
         "placeholders": {}

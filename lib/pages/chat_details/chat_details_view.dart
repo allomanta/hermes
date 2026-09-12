@@ -42,14 +42,15 @@ class ChatDetailsView extends StatelessWidget {
       );
     }
 
-    final directChatMatrixID = room.directChatMatrixID;
-    final roomAvatar = room.avatar;
-
     return StreamBuilder(
-      stream: room.client.onRoomState.stream.where(
-        (update) => update.roomId == room.id,
+      stream: room.client.onSync.stream.where(
+        (sync) =>
+            sync.rooms?.join?.containsKey(room.id) == true ||
+            sync.accountData?.any((data) => data.type == 'm.direct') == true,
       ),
       builder: (context, snapshot) {
+        final directChatMatrixID = room.directChatMatrixID;
+        final roomAvatar = room.avatar;
         var members = room.getParticipants().toList()
           ..sort((b, a) => a.powerLevel.level.compareTo(b.powerLevel.level));
         members = members.take(10).toList();
@@ -293,6 +294,17 @@ class ChatDetailsView extends StatelessWidget {
                           const SizedBox(height: 16),
                         ],
                         Divider(color: theme.dividerColor),
+                        if (!room.isSpace && room.membership == Membership.join)
+                          SwitchListTile.adaptive(
+                            title: Text(L10n.of(context).directChat),
+                            subtitle: Text(
+                              L10n.of(context).directChatDescription,
+                            ),
+                            value: room.isDirectChat,
+                            onChanged: controller.changingChatType
+                                ? null
+                                : controller.setDirectChat,
+                          ),
                         ListTile(
                           leading: CircleAvatar(
                             backgroundColor: theme.colorScheme.surfaceContainer,
