@@ -355,8 +355,12 @@ class ChatController extends State<ChatPageWithRoom>
 
     if (evt is KeyDownEvent &&
         evt.logicalKey == LogicalKeyboardKey.escape &&
-        editEvent != null) {
-      _cancelEditWithConfirmation();
+        (editEvent != null || replyEvent != null)) {
+      if (editEvent != null) {
+        _cancelEditWithConfirmation();
+      } else {
+        cancelReplyEventAction();
+      }
       return KeyEventResult.handled;
     }
 
