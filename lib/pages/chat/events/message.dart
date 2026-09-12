@@ -356,7 +356,9 @@ class Message extends StatelessWidget {
     if (ownMessage) {
       color = displayEvent.status.isError
           ? Colors.redAccent
-          : theme.bubbleColor;
+          : ((event.status == EventStatus.sending)
+                ? theme.bubbleColor.withAlpha(160)
+                : theme.bubbleColor);
     }
 
     final sentReactions = <String>{};
