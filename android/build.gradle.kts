@@ -16,12 +16,13 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 
-project(":fcm_shared_isolate") {
+subprojects {
     plugins.withId("com.android.library") {
         extensions.configure<LibraryAndroidComponentsExtension> {
             finalizeDsl {
-                // fcm_shared_isolate 0.2.0 hardcodes API 33, below its AndroidX requirements.
-                it.compileSdk = project(":app").extensions.getByType<ApplicationExtension>().compileSdk
+                // Raise older plugins to the app's SDK while preserving higher SDK requirements.
+                val appCompileSdk = project(":app").extensions.getByType<ApplicationExtension>().compileSdk
+                it.compileSdk = maxOf(it.compileSdk ?: 0, requireNotNull(appCompileSdk))
             }
         }
     }
