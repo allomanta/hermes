@@ -139,14 +139,14 @@ class ChatInputRow extends StatelessWidget {
                     width: 48,
                     alignment: Alignment.center,
                     child: IconButton(
-                      tooltip: openStickersByDefault
+                      tooltip: openStickersByDefault && !textMessageOnly
                           ? L10n.of(context).stickers
                           : L10n.of(context).emojis,
                       color: theme.colorScheme.onPrimaryContainer,
                       icon: Icon(
                         controller.showEmojiPicker
                             ? Icons.keyboard
-                            : openStickersByDefault
+                            : openStickersByDefault && !textMessageOnly
                             ? Icons.settings_system_daydream_outlined
                             : Icons.add_reaction_outlined,
                         key: ValueKey(controller.showEmojiPicker),

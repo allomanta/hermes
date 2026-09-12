@@ -1084,7 +1084,13 @@ class ChatController extends State<ChatPageWithRoom>
     }
     setState(() {
       showEmojiPicker = !showEmojiPicker;
-      emojiPickerIndex = AppSettings.openStickersByDefault.value ? 1 : 0;
+      emojiPickerIndex =
+          AppSettings.openStickersByDefault.value &&
+              sendController.text.isEmpty &&
+              replyEvent == null &&
+              editEvent == null
+          ? 1
+          : 0;
     });
   }
 
