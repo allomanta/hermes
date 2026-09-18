@@ -1,13 +1,16 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
-import 'package:matrix/matrix.dart';
-import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
-import 'package:hermes/utils/url_launcher.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/mxc_image.dart';
-import '../../widgets/avatar.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+
+import '../../widgets/avatar.dart';
 
 class _CloseStickerPickerIntent extends Intent {
   const _CloseStickerPickerIntent();
@@ -34,6 +37,8 @@ class StickerPickerDialog extends StatefulWidget {
 class StickerPickerDialogState extends State<StickerPickerDialog> {
   String? searchFilter;
   late final FocusNode _searchFocusNode = FocusNode();
+  final _searchController = TextEditingController();
+  final _scrollController = AutoScrollController();
 
   @override
   void initState() {
@@ -50,6 +55,8 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
   @override
   void dispose() {
     _searchFocusNode.dispose();
+    _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -90,7 +97,6 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
       final packName = pack.pack.displayName ?? packSlugs[packIndex];
       return Column(
         children: <Widget>[
-          if (packIndex != 0) const SizedBox(height: 20),
           if (packName != 'user')
             ListTile(
               leading: Avatar(
@@ -140,6 +146,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
               );
             },
           ),
+          if (packIndex != packSlugs.length - 1) const SizedBox(height: 20),
         ],
       );
     };
@@ -163,6 +170,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
           body: SizedBox(
             width: double.maxFinite,
             child: CustomScrollView(
+              controller: _scrollController,
               slivers: <Widget>[
                 SliverAppBar(
                   primary: false,
@@ -170,20 +178,74 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                   pinned: true,
                   scrolledUnderElevation: 0,
                   automaticallyImplyLeading: false,
-                  backgroundColor: Colors.transparent,
-                  title: SizedBox(
-                    height: 42,
-                    child: TextField(
-                      autofocus: false,
-                      focusNode: _searchFocusNode,
-                      decoration: InputDecoration(
-                        filled: true,
-                        hintText: L10n.of(context).search,
-                        prefixIcon: const Icon(Icons.search_outlined),
-                        contentPadding: EdgeInsets.zero,
+                  backgroundColor: theme.colorScheme.onInverseSurface,
+                  toolbarHeight: packSlugs.isEmpty
+                      ? kToolbarHeight
+                      : kToolbarHeight * 2,
+                  title: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (packSlugs.isNotEmpty)
+                        SizedBox(
+                          height: kToolbarHeight,
+                          child: ScrollConfiguration(
+                            behavior: ScrollConfiguration.of(context).copyWith(
+                              dragDevices: {
+                                ...ScrollConfiguration.of(context).dragDevices,
+                                PointerDeviceKind.mouse,
+                              },
+                            ),
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: packSlugs.length,
+                              itemBuilder: (context, index) {
+                                final pack = stickerPacks[packSlugs[index]]!;
+                                final packName =
+                                    pack.pack.displayName ?? packSlugs[index];
+                                return IconButton(
+                                  tooltip: packName,
+                                  icon: Avatar(
+                                    mxContent:
+                                        pack.pack.avatarUrl ??
+                                        pack.images.values.firstOrNull?.url,
+                                    name: packName,
+                                    client: widget.room.client,
+                                    size: 36,
+                                  ),
+                                  onPressed: () async {
+                                    _searchFocusNode.unfocus();
+                                    if (searchFilter?.isNotEmpty ?? false) {
+                                      _searchController.clear();
+                                      setState(() => searchFilter = null);
+                                      await WidgetsBinding.instance.endOfFrame;
+                                      if (!mounted) return;
+                                    }
+                                    await _scrollController.scrollToIndex(
+                                      index,
+                                      preferPosition: AutoScrollPosition.begin,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      SizedBox(
+                        height: 42,
+                        child: TextField(
+                          controller: _searchController,
+                          autofocus: false,
+                          focusNode: _searchFocusNode,
+                          decoration: InputDecoration(
+                            filled: true,
+                            hintText: L10n.of(context).search,
+                            prefixIcon: const Icon(Icons.search_outlined),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          onChanged: (s) => setState(() => searchFilter = s),
+                        ),
                       ),
-                      onChanged: (s) => setState(() => searchFilter = s),
-                    ),
+                    ],
                   ),
                 ),
                 if (packSlugs.isEmpty)
@@ -207,10 +269,29 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                     ),
                   )
                 else
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      packBuilder,
-                      childCount: packSlugs.length,
+                  SliverLayoutBuilder(
+                    builder: (context, constraints) => SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => AutoScrollTag(
+                          key: ValueKey(packSlugs[index]),
+                          controller: _scrollController,
+                          index: index,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              // Let even a short final pack reach the header.
+                              minHeight:
+                                  index == packSlugs.length - 1 &&
+                                      !(searchFilter?.isNotEmpty ?? false)
+                                  ? (constraints.viewportMainAxisExtent -
+                                            kToolbarHeight * 2)
+                                        .clamp(0.0, double.infinity)
+                                  : 0,
+                            ),
+                            child: packBuilder(context, index),
+                          ),
+                        ),
+                        childCount: packSlugs.length,
+                      ),
                     ),
                   ),
               ],
