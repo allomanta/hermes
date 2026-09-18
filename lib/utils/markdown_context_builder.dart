@@ -106,7 +106,7 @@ class MarkdownContextBuilder extends StatelessWidget {
               controller.text = controller.text.replaceRange(
                 selection.start,
                 selection.end,
-                '> $selectedText',
+                '>> $selectedText',
               );
               ContextMenuController.removeAny();
             },
