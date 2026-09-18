@@ -3,15 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/utils/client_download_content_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:hermes/utils/mxc_image_cache.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_ui/material_ui.dart';
@@ -32,6 +31,7 @@ class MxcImage extends StatefulWidget {
   final Widget Function(BuildContext context)? placeholder;
   final String? cacheKey;
   final String? cacheName;
+  final MxcImageCache? memoryCache;
   final Client? client;
   final BorderRadius borderRadius;
 
@@ -55,6 +55,7 @@ class MxcImage extends StatefulWidget {
     this.client,
     this.borderRadius = BorderRadius.zero,
     this.cacheName,
+    this.memoryCache,
     super.key,
   });
 
@@ -68,10 +69,36 @@ class _MxcImageState extends State<MxcImage> {
       _imageDataCaches[widget.cacheName ?? ''] ??= {};
 
   Uint8List? _imageDataNoCache;
+  Object? _memoryKey;
+  MxcImageData? _memoryImageData;
 
-  Uint8List? get _imageData => widget.cacheKey == null
-      ? _imageDataNoCache
-      : _imageDataCache[widget.cacheKey];
+  Object get _memoryCacheKey => (
+    widget.client ?? widget.event?.room.client ?? Matrix.of(context).client,
+    widget.uri,
+    widget.isThumbnail,
+    widget.isThumbnail ? widget.width : null,
+    widget.isThumbnail ? widget.height : null,
+    widget.isThumbnail ? MediaQuery.devicePixelRatioOf(context) : null,
+    widget.thumbnailMethod,
+    widget.animated,
+  );
+
+  MxcImageData? get _cachedImageData {
+    final cache = widget.memoryCache;
+    if (cache == null) return null;
+    final key = _memoryCacheKey;
+    if (_memoryKey != key) {
+      _memoryKey = key;
+      _memoryImageData = null;
+    }
+    return _memoryImageData ??= cache.get(key);
+  }
+
+  Uint8List? get _imageData =>
+      _cachedImageData?.bytes ??
+      (widget.cacheKey == null
+          ? _imageDataNoCache
+          : _imageDataCache[widget.cacheKey]);
 
   set _imageData(Uint8List? data) {
     if (data == null) return;
@@ -95,7 +122,7 @@ class _MxcImageState extends State<MxcImage> {
       final height = widget.height;
       final realHeight = height == null ? null : height * devicePixelRatio;
 
-      final remoteData = await client.downloadMxcCached(
+      Future<Uint8List> loadImage() => client.downloadMxcCached(
         uri,
         width: realWidth,
         height: realHeight,
@@ -103,10 +130,25 @@ class _MxcImageState extends State<MxcImage> {
         isThumbnail: widget.isThumbnail,
         animated: widget.animated,
       );
-      if (!mounted) return;
-      setState(() {
-        _imageData = remoteData;
-      });
+
+      final cache = widget.memoryCache;
+      if (cache != null) {
+        final key = _memoryCacheKey;
+        final data = await cache.load(key, loadImage);
+        if (!mounted || widget.memoryCache != cache || _memoryCacheKey != key) {
+          return;
+        }
+        setState(() {
+          _memoryKey = key;
+          _memoryImageData = data;
+        });
+      } else {
+        final remoteData = await loadImage();
+        if (!mounted) return;
+        setState(() {
+          _imageData = remoteData;
+        });
+      }
     }
 
     if (event != null) {
@@ -132,7 +174,7 @@ class _MxcImageState extends State<MxcImage> {
   }
 
   Future<void> _tryLoad() async {
-    if (_imageData != null) {
+    if (!mounted || _imageData != null) {
       return;
     }
     try {
@@ -147,16 +189,30 @@ class _MxcImageState extends State<MxcImage> {
   }
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad());
+  }
+
+  @override
+  void didUpdateWidget(covariant MxcImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.memoryCache != widget.memoryCache) {
+      _memoryKey = null;
+      _memoryImageData = null;
+    }
+    if (widget.memoryCache != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final data = _imageData;
     final hasData = data != null && data.isNotEmpty;
-    final ungzippedLottieData = data == null ? null : _ungzipLottie(data);
+    final ungzippedLottieData = data == null
+        ? null
+        : (_cachedImageData ?? MxcImageData(data)).lottieBytes;
 
     Widget errorFallback(
       BuildContext context,
@@ -242,25 +298,4 @@ class _MxcImagePlaceholder extends StatelessWidget {
           child: const CircularProgressIndicator.adaptive(strokeWidth: 2),
         );
   }
-}
-
-Uint8List? _ungzipLottie(Uint8List data) {
-  // early return if the data is not gzipped
-  if (data.length < 2 || data.first != 0x1f || data[1] != 0x8b) {
-    return null;
-  }
-
-  // try decoding json
-  try {
-    final decompressed = GZipDecoder().decodeBytes(data);
-    final jsonStr = utf8.decode(decompressed);
-    final json = jsonDecode(jsonStr);
-    if (json is Map && json.containsKey('v')) {
-      return Uint8List.fromList(utf8.encode(jsonStr));
-    }
-  } catch (_) {
-    return null;
-  }
-
-  return null;
 }

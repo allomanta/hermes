@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/mxc_image_cache.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/mxc_image.dart';
@@ -39,6 +40,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
   late final FocusNode _searchFocusNode = FocusNode();
   final _searchController = TextEditingController();
   final _scrollController = AutoScrollController();
+  final _imageCache = MxcImageCache();
 
   @override
   void initState() {
@@ -134,6 +136,8 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                   child: AbsorbPointer(
                     absorbing: true,
                     child: MxcImage(
+                      client: widget.room.client,
+                      memoryCache: _imageCache,
                       uri: image.url,
                       fit: BoxFit.contain,
                       width: 128,
