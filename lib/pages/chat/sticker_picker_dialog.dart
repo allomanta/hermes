@@ -216,7 +216,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                     children: [
                       if (packSlugs.isNotEmpty)
                         SizedBox(
-                          height: kToolbarHeight,
+                          height: kToolbarHeight + 10,
                           child: ScrollConfiguration(
                             behavior: ScrollConfiguration.of(context).copyWith(
                               dragDevices: {
