@@ -24,6 +24,9 @@ class MxcImage extends StatefulWidget {
   final BoxFit? fit;
   final bool isThumbnail;
   final bool animated;
+
+  /// Decode raster images within the display dimensions, at screen pixel density.
+  final bool decodeAtDisplaySize;
   final Duration retryDuration;
   final Duration animationDuration;
   final Curve animationCurve;
@@ -47,6 +50,7 @@ class MxcImage extends StatefulWidget {
     this.placeholder,
     this.isThumbnail = true,
     this.animated = false,
+    this.decodeAtDisplaySize = false,
     this.animationDuration = PantheonThemes.animationDuration,
     this.retryDuration = const Duration(seconds: 2),
     this.animationCurve = PantheonThemes.animationCurve,
@@ -213,6 +217,17 @@ class _MxcImageState extends State<MxcImage> {
     final ungzippedLottieData = data == null
         ? null
         : (_cachedImageData ?? MxcImageData(data)).lottieBytes;
+    final pixelRatio = widget.decodeAtDisplaySize
+        ? MediaQuery.devicePixelRatioOf(context)
+        : 1.0;
+    final decodeWidth =
+        widget.decodeAtDisplaySize && (widget.width?.isFinite ?? false)
+        ? max(1, (widget.width! * pixelRatio).ceil())
+        : null;
+    final decodeHeight =
+        widget.decodeAtDisplaySize && (widget.height?.isFinite ?? false)
+        ? max(1, (widget.height! * pixelRatio).ceil())
+        : null;
 
     Widget errorFallback(
       BuildContext context,
@@ -248,8 +263,15 @@ class _MxcImageState extends State<MxcImage> {
                   fit: widget.fit,
                   errorBuilder: errorFallback,
                 )
-              : Image.memory(
-                  data,
+              : Image(
+                  image: decodeWidth != null || decodeHeight != null
+                      ? ResizeImage(
+                          MemoryImage(data),
+                          width: decodeWidth,
+                          height: decodeHeight,
+                          policy: ResizeImagePolicy.fit,
+                        )
+                      : MemoryImage(data),
                   width: widget.width,
                   height: widget.height,
                   fit: widget.fit,

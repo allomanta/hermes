@@ -10,6 +10,7 @@ import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hermes/utils/mxc_image_cache.dart';
 import 'package:hermes/widgets/mxc_image.dart';
+import 'package:image/image.dart' as img;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -34,20 +35,72 @@ Future<void> _mountImage(
   Client client,
   MxcImageCache cache, {
   String id = 'sticker',
+  bool decodeAtDisplaySize = false,
+  double pixelRatio = 1,
 }) => tester.pumpWidget(
   MaterialApp(
-    home: MxcImage(
-      client: client,
-      uri: Uri.parse('mxc://example.org/$id'),
-      memoryCache: cache,
-      isThumbnail: false,
-      width: 128,
-      height: 128,
+    home: MediaQuery(
+      data: MediaQueryData(devicePixelRatio: pixelRatio),
+      child: MxcImage(
+        client: client,
+        uri: Uri.parse('mxc://example.org/$id'),
+        memoryCache: cache,
+        isThumbnail: false,
+        width: 128,
+        height: 128,
+        decodeAtDisplaySize: decodeAtDisplaySize,
+      ),
     ),
   ),
 );
 
 void main() {
+  for (final (width, height, pixelRatio, decodedWidth, decodedHeight) in [
+    (1024, 512, 1.0, 128, 64),
+    (1024, 512, 2.0, 256, 128),
+    (512, 1024, 2.0, 128, 256),
+    (64, 32, 2.0, 64, 32),
+  ]) {
+    testWidgets('decodes $width x $height at pixel ratio $pixelRatio', (
+      tester,
+    ) async {
+      final client = _Client();
+      client.database.result.complete(
+        Uint8List.fromList(
+          img.encodePng(img.Image(width: width, height: height)),
+        ),
+      );
+      await _mountImage(
+        tester,
+        client,
+        MxcImageCache(),
+        decodeAtDisplaySize: true,
+        pixelRatio: pixelRatio,
+      );
+      await tester.pump();
+      final image = tester.widget<Image>(find.byType(Image));
+      final decoded = await tester.runAsync(() async {
+        final result = Completer<ImageInfo>();
+        final stream = image.image.resolve(ImageConfiguration.empty);
+        final listener = ImageStreamListener(
+          (info, _) => result.complete(info),
+          onError: result.completeError,
+        );
+        stream.addListener(listener);
+        try {
+          return await result.future;
+        } finally {
+          stream.removeListener(listener);
+        }
+      });
+      expect(decoded!.image.width, decodedWidth);
+      expect(decoded.image.height, decodedHeight);
+      decoded.dispose();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   test('concurrent loads share bytes and prepared Lottie data', () async {
     final cache = MxcImageCache();
     final pending = Completer<Uint8List>();
