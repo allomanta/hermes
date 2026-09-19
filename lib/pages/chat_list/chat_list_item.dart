@@ -66,7 +66,7 @@ class ChatListItem extends StatelessWidget {
         clipBehavior: Clip.hardEdge,
         color: backgroundColor,
         child: FutureBuilder(
-          future: room.loadHeroUsers(),
+          future: room.name.isEmpty ? room.loadHeroUsers() : null,
           builder: (context, snapshot) => HoverBuilder(
             builder: (context, listTileHovered) => GestureDetector(
               onSecondaryTap: () => onLongPress?.call(context),
