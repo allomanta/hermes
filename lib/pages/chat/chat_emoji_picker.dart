@@ -19,89 +19,93 @@ class ChatEmojiPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final pickerHeight = MediaQuery.sizeOf(context).height / 2;
     return AnimatedContainer(
       duration: PantheonThemes.animationDuration,
       curve: PantheonThemes.animationCurve,
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(),
-      height: controller.showEmojiPicker
-          ? MediaQuery.sizeOf(context).height / 2
-          : 0,
+      height: controller.showEmojiPicker ? pickerHeight : 0,
       child: controller.showEmojiPicker
-          ? DefaultTabController(
-              length: 2,
-              initialIndex: controller.emojiPickerIndex,
-              child: Column(
-                children: [
-                  TabBar(
-                    tabs: [
-                      Tab(text: L10n.of(context).emojis),
-                      Tab(text: L10n.of(context).stickers),
-                    ],
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        EmojiPicker(
-                          onEmojiSelected: controller.onEmojiSelected,
-                          onBackspacePressed: controller.emojiPickerBackspace,
-                          config: Config(
-                            locale: Localizations.localeOf(context),
-                            emojiViewConfig: EmojiViewConfig(
-                              noRecents: const NoRecent(),
-                              backgroundColor:
-                                  theme.colorScheme.onInverseSurface,
-                            ),
-                            bottomActionBarConfig: const BottomActionBarConfig(
-                              enabled: false,
-                            ),
-                            categoryViewConfig: CategoryViewConfig(
-                              backspaceColor: theme.colorScheme.primary,
-                              iconColor: theme.colorScheme.primary.withAlpha(
-                                128,
-                              ),
-                              iconColorSelected: theme.colorScheme.primary,
-                              indicatorColor: theme.colorScheme.primary,
-                              backgroundColor: theme.colorScheme.surface,
-                            ),
-                            skinToneConfig: SkinToneConfig(
-                              dialogBackgroundColor: Color.lerp(
-                                theme.colorScheme.surface,
-                                theme.colorScheme.primaryContainer,
-                                0.75,
-                              )!,
-                              indicatorColor: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                        ),
-                        StickerPickerDialog(
-                          room: controller.room,
-                          onSelected: (sticker) async {
-                            final proceed = await showTrustUserInRoomDialog(
-                              context,
-                              controller.room,
-                            );
-                            if (!proceed) return;
-                            controller.room.sendEvent(
-                              {
-                                'body': sticker.body,
-                                'info': sticker.info ?? {},
-                                'url': sticker.url.toString(),
-                              },
-                              type: EventTypes.Sticker,
-                              threadRootEventId: controller.activeThreadId,
-                              threadLastEventId: controller.threadLastEventId,
-                            );
-                          },
-                          onEscape: () {
-                            controller.hideEmojiPicker();
-                            controller.inputFocus.requestFocus();
-                          },
-                        ),
+          ? OverflowBox(
+              // Keep autofocus from scrolling a temporarily shortened viewport.
+              alignment: Alignment.topCenter,
+              minHeight: pickerHeight,
+              maxHeight: pickerHeight,
+              child: DefaultTabController(
+                length: 2,
+                initialIndex: controller.emojiPickerIndex,
+                child: Column(
+                  children: [
+                    TabBar(
+                      tabs: [
+                        Tab(text: L10n.of(context).emojis),
+                        Tab(text: L10n.of(context).stickers),
                       ],
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          EmojiPicker(
+                            onEmojiSelected: controller.onEmojiSelected,
+                            onBackspacePressed: controller.emojiPickerBackspace,
+                            config: Config(
+                              locale: Localizations.localeOf(context),
+                              emojiViewConfig: EmojiViewConfig(
+                                noRecents: const NoRecent(),
+                                backgroundColor:
+                                    theme.colorScheme.onInverseSurface,
+                              ),
+                              bottomActionBarConfig:
+                                  const BottomActionBarConfig(enabled: false),
+                              categoryViewConfig: CategoryViewConfig(
+                                backspaceColor: theme.colorScheme.primary,
+                                iconColor: theme.colorScheme.primary.withAlpha(
+                                  128,
+                                ),
+                                iconColorSelected: theme.colorScheme.primary,
+                                indicatorColor: theme.colorScheme.primary,
+                                backgroundColor: theme.colorScheme.surface,
+                              ),
+                              skinToneConfig: SkinToneConfig(
+                                dialogBackgroundColor: Color.lerp(
+                                  theme.colorScheme.surface,
+                                  theme.colorScheme.primaryContainer,
+                                  0.75,
+                                )!,
+                                indicatorColor: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                          StickerPickerDialog(
+                            room: controller.room,
+                            onSelected: (sticker) async {
+                              final proceed = await showTrustUserInRoomDialog(
+                                context,
+                                controller.room,
+                              );
+                              if (!proceed) return;
+                              controller.room.sendEvent(
+                                {
+                                  'body': sticker.body,
+                                  'info': sticker.info ?? {},
+                                  'url': sticker.url.toString(),
+                                },
+                                type: EventTypes.Sticker,
+                                threadRootEventId: controller.activeThreadId,
+                                threadLastEventId: controller.threadLastEventId,
+                              );
+                            },
+                            onEscape: () {
+                              controller.hideEmojiPicker();
+                              controller.inputFocus.requestFocus();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             )
           : null,

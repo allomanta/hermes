@@ -215,6 +215,7 @@ class Message extends StatelessWidget {
         items: menuItems,
       );
     }
+    if (!context.mounted) return;
     switch (result) {
       case _MessageAction.reply:
         onReply();

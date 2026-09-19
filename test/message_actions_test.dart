@@ -62,14 +62,13 @@ class _Event extends Event {
     Room room,
     String id,
     String sender, {
-    EventStatus status = EventStatus.sent,
+    super.status = EventStatus.sent,
     this.canRedact = false,
   }) : super(
          room: room,
          eventId: id,
          senderId: sender,
          type: EventTypes.Message,
-         status: status,
          originServerTs: DateTime.now(),
          content: {
            'msgtype': MessageTypes.Text,
@@ -152,8 +151,9 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (call) async {
-        if (call.method == 'Clipboard.setData')
+        if (call.method == 'Clipboard.setData') {
           copied.add((call.arguments as Map)['text'] as String);
+        }
         return null;
       },
     );

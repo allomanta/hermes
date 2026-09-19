@@ -121,7 +121,9 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
             SliverGrid.builder(
               itemCount: imageKeys.length,
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 128,
+                maxCrossAxisExtent: 84,
+                mainAxisSpacing: 8.0,
+                crossAxisSpacing: 8.0,
               ),
               itemBuilder: (BuildContext context, int imageIndex) {
                 final image = pack.images[imageKeys[imageIndex]]!;
@@ -146,8 +148,8 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                         memoryCache: _imageCache,
                         uri: image.url,
                         fit: BoxFit.contain,
-                        width: 128,
-                        height: 128,
+                        width: 84,
+                        height: 84,
                         animated: true,
                         decodeAtDisplaySize: true,
                         isThumbnail: false,
@@ -276,7 +278,17 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                           focusNode: _searchFocusNode,
                           decoration: InputDecoration(
                             filled: true,
+                            fillColor: theme.colorScheme.secondaryContainer,
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(99),
+                            ),
                             hintText: L10n.of(context).search,
+                            hintStyle: TextStyle(
+                              color: theme.colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.normal,
+                            ),
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
                             prefixIcon: const Icon(Icons.search_outlined),
                             contentPadding: EdgeInsets.zero,
                           ),

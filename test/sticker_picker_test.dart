@@ -5,12 +5,22 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat/chat.dart';
+import 'package:hermes/pages/chat/chat_emoji_picker.dart';
 import 'package:hermes/pages/chat/sticker_picker_dialog.dart';
 import 'package:hermes/widgets/mxc_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class _ChatController extends ChatController {
+  _ChatController(this.room);
+  @override
+  final Room room;
+}
 
 class _Database extends Fake implements DatabaseApi {
   final reads = <Uri, int>{};
@@ -87,6 +97,53 @@ Future<void> _mountPicker(
 }
 
 void main() {
+  testWidgets(
+    'opening animation keeps the first pack below the pinned header',
+    (tester) async {
+      final open = ValueNotifier(false);
+      addTearDown(open.dispose);
+      final room = _Room();
+      SharedPreferences.setMockInitialValues({});
+      final controller = _ChatController(room)..emojiPickerIndex = 1;
+      addTearDown(controller.scrollController.dispose);
+      addTearDown(controller.sendController.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(appBarTheme: const AppBarTheme(toolbarHeight: 72)),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          home: Align(
+            alignment: Alignment.bottomCenter,
+            child: ValueListenableBuilder(
+              valueListenable: open,
+              builder: (context, isOpen, _) {
+                controller.showEmojiPicker = isOpen;
+                return SizedBox(width: 400, child: ChatEmojiPicker(controller));
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      open.value = true;
+      await tester.pump();
+      for (var frame = 0; frame < 20; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(tester.takeException(), isNull);
+      }
+      await tester.pumpAndSettle();
+      final scroll = tester.widget<CustomScrollView>(
+        find.byType(CustomScrollView),
+      );
+      expect(scroll.controller!.offset, 0);
+      expect(
+        tester.getTopLeft(find.widgetWithText(ListTile, 'Pack 0')).dy,
+        closeTo(tester.getBottomLeft(find.byType(AppBar)).dy, 0.1),
+      );
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
   testWidgets('large packs load visible stickers and reuse them on return', (
     tester,
   ) async {
@@ -95,7 +152,7 @@ void main() {
     final stickers = find.byWidgetPredicate(
       (widget) => widget is MxcImage && !widget.isThumbnail,
     );
-    expect(stickers.evaluate().length, lessThan(30));
+    expect(stickers.evaluate().length, lessThan(40));
     expect(
       room.client.database.reads.containsKey(
         Uri.parse('mxc://example.org/sticker-0-100'),
@@ -112,7 +169,7 @@ void main() {
       find.byKey(const ValueKey('mxc://example.org/sticker-0-0')),
       findsNothing,
     );
-    expect(stickers.evaluate().length, lessThan(40));
+    expect(stickers.evaluate().length, lessThan(70));
     scroll.controller!.jumpTo(0);
     await tester.pumpAndSettle();
     expect(
