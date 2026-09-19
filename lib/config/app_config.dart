@@ -50,13 +50,6 @@ abstract class AppConfig {
     path: 'allomanta/hermes/refs/heads/main/recommended_homeservers.json',
   );
 
-  // static bool swipePopEnableFullScreenDrag = true;
-  // static int swipePopDurationMs = 280;
-  // static double swipePopMinimumDragFraction = 0.3;
-  // static double swipePopVelocityThreshold = 350.0;
-  // static Duration get swipePopDuration =>
-  //     Duration(milliseconds: swipePopDurationMs);
-
   static final Uri privacyUrl = Uri(
     scheme: 'https',
     host: 'github.com',

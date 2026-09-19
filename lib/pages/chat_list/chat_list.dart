@@ -42,34 +42,11 @@ import '../../widgets/matrix.dart';
 
 enum ActiveFilter { allChats, unread, groups, messages, tag }
 
-extension LocalizedActiveFilter on ActiveFilter {
-  String toLocalizedString(BuildContext context) {
-    switch (this) {
-      case ActiveFilter.allChats:
-        return L10n.of(context).all;
-      case ActiveFilter.messages:
-        return L10n.of(context).messages;
-      case ActiveFilter.unread:
-        return L10n.of(context).unread;
-      case ActiveFilter.groups:
-        return L10n.of(context).groups;
-      case ActiveFilter.tag:
-        throw 'Tags should not directly be displayed!';
-    }
-  }
-}
-
 class ChatList extends StatefulWidget {
   final String? activeChat;
   final String? activeSpace;
-  final bool displayNavigationRail;
 
-  const ChatList({
-    super.key,
-    required this.activeChat,
-    this.activeSpace,
-    this.displayNavigationRail = false,
-  });
+  const ChatList({super.key, required this.activeChat, this.activeSpace});
 
   @override
   ChatListController createState() => ChatListController();
@@ -188,104 +165,10 @@ class ChatListController extends State<ChatList>
   ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).toList();
 
   bool isSearchMode = false;
-  Future<QueryPublicRoomsResponse>? publicRoomsResponse;
-  String? searchServer;
-  Timer? _coolDown;
-  SearchUserDirectoryResponse? userSearchResult;
-  QueryPublicRoomsResponse? roomSearchResult;
-
-  bool isSearching = false;
-  static const String _serverStoreNamespace = 'im.hermes.search.server';
-
-  Future<void> setServer() async {
-    final matrix = Matrix.of(context);
-    final l10n = L10n.of(context);
-    final newServer = await showTextInputDialog(
-      useRootNavigator: false,
-      title: l10n.changeTheHomeserver,
-      context: context,
-      okLabel: l10n.ok,
-      cancelLabel: l10n.cancel,
-      prefixText: 'https://',
-      hintText: matrix.client.homeserver?.host,
-      initialText: searchServer,
-      keyboardType: TextInputType.url,
-      autocorrect: false,
-      validator: (server) =>
-          server.contains('.') == true ? null : l10n.invalidServerName,
-    );
-    if (newServer == null) return;
-    if (!mounted) return;
-    matrix.store.setString(_serverStoreNamespace, newServer);
-    setState(() {
-      searchServer = newServer;
-    });
-    _coolDown?.cancel();
-    _coolDown = Timer(const Duration(milliseconds: 500), _search);
-  }
-
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
 
-  Future<void> _search() async {
-    final client = Matrix.of(context).client;
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    if (!isSearching) {
-      setState(() {
-        isSearching = true;
-      });
-    }
-    SearchUserDirectoryResponse? userSearchResult;
-    QueryPublicRoomsResponse? roomSearchResult;
-    final searchQuery = searchController.text.trim();
-    try {
-      roomSearchResult = await client.queryPublicRooms(
-        server: searchServer,
-        filter: PublicRoomQueryFilter(genericSearchTerm: searchQuery),
-        limit: 20,
-      );
-
-      if (searchQuery.isValidMatrixIdStrict() &&
-          searchQuery.sigil == '#' &&
-          roomSearchResult.chunk.any(
-                (room) => room.canonicalAlias == searchQuery,
-              ) ==
-              false) {
-        final response = await client.getRoomIdByAlias(searchQuery);
-        final roomId = response.roomId;
-        if (roomId != null) {
-          roomSearchResult.chunk.add(
-            PublishedRoomsChunk(
-              name: searchQuery,
-              guestCanJoin: false,
-              numJoinedMembers: 0,
-              roomId: roomId,
-              worldReadable: false,
-              canonicalAlias: searchQuery,
-            ),
-          );
-        }
-      }
-      userSearchResult = await client.searchUserDirectory(
-        searchController.text,
-        limit: 20,
-      );
-    } catch (e, s) {
-      Logs().w('Searching has crashed', e, s);
-      if (!mounted) return;
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(e.toLocalizedString(context))),
-      );
-    }
-    if (!isSearchMode) return;
-    setState(() {
-      isSearching = false;
-      this.roomSearchResult = roomSearchResult;
-      this.userSearchResult = userSearchResult;
-    });
-  }
-
-  void onSearchEnter(String text, {bool globalSearch = true}) {
+  void onSearchEnter(String text) {
     if (text.isEmpty) {
       cancelSearch(unfocus: false);
       return;
@@ -294,40 +177,15 @@ class ChatListController extends State<ChatList>
     setState(() {
       isSearchMode = true;
     });
-    _coolDown?.cancel();
-    if (globalSearch) {
-      _coolDown = Timer(const Duration(milliseconds: 500), _search);
-    }
-  }
-
-  void openNavrail() {
-    setState(() {
-      AppSettings.displayNavigationRail.setItem(
-        !AppSettings.displayNavigationRail.value,
-      );
-    });
-  }
-
-  void startSearch() {
-    setState(() {
-      isSearchMode = true;
-    });
-    searchFocusNode.requestFocus();
-    _coolDown?.cancel();
-    _coolDown = Timer(const Duration(milliseconds: 500), _search);
   }
 
   void cancelSearch({bool unfocus = true}) {
     setState(() {
       searchController.clear();
       isSearchMode = false;
-      roomSearchResult = userSearchResult = null;
-      isSearching = false;
     });
     if (unfocus) searchFocusNode.unfocus();
   }
-
-  BoxConstraints? snappingSheetContainerSize;
 
   final ScrollController scrollController = ScrollController();
   final ValueNotifier<bool> scrolledToTop = ValueNotifier(true);
@@ -480,9 +338,6 @@ class ChatListController extends State<ChatList>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        searchServer = Matrix.of(
-          context,
-        ).store.getString(_serverStoreNamespace);
         Matrix.of(context).backgroundPush?.setupPush(context);
         UpdateNotifier.showUpdateDialog(context);
       }
@@ -1016,19 +871,6 @@ class ChatListController extends State<ChatList>
         ),
       );
     }
-  }
-
-  void setActiveFilter(ActiveFilter filter, String? tag) {
-    if (filter == ActiveFilter.tag && tag == null) {
-      throw ('Must set a tag when setting filter to tags!');
-    }
-    setState(() {
-      activeTag = tag;
-      activeFilter = filter;
-    });
-    AppSettings.chatFilter.setItem(
-      filter == ActiveFilter.tag ? tag! : filter.name,
-    );
   }
 
   void setActiveClient(Client client) {

@@ -13,43 +13,6 @@ import 'package:managed_configurations/managed_configurations.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// abstract class SettingKeys {
-//   static const String renderHtml = 'chat.pantheon.renderHtml';
-//   static const String hideRedactedEvents = 'chat.pantheon.hideRedactedEvents';
-//   static const String hideUnknownEvents = 'chat.pantheon.hideUnknownEvents';
-//   static const String hideUnimportantStateEvents =
-//       'chat.pantheon.hideUnimportantStateEvents';
-//   static const String separateChatTypes = 'chat.pantheon.separateChatTypes';
-//   static const String sentry = 'sentry';
-//   static const String theme = 'theme';
-//   static const String amoledEnabled = 'amoled_enabled';
-//   static const String codeLanguage = 'code_language';
-//   static const String showNoGoogle = 'chat.pantheon.show_no_google';
-//   static const String fontSizeFactor = 'chat.pantheon.font_size_factor';
-//   static const String showNoPid = 'chat.pantheon.show_no_pid';
-//   static const String databasePassword = 'database-password';
-//   static const String appLockKey = 'chat.pantheon.app_lock';
-//   static const String unifiedPushRegistered =
-//       'chat.pantheon.unifiedpush.registered';
-//   static const String unifiedPushEndpoint =
-//       'chat.pantheon.unifiedpush.endpoint';
-//   static const String ownStatusMessage = 'chat.pantheon.status_msg';
-//   static const String dontAskForBootstrapKey = 'chat.hermes.dont_ask_bootstrap';
-//   static const String autoplayImages = 'chat.pantheon.autoplay_images';
-//   static const String sendTypingNotifications =
-//       'chat.pantheon.send_typing_notifications';
-//   static const String sendPublicReadReceipts =
-//       'chat.pantheon.send_public_read_receipts';
-//   static const String sendOnEnter = 'chat.pantheon.send_on_enter';
-//   static const String swipeRightToLeftToReply =
-//       'chat.pantheon.swipeRightToLeftToReply';
-
-//   static const String experimentalVoip = 'chat.pantheon.experimental_voip';
-//   static const String showPresences = 'chat.pantheon.show_presences';
-//   static const String displayNavigationRail =
-//       'chat.pantheon.display_navigation_rail';
-// }
-
 enum AppSettings<T> {
   textMessageMaxLength<int>('textMessageMaxLength', 16384),
 
@@ -76,7 +39,6 @@ enum AppSettings<T> {
   fontSizeFactor<double>('chat.pantheon.font_size_factor', 1.0),
   hideRedactedEvents<bool>('chat.pantheon.hideRedactedEvents', true),
   hideUnknownEvents<bool>('chat.pantheon.hideUnknownEvents', true),
-  separateChatTypes<bool>('chat.pantheon.separateChatTypes', false),
   autoplayImages<bool>('chat.pantheon.autoplay_images', true),
   sendTypingNotifications<bool>(
     'chat.pantheon.send_typing_notifications',
@@ -99,9 +61,7 @@ enum AppSettings<T> {
   ),
 
   sendOnEnter<bool>('chat.pantheon.send_on_enter', false),
-  showPresences<bool>('chat.pantheon.show_presences', true),
   displayNavigationRail<bool>('chat.pantheon.display_navigation_rail', false),
-  experimentalVoip<bool>('chat.pantheon.experimental_voip', false),
   shareKeysWith<String>('chat.pantheon.share_keys_with_2', 'all'),
   noEncryptionWarningShown<bool>(
     'chat.pantheon.no_encryption_warning_shown',

@@ -1,22 +1,16 @@
-import 'package:matrix/matrix.dart';
-import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/themes.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_list/chat_list.dart';
 import 'package:hermes/utils/sync_status_localization.dart';
-import '../../widgets/matrix.dart';
-import 'package:hermes/config/setting_keys.dart';
-import 'package:hermes/pages/chat_list/client_chooser_button.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
+import '../../widgets/matrix.dart';
 
 class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
   final ChatListController controller;
-  final bool globalSearch;
 
-  const ChatListHeader({
-    super.key,
-    required this.controller,
-    this.globalSearch = true,
-  });
+  const ChatListHeader({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +44,7 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
             controller: controller.searchController,
             focusNode: controller.searchFocusNode,
             textInputAction: TextInputAction.search,
-            onChanged: (text) =>
-                controller.onSearchEnter(text, globalSearch: globalSearch),
+            onChanged: controller.onSearchEnter,
             decoration: InputDecoration(
               filled: true,
               fillColor: theme.colorScheme.secondaryContainer,
@@ -90,39 +83,6 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                         ),
                       ),
                     ),
-              // suffixIcon: controller.isSearchMode && globalSearch
-              //     ? controller.isSearching
-              //         ? const Padding(
-              //             padding: EdgeInsets.symmetric(
-              //               vertical: 10.0,
-              //               horizontal: 12,
-              //             ),
-              //             child: SizedBox.square(
-              //               dimension: 24,
-              //               child: CircularProgressIndicator.adaptive(
-              //                 strokeWidth: 2,
-              //               ),
-              //             ),
-              //           )
-              //         : TextButton.icon(
-              //             onPressed: controller.setServer,
-              //             style: TextButton.styleFrom(
-              //               shape: RoundedRectangleBorder(
-              //                 borderRadius: BorderRadius.circular(99),
-              //               ),
-              //               textStyle: const TextStyle(fontSize: 12),
-              //             ),
-              //             icon: const Icon(Icons.edit_outlined, size: 16),
-              //             label: Text(
-              //               controller.searchServer ??
-              //                   Matrix.of(context).client.homeserver!.host,
-              //               maxLines: 2,
-              //             ),
-              //           )
-              //     : SizedBox(
-              //         width: 0,
-              //         child: ClientChooserButton(controller),
-              //       ),
             ),
           );
         },

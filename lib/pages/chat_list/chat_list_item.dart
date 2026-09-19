@@ -10,9 +10,6 @@ import 'package:hermes/widgets/hover_builder.dart';
 import '../../config/themes.dart';
 import '../../utils/date_time_extension.dart';
 import '../../widgets/avatar.dart';
-import 'package:hermes/pages/chat_list/active_call_indicator.dart';
-import 'package:hermes/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
-import 'package:hermes/widgets/typing_animation.dart';
 import 'package:material_ui/material_ui.dart';
 
 class ChatListItem extends StatelessWidget {
