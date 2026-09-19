@@ -33,9 +33,8 @@ extension NotificationAvatarExtension on Client {
     }
   }
 
-  /// Keep in sync with `createAttachment()` in iOS Notification Extension
-  /// This loads the avatar for a room and also stores it in a temporary
-  /// directory so the Notification Service Extension can access it later.
+  /// Keep in sync with `downloadAttachment()` in iOS Notification Extension.
+  /// Store the avatar in the shared per-client media directory for the extension.
   Future<String?> getIosNotificationAvatar(Uri? roomAvatar) async {
     if (roomAvatar == null) return null;
 
