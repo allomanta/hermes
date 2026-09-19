@@ -66,6 +66,7 @@ jobs:
         with:
           target: android
       - uses: dtolnay/rust-toolchain@stable
+      - run: ./scripts/add-firebase-messaging.sh
       - run: flutter pub get
       - name: Prepare Android signing
         env:
@@ -142,6 +143,7 @@ jobs:
       - name: Install Fastlane
         working-directory: android
         run: gem install fastlane -NV
+      - run: ./scripts/add-firebase-messaging.sh
       - run: flutter pub get
       - name: Prepare Android Release Build
         env:

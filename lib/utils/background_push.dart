@@ -11,13 +11,13 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
+//<GOOGLE_SERVICES>import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/main.dart';
 import 'package:hermes/utils/notification_background_handler.dart';
 import 'package:hermes/utils/push_helper.dart';
 import 'package:hermes/widgets/hermes_app.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
@@ -62,14 +62,15 @@ class BackgroundPush {
   }
 
   final pendingTests = <String, Completer<void>>{};
-  final bool firebaseEnabled = PlatformInfos.isMobile;
-  final firebase = FcmSharedIsolate();
+  bool firebaseEnabled = false;
+  //<GOOGLE_SERVICES>final firebase = FcmSharedIsolate();
 
   DateTime? lastReceivedPush;
 
   bool upAction = false;
 
   Future<void> _init() async {
+    //<GOOGLE_SERVICES>firebaseEnabled = PlatformInfos.isMobile;
     try {
       mainIsolateReceivePort?.listen((message) async {
         try {
@@ -131,23 +132,23 @@ class BackgroundPush {
             ?.requestPermissions(alert: true, badge: true, sound: true);
       }
       if (firebaseEnabled) {
-        firebase.setListeners(
-          onMessage: (message) {
-            final data = message['data'];
-            unawaited(
-              pushHelper(
-                PushNotification.fromJson(
-                  Map<String, Object?>.from(data is Map ? data : message),
-                ),
-                clients: clients,
-                l10n: l10n,
-                activeRoomId: matrix?.activeRoomId,
-                flutterLocalNotificationsPlugin:
-                    _flutterLocalNotificationsPlugin,
-              ),
-            );
-          },
-        );
+        //<GOOGLE_SERVICES>firebase.setListeners(
+        //<GOOGLE_SERVICES>  onMessage: (message) {
+        //<GOOGLE_SERVICES>    final data = message['data'];
+        //<GOOGLE_SERVICES>    unawaited(
+        //<GOOGLE_SERVICES>      pushHelper(
+        //<GOOGLE_SERVICES>        PushNotification.fromJson(
+        //<GOOGLE_SERVICES>          Map<String, Object?>.from(data is Map ? data : message),
+        //<GOOGLE_SERVICES>        ),
+        //<GOOGLE_SERVICES>        clients: clients,
+        //<GOOGLE_SERVICES>        l10n: l10n,
+        //<GOOGLE_SERVICES>        activeRoomId: matrix?.activeRoomId,
+        //<GOOGLE_SERVICES>        flutterLocalNotificationsPlugin:
+        //<GOOGLE_SERVICES>            _flutterLocalNotificationsPlugin,
+        //<GOOGLE_SERVICES>      ),
+        //<GOOGLE_SERVICES>    );
+        //<GOOGLE_SERVICES>  },
+        //<GOOGLE_SERVICES>);
       }
       if (Platform.isAndroid) {
         await UnifiedPush.initialize(
@@ -189,7 +190,7 @@ class BackgroundPush {
     String? token,
   }) async {
     if (PlatformInfos.isIOS) {
-      await firebase.requestPermission();
+      //<GOOGLE_SERVICES>await firebase.requestPermission();
     }
     if (PlatformInfos.isAndroid && !isIntegrationTest) {
       _flutterLocalNotificationsPlugin
@@ -359,13 +360,13 @@ class BackgroundPush {
     }
     if (_fcmToken?.isEmpty ?? true) {
       if (PlatformInfos.isIOS) {
-        await firebase.requestPermission();
+        //<GOOGLE_SERVICES>await firebase.requestPermission();
       }
       const max = 5;
       for (var i = 0; i < max; i++) {
         try {
           await Future.delayed(const Duration(seconds: 1));
-          _fcmToken = await firebase.getToken();
+          //<GOOGLE_SERVICES>_fcmToken = await firebase.getToken();
           if (_fcmToken != null) break;
         } catch (e, s) {
           Logs().w(

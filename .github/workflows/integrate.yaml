@@ -19,11 +19,15 @@ jobs:
           flutter-version-file: .tool_versions.yaml
           cache: true
       - uses: dtolnay/rust-toolchain@stable
-      - name: Fetch dependencies
+      - name: Check for empty translations
         run: |
-          rm -f .dart_tool/package_graph.json
-          flutter pub get
-      - run: flutter gen-l10n
+          if grep -rn '": ""' lib/l10n/*.arb; then
+            echo "❌ Found empty translation strings."
+            exit 1
+          fi
+      - run: flutter pub get
+      - name: Check if pubspec.lock is up to date
+        run: git diff --exit-code pubspec.lock
       - name: Check formatting
         run: dart format lib/ test/ --set-exit-if-changed
       - name: Check license compliance
@@ -48,6 +52,8 @@ jobs:
             echo "❌ Found commented-out Dart code ending with semicolon."
             exit 1
           fi
+      - name: Add Firebase Messaging
+        run: ./scripts/add-firebase-messaging.sh
       - run: flutter analyze
       - run: flutter test
 
@@ -70,6 +76,7 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
+      - run: ./scripts/add-firebase-messaging.sh
       - run: flutter build apk --debug --target-platform android-x64
       - name: Upload Debug APK
         uses: actions/upload-artifact@v7
@@ -131,6 +138,7 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_26.3.app
       - run: brew install sqlcipher
       - uses: dtolnay/rust-toolchain@stable
+      - run: ./scripts/add-firebase-messaging.sh
       - run: flutter pub get
       - run: flutter build ios --no-codesign
 
@@ -218,4 +226,6 @@ jobs:
           ram-size: 4096M
           sdcard-path-or-size: 4096M
           emulator-options: -no-snapshot-save -no-window -wipe-data -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: flutter test integration_test/mobile_test.dart
+          script: |
+            ./scripts/add-firebase-messaging.sh
+            flutter test integration_test/mobile_test.dart

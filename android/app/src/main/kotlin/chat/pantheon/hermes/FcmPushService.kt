@@ -1,4 +1,4 @@
-package chat.pantheon.hermes
+/*package chat.pantheon.hermes
 
 import com.famedly.fcm_shared_isolate.FcmSharedIsolateService
 
@@ -25,4 +25,4 @@ class FcmPushService : FcmSharedIsolateService() {
         }
     }
 }
-
+*/

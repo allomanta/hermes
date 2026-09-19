@@ -55,6 +55,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Install Fastlane
         run: gem install fastlane -NV
+      - run: ./scripts/add-firebase-messaging.sh
       - run: flutter pub get
       - name: Prepare Android Release Build
         env:

@@ -80,6 +80,9 @@ jobs:
       # - name: Enable desktop support
       #   run: flutter config --enable-macos-desktop
 
+      - name: Add Firebase Messaging
+        run: ./scripts/add-firebase-messaging.sh
+
       - name: Fetch dependencies
         run: flutter pub get
 
