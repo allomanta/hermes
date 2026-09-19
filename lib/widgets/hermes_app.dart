@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
+
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/routes.dart';
@@ -10,6 +12,7 @@ import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/app_lock.dart';
+import 'package:hermes/widgets/escape_back_handler.dart';
 import 'package:hermes/widgets/layouts/call_overlay.dart';
 import 'package:hermes/widgets/theme_builder.dart';
 import 'package:go_router/go_router.dart';
@@ -92,8 +95,11 @@ class HermesApp extends StatelessWidget {
           child: Matrix(
             clients: clients,
             store: store,
-            child: CallOverlay(
-              child: testWidget ?? child ?? const SizedBox.shrink(),
+            child: EscapeBackHandler(
+              onBack: () => unawaited(router.routerDelegate.popRoute()),
+              child: CallOverlay(
+                child: testWidget ?? child ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         ),

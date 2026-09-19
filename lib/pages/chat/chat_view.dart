@@ -58,18 +58,14 @@ class ChatView extends StatelessWidget {
 
     return PopScope(
       canPop:
+          controller.editEvent == null &&
+          controller.replyEvent == null &&
           controller.selectedEvents.isEmpty &&
           !controller.showEmojiPicker &&
-          controller.activeThreadId == null,
-      onPopInvokedWithResult: (pop, _) async {
-        if (pop) return;
-        if (controller.selectedEvents.isNotEmpty) {
-          controller.clearSelectedEvents();
-        } else if (controller.showEmojiPicker) {
-          controller.emojiPickerAction();
-        } else if (controller.activeThreadId != null) {
-          controller.closeThread();
-        }
+          controller.activeThreadId == null &&
+          !controller.hasOpenChatDetails,
+      onPopInvokedWithResult: (pop, _) {
+        if (!pop) controller.handleExitEvent();
       },
       child: StreamBuilder(
         stream: controller.room.client.onRoomState.stream

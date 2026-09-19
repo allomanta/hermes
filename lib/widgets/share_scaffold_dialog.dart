@@ -151,7 +151,7 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
                 child: Opacity(
                   opacity: filterOut ? 0.5 : 1,
                   child: FutureBuilder(
-                    future: room.loadHeroUsers(),
+                    future: room.name.isEmpty ? room.loadHeroUsers() : null,
                     builder: (context, _) => CheckboxListTile.adaptive(
                       checkboxShape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(90),

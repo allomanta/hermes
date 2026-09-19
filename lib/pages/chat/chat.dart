@@ -1561,12 +1561,18 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void handleExitEvent() {
-    if (selectedEvents.isNotEmpty) {
+    if (editEvent != null) {
+      _cancelEditWithConfirmation();
+    } else if (replyEvent != null) {
+      cancelReplyEventAction();
+    } else if (selectedEvents.isNotEmpty) {
       clearSelectedEvents();
     } else if (showEmojiPicker) {
       emojiPickerAction();
     } else if (activeThreadId != null) {
       closeThread();
+    } else if (hasOpenChatDetails) {
+      unawaited(toggleDisplayChatDetailsColumn());
     }
   }
 
@@ -1900,11 +1906,19 @@ class ChatController extends State<ChatPageWithRoom>
 
   late final ValueNotifier<bool> _displayChatDetailsColumn;
 
+  bool get hasOpenChatDetails =>
+      PantheonThemes.isThreeColumnMode(context) &&
+      _displayChatDetailsColumn.value &&
+      room.membership == Membership.join;
+
   Future<void> toggleDisplayChatDetailsColumn() async {
     await AppSettings.displayChatDetailsColumn.setItem(
       !_displayChatDetailsColumn.value,
     );
-    _displayChatDetailsColumn.value = !_displayChatDetailsColumn.value;
+    if (!mounted) return;
+    setState(() {
+      _displayChatDetailsColumn.value = !_displayChatDetailsColumn.value;
+    });
   }
 
   @override
