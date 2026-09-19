@@ -248,6 +248,17 @@ class MatrixState extends State<Matrix> {
 
   AppLifecycleListener? _listener;
   Future<bool?>? _localNotificationsInitialized;
+  static bool _handledMacNotificationLaunch = false;
+
+  Future<void> handleNotificationResponse(NotificationResponse response) async {
+    if (!mounted || widget.clients.isEmpty) return;
+    await notificationTap(
+      response,
+      clients: widget.clients,
+      router: HermesApp.router,
+      l10n: null,
+    );
+  }
 
   void _registerSubs(String name) {
     final c = getClientByName(name);
@@ -329,30 +340,49 @@ class MatrixState extends State<Matrix> {
           );
         });
     if (PlatformInfos.isWeb || PlatformInfos.isLinux || PlatformInfos.isMacOS) {
-      _localNotificationsInitialized ??= FlutterLocalNotificationsPlugin()
-          .initialize(
-            settings: InitializationSettings(
-              linux: LinuxInitializationSettings(
-                defaultActionName: HermesNotificationActions.open.name,
-              ),
-              macOS: const DarwinInitializationSettings(
-                defaultPresentAlert: true,
-                defaultPresentSound: true,
-                defaultPresentBadge: true,
-              ),
-            ),
-            onDidReceiveNotificationResponse: (response) {
-              if (!mounted) return;
-              unawaited(
-                notificationTap(
-                  response,
-                  clients: widget.clients,
-                  router: HermesApp.router,
-                  l10n: null,
+      if (_localNotificationsInitialized == null) {
+        _localNotificationsInitialized = FlutterLocalNotificationsPlugin()
+            .initialize(
+              settings: InitializationSettings(
+                linux: LinuxInitializationSettings(
+                  defaultActionName: HermesNotificationActions.open.name,
                 ),
-              );
-            },
+                macOS: const DarwinInitializationSettings(
+                  defaultPresentAlert: true,
+                  defaultPresentSound: true,
+                  defaultPresentBadge: true,
+                ),
+              ),
+              onDidReceiveNotificationResponse: handleNotificationResponse,
+            );
+        if (PlatformInfos.isMacOS && !_handledMacNotificationLaunch) {
+          unawaited(
+            _localNotificationsInitialized!
+                .then((_) async {
+                  if (!mounted || _handledMacNotificationLaunch) return;
+                  final details = await FlutterLocalNotificationsPlugin()
+                      .getNotificationAppLaunchDetails();
+                  final response = details?.notificationResponse;
+                  if (details?.didNotificationLaunchApp != true ||
+                      response == null) {
+                    return;
+                  }
+                  // The router must be mounted before handling a cold-start click.
+                  await WidgetsBinding.instance.endOfFrame;
+                  if (!mounted ||
+                      widget.clients.isEmpty ||
+                      _handledMacNotificationLaunch) {
+                    return;
+                  }
+                  _handledMacNotificationLaunch = true;
+                  await handleNotificationResponse(response);
+                })
+                .catchError((Object e, StackTrace s) {
+                  Logs().w('Unable to handle notification launch', e, s);
+                }),
           );
+        }
+      }
       Future.wait([_localNotificationsInitialized!, c.onSync.stream.first])
           .then((_) {
             if (!mounted || !widget.clients.contains(c)) return;
