@@ -22,10 +22,7 @@ jobs:
       - name: Fetch dependencies
         run: |
           rm -f .dart_tool/package_graph.json
-          if ! flutter pub get; then
-            echo "Retrying after Flutter generated an incomplete package graph."
-            flutter pub get
-          fi
+          flutter pub get
       - run: flutter gen-l10n
       - name: Check formatting
         run: dart format lib/ test/ --set-exit-if-changed
