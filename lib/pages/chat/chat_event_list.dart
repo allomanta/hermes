@@ -159,11 +159,17 @@ class ChatEventList extends StatelessWidget {
                   bigEmojis: controller.bigEmojis,
                   animateIn: animateIn,
                   onReply: () => controller.replyAction(replyTo: event),
-                  onForward: () => controller.forwardEventAction(event),
-                  onPin: () => controller.pinEvent(event),
-                  onRedact: () => controller.redactEventAction(event),
-                  onEdit: () => controller.editEventAction(event),
-                  onCopy: () => controller.copyEventAction(event),
+                  onForward: () => controller.forwardEventsAction([event]),
+                  onPin: controller.canPinEvent(event)
+                      ? () => controller.pinEvent(event)
+                      : null,
+                  onRedact: controller.canRedactEvent(event)
+                      ? () => controller.redactEventsAction([event])
+                      : null,
+                  onEdit: controller.canEditEvent(event)
+                      ? () => controller.editEventAction(event)
+                      : null,
+                  onCopy: () => controller.copyEventsAction([event]),
                   onInfoTab: controller.showEventInfo,
                   onMention: () => controller.sendController.text +=
                       '${event.senderFromMemoryOrFallback.mention} ',

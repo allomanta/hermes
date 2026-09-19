@@ -47,10 +47,10 @@ class Message extends StatelessWidget {
   final void Function() onReply;
   final void Function() onForward;
   final void Function() onCopy;
-  final void Function() onPin;
-  final void Function() onRedact;
+  final void Function()? onPin;
+  final void Function()? onRedact;
   final void Function() onMention;
-  final void Function() onEdit;
+  final void Function()? onEdit;
   final void Function(String eventId)? enterThread;
   final bool longPressSelect;
   final bool selected;
@@ -107,8 +107,6 @@ class Message extends StatelessWidget {
 
     final local = overlay.globalToLocal(globalPosition);
     final size = overlay.size;
-    final client = Matrix.of(context).client;
-    final ownMessage = client.userID == event.senderId;
     final l10n = L10n.of(context);
     final theme = Theme.of(context);
 
@@ -128,18 +126,21 @@ class Message extends StatelessWidget {
         icon: Icons.forward,
         label: l10n.forward,
       ),
-      _ContextMenuAction(
-        action: _MessageAction.pin,
-        icon: Icons.push_pin_outlined,
-        label: l10n.pin,
-      ),
-      if (ownMessage)
+      if (onPin != null)
+        _ContextMenuAction(
+          action: _MessageAction.pin,
+          icon: Icons.push_pin_outlined,
+          label: event.room.pinnedEventIds.contains(event.eventId)
+              ? l10n.unpin
+              : l10n.pin,
+        ),
+      if (onEdit != null)
         _ContextMenuAction(
           action: _MessageAction.edit,
           icon: Icons.edit_outlined,
           label: l10n.edit,
         ),
-      if (ownMessage)
+      if (onRedact != null)
         _ContextMenuAction(
           action: _MessageAction.redact,
           icon: Icons.delete_outlined,
@@ -225,13 +226,13 @@ class Message extends StatelessWidget {
         onForward();
         break;
       case _MessageAction.pin:
-        onPin();
+        onPin?.call();
         break;
       case _MessageAction.edit:
-        onEdit();
+        onEdit?.call();
         break;
       case _MessageAction.redact:
-        onRedact();
+        onRedact?.call();
         break;
       case null:
         break;

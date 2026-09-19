@@ -140,7 +140,7 @@ class ChatView extends StatelessWidget {
                       IconButton(
                         icon: const Icon(Icons.edit_outlined),
                         tooltip: L10n.of(context).edit,
-                        onPressed: controller.editSelectedEventAction,
+                        onPressed: controller.editEventAction,
                       ),
                     if (controller.selectedEvents.length == 1 &&
                         controller.activeThreadId == null &&

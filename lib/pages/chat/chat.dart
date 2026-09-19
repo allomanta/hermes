@@ -1111,31 +1111,13 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  String _getSelectedEventString() {
-    var copyString = '';
-    if (selectedEvents.length == 1) {
-      return selectedEvents.first.getDisplayEvent(timeline!).body;
-    }
-    for (final event in selectedEvents) {
-      if (copyString.isNotEmpty) copyString += '\n\n';
-      copyString += event.getDisplayEvent(timeline!).body;
-    }
-    return copyString;
-  }
-
-  void copyEventsAction() {
-    Clipboard.setData(ClipboardData(text: _getSelectedEventString()));
-    setState(() {
-      showEmojiPicker = false;
-      selectedEvents.clear();
-    });
-  }
-
-  void copyEventAction(Event event) {
-    final text = event
-        .getDisplayEvent(timeline!)
-        .calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)));
-
+  void copyEventsAction([List<Event>? events]) {
+    final timeline = this.timeline;
+    final targets = events ?? selectedEvents;
+    if (timeline == null || targets.isEmpty) return;
+    final text = targets
+        .map((event) => event.getDisplayEvent(timeline).body)
+        .join('\n\n');
     Clipboard.setData(ClipboardData(text: text));
     setState(() {
       showEmojiPicker = false;
@@ -1194,8 +1176,10 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void redactEventAction(Event event) async {
-    final reasonInput = event.status.isSent
+  Future<void> redactEventsAction([List<Event>? events]) async {
+    final targets = List<Event>.of(events ?? selectedEvents);
+    if (targets.isEmpty || !targets.every(canRedactEvent)) return;
+    final reasonInput = targets.any((event) => event.status.isSent)
         ? await showTextInputDialog(
             context: context,
             title: L10n.of(context).redactMessage,
@@ -1208,75 +1192,23 @@ class ChatController extends State<ChatPageWithRoom>
             okLabel: L10n.of(context).remove,
             cancelLabel: L10n.of(context).cancel,
           )
-        : null;
-    if (reasonInput == null) return;
+        : '';
+    if (!mounted || reasonInput == null) return;
+    if (!targets.every(canRedactEvent)) return;
     final reason = reasonInput.isEmpty ? null : reasonInput;
-    await showFutureLoadingDialog(
+    final clients = currentRoomBundle;
+    final result = await showFutureLoadingDialog(
       context: context,
       futureWithProgress: (onProgress) async {
-        if (event.status.isSent) {
-          if (event.canRedact) {
-            await event.redactEvent(reason: reason);
-          } else {
-            final client = currentRoomBundle.firstWhere(
-              (cl) => selectedEvents.first.senderId == cl!.userID,
-              orElse: () => null,
-            );
-            if (client == null) {
-              return;
-            }
-            final room = client.getRoomById(roomId)!;
-            await Event.fromJson(
-              event.toJson(),
-              room,
-            ).redactEvent(reason: reason);
-          }
-        } else {
-          await event.cancelSend();
-        }
-      },
-    );
-    setState(() {
-      showEmojiPicker = false;
-      selectedEvents.clear();
-    });
-  }
-
-  void redactEventsAction() async {
-    final reasonInput = selectedEvents.any((event) => event.status.isSent)
-        ? await showTextInputDialog(
-            context: context,
-            title: L10n.of(context).redactMessage,
-            message: L10n.of(context).redactMessageDescription,
-            isDestructive: true,
-            hintText: L10n.of(context).optionalRedactReason,
-            maxLength: 255,
-            maxLines: 3,
-            minLines: 1,
-            okLabel: L10n.of(context).remove,
-            cancelLabel: L10n.of(context).cancel,
-          )
-        : null;
-    if (reasonInput == null) return;
-    final reason = reasonInput.isEmpty ? null : reasonInput;
-    if (!mounted) return;
-    await showFutureLoadingDialog(
-      context: context,
-      futureWithProgress: (onProgress) async {
-        final count = selectedEvents.length;
-        for (final (i, event) in selectedEvents.indexed) {
-          onProgress(i / count);
+        for (final (i, event) in targets.indexed) {
+          onProgress(i / targets.length);
           if (event.status.isSent) {
             if (event.canRedact) {
               await event.redactEvent(reason: reason);
             } else {
-              final client = currentRoomBundle.firstWhere(
-                (cl) => selectedEvents.first.senderId == cl!.userID,
-                orElse: () => null,
-              );
-              if (client == null) {
-                return;
-              }
+              final client = clients.firstWhere(
+                (client) => event.senderId == client?.userID,
+              )!;
               final room = client.getRoomById(roomId)!;
               await Event.fromJson(
                 event.toJson(),
@@ -1289,81 +1221,56 @@ class ChatController extends State<ChatPageWithRoom>
         }
       },
     );
+    if (!mounted || result.error != null) return;
     setState(() {
       showEmojiPicker = false;
       selectedEvents.clear();
     });
   }
 
-  List<Client?> get currentRoomBundle {
-    final clients = Matrix.of(context).currentBundle!;
-    clients.removeWhere((c) => c!.getRoomById(roomId) == null);
-    return clients;
-  }
+  List<Client?> get currentRoomBundle => Matrix.of(context).currentBundle!
+      .where((client) => client?.getRoomById(roomId) != null)
+      .toList();
 
-  bool get canRedactSelectedEvents {
-    if (isArchived) return false;
-    final clients = Matrix.of(context).currentBundle;
-    for (final event in selectedEvents) {
-      if (!event.status.isSent) return false;
-      if (event.canRedact == false &&
-          !(clients!.any((cl) => event.senderId == cl!.userID))) {
-        return false;
-      }
-    }
-    return true;
-  }
+  bool canRedactEvent(Event event) =>
+      !isArchived &&
+      ((event.status.isSent && event.canRedact) ||
+          currentRoomBundle.any((client) => event.senderId == client?.userID));
 
-  bool get canPinSelectedEvents {
-    if (isArchived ||
-        !room.canChangeStateEvent(EventTypes.RoomPinnedEvents) ||
-        selectedEvents.length != 1 ||
-        !selectedEvents.single.status.isSent ||
-        activeThreadId != null) {
-      return false;
-    }
-    return true;
-  }
+  bool get canRedactSelectedEvents =>
+      selectedEvents.isNotEmpty && selectedEvents.every(canRedactEvent);
 
-  bool get canEditSelectedEvents {
-    if (isArchived ||
-        selectedEvents.length != 1 ||
-        !selectedEvents.first.status.isSent) {
-      return false;
-    }
-    return currentRoomBundle.any(
-      (cl) => selectedEvents.first.senderId == cl!.userID,
-    );
-  }
+  bool canPinEvent(Event event) =>
+      !isArchived &&
+      room.canChangeStateEvent(EventTypes.RoomPinnedEvents) &&
+      event.status.isSent &&
+      activeThreadId == null;
 
-  void forwardEventAction(Event event) async {
+  bool get canPinSelectedEvents =>
+      selectedEvents.length == 1 && canPinEvent(selectedEvents.single);
+
+  bool canEditEvent(Event event) =>
+      !isArchived &&
+      event.status.isSent &&
+      currentRoomBundle.any((client) => event.senderId == client?.userID);
+
+  bool get canEditSelectedEvents =>
+      selectedEvents.length == 1 && canEditEvent(selectedEvents.single);
+
+  Future<void> forwardEventsAction([List<Event>? events]) async {
     final timeline = this.timeline;
     if (timeline == null) return;
-
-    final items = [ContentShareItem(event.getDisplayEvent(timeline).content)];
+    final targets = List<Event>.of(events ?? selectedEvents);
+    if (targets.isEmpty) return;
+    final items = targets
+        .map(
+          (event) =>
+              ContentShareItem(event.getDisplayEvent(timeline).content.copy()),
+        )
+        .toList();
     await showScaffoldDialog(
       context: context,
       builder: (context) => ShareScaffoldDialog(items: items),
-    );
-    if (!mounted) return;
-  }
-
-  void forwardEventsAction() async {
-    if (selectedEvents.isEmpty) return;
-    final timeline = this.timeline;
-    if (timeline == null) return;
-
-    final forwardEvents = List<Event>.from(
-      selectedEvents,
-    ).map((event) => event.getDisplayEvent(timeline)).toList();
-
-    await showScaffoldDialog(
-      context: context,
-      builder: (context) => ShareScaffoldDialog(
-        items: forwardEvents
-            .map((event) => ContentShareItem(event.content.copy()))
-            .toList(),
-      ),
     );
     if (!mounted) return;
     setState(() => selectedEvents.clear());
@@ -1536,10 +1443,10 @@ class ChatController extends State<ChatPageWithRoom>
     inputFocus.requestFocus();
   }
 
-  void editEventAction(Event event) => _startEditingEvent(event);
-
-  void editSelectedEventAction() {
-    _startEditingEvent(selectedEvents.first, clearSelection: true);
+  void editEventAction([Event? event]) {
+    final target = event ?? selectedEvents.singleOrNull;
+    if (target == null || !canEditEvent(target)) return;
+    _startEditingEvent(target, clearSelection: true);
   }
 
   void _editLastSentMessage() {
@@ -1762,28 +1669,12 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void pinEvent(Event event) {
-    final pinnedEventIds = room.pinnedEventIds;
+    if (!canPinEvent(event)) return;
+    final pinnedEventIds = List<String>.of(room.pinnedEventIds);
     if (pinnedEventIds.contains(event.eventId)) {
       pinnedEventIds.remove(event.eventId);
     } else {
       pinnedEventIds.add(event.eventId);
-    }
-    showFutureLoadingDialog(
-      context: context,
-      future: () => room.setPinnedEvents(pinnedEventIds),
-    );
-  }
-
-  void pinSelectedEvent() {
-    final pinnedEventIds = room.pinnedEventIds;
-    final selectedEventIds = selectedEvents.map((e) => e.eventId).toSet();
-    final unpin =
-        selectedEventIds.length == 1 &&
-        pinnedEventIds.contains(selectedEventIds.single);
-    if (unpin) {
-      pinnedEventIds.removeWhere(selectedEventIds.contains);
-    } else {
-      pinnedEventIds.addAll(selectedEventIds);
     }
     showFutureLoadingDialog(
       context: context,
