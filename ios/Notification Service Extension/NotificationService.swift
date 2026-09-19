@@ -7,11 +7,13 @@
 
 import FMDB
 import Foundation
+import ImageIO
 import UserNotifications
 import os
 
 class NotificationService: UNNotificationServiceExtension {
 
+    private let contentHandlerLock = NSLock()
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
 
@@ -20,42 +22,21 @@ class NotificationService: UNNotificationServiceExtension {
         withContentHandler contentHandler:
             @escaping (UNNotificationContent) -> Void
     ) {
+        contentHandlerLock.lock()
         self.contentHandler = contentHandler
-        bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-        
-        if let bestAttemptContent = bestAttemptContent {
-            // Uncomment to read the push message payload:
-            // os_log("[HermesPushHelper] New message received: %{public}@", log: .default, type: .error, bestAttemptContent.userInfo)
-            os_log("[HermesPushHelper] New message received")
-            
-            guard let roomId = bestAttemptContent.userInfo["room_id"] as? String,
-                  let _ = bestAttemptContent.userInfo["event_id"] as? String else {
-                os_log("[HermesPushHelper] Room ID or Event ID is missing!")
-                let emptyContent = UNMutableNotificationContent()
-                contentHandler(emptyContent)
-                return
-            }
-            bestAttemptContent.threadIdentifier = roomId
-            
-            if
-               let jsonString = bestAttemptContent.userInfo["counts"] as? String,
-               let jsonData = jsonString.data(using: .utf8),
-               let jsonMap = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
-               let unread = jsonMap["unread"] as? Int {
-                bestAttemptContent.title = String(
-                    localized: "\(unread) unread messages",
-                    comment: "Default notification title"
-                )
-                bestAttemptContent.badge = NSNumber(integerLiteral: unread)
-            }
-            
-            // TODO: Download and decrypt event to display a better body:
-            bestAttemptContent.body = String(
-                localized: "New message - open app to read",
-                comment: "Default notification body"
-            )
-            
-            contentHandler(bestAttemptContent)
+        contentHandlerLock.unlock()
+        bestAttemptContent = request.content.mutableCopy() as? UNMutableNotificationContent
+        guard let bestAttemptContent = bestAttemptContent else {
+            finish(request.content)
+            return
+        }
+        defer { finish(bestAttemptContent) }
+
+        guard let roomId = bestAttemptContent.userInfo["room_id"] as? String,
+              bestAttemptContent.userInfo["event_id"] is String else {
+            os_log("[HermesPushHelper] Room ID or Event ID is missing!")
+            finish(UNMutableNotificationContent())
+            return
         }
 
         // Set thread identifier and fallback body:
@@ -65,10 +46,11 @@ class NotificationService: UNNotificationServiceExtension {
         )
 
         var unread: Int?
-        if let countsJson = bestAttemptContent.userInfo["counts"] as? String,
+        if let countsData = (bestAttemptContent.userInfo["counts"] as? String)?.data(using: .utf8)
+            ?? (try? JSONSerialization.data(withJSONObject: bestAttemptContent.userInfo["counts"] as? [String: Any] ?? [:])),
             let counts = try? JSONDecoder().decode(
                 NotificationCounts.self,
-                from: countsJson.data(using: .utf8)!
+                from: countsData
             )
         {
             unread = counts.unread
@@ -85,17 +67,17 @@ class NotificationService: UNNotificationServiceExtension {
 
         // Fetch the client_name:
         guard
-            let devicesJson = bestAttemptContent.userInfo["devices"] as? String,
+            let devicesData = (bestAttemptContent.userInfo["devices"] as? String)?.data(using: .utf8)
+                ?? (try? JSONSerialization.data(withJSONObject: bestAttemptContent.userInfo["devices"] as? [[String: Any]] ?? [])),
             let devices = try? JSONDecoder().decode(
                 [NotificationDevice].self,
-                from: devicesJson.data(using: .utf8)!
+                from: devicesData
             ),
             let clientName = devices.first?.data.client_name
         else {
             os_log(
                 "[HermesPushHelper] No client_name found in Push Notification!"
             )
-            contentHandler(bestAttemptContent)
             return
         }
 
@@ -104,23 +86,22 @@ class NotificationService: UNNotificationServiceExtension {
         // Open database:
         guard let key = getDatabaseKey() else {
             os_log("[HermesPushHelper] Unable to get database key!")
-            contentHandler(bestAttemptContent)
             return
         }
         guard let containerPath = FileManager.default.containerURL(
                 forSecurityApplicationGroupIdentifier: "group.im.hermes.app"
             ) else {
                 os_log("[HermesPushHelper] Unable to get container path!")
-                contentHandler(bestAttemptContent)
                 return
         }
         let databasePath = containerPath.appendingPathComponent("\(clientName).sqlite").path
         guard let database = getDatabase(key: key, path: databasePath) else {
             // getDatabase already logged the concrete SQLite error
             os_log("[HermesPushHelper] Unable to open database!")
-            contentHandler(bestAttemptContent)
             return
         }
+
+        defer { database.close() }
 
         // Get room name:
         var roomName = getRoomNameFromDatabase(
@@ -157,25 +138,29 @@ class NotificationService: UNNotificationServiceExtension {
         
         if let roomAvatarUrl = roomAvatarUrl {
             do {
-                let attachment = try downloadAttachment(url: roomAvatarUrl, containerPath: containerPath)
+                let attachment = try downloadAttachment(url: roomAvatarUrl, containerPath: containerPath, clientName: clientName)
                 bestAttemptContent.attachments = [attachment]
             } catch {
                 os_log("[HermesPushHelper] Unable to download avatar!")
             }
         }
 
-        contentHandler(bestAttemptContent)
-        database.close()
     }
 
     override func serviceExtensionTimeWillExpire() {
         // Called just before the extension will be terminated by the system.
         // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
-        if let contentHandler = contentHandler,
-            let bestAttemptContent = bestAttemptContent
-        {
-            contentHandler(bestAttemptContent)
+        if let bestAttemptContent = bestAttemptContent {
+            finish(bestAttemptContent)
         }
+    }
+
+    private func finish(_ content: UNNotificationContent) {
+        contentHandlerLock.lock()
+        let handler = contentHandler
+        contentHandler = nil
+        contentHandlerLock.unlock()
+        handler?(content)
     }
 
     func getDatabaseKey() -> String? {
@@ -250,7 +235,7 @@ class NotificationService: UNNotificationServiceExtension {
             if roomMemberResult.next(),
                 let event = roomMemberResult.string(forColumn: "v")
             {
-                let userEvent = try! JSONDecoder().decode(
+                let userEvent = try JSONDecoder().decode(
                     UserEventJson.self,
                     from: event.data(using: .utf8)!
                 )
@@ -282,7 +267,7 @@ class NotificationService: UNNotificationServiceExtension {
             if roomAvatarResult.next(),
                 let event = roomAvatarResult.string(forColumn: "v")
             {
-                let roomAvatarEvent = try! JSONDecoder().decode(
+                let roomAvatarEvent = try JSONDecoder().decode(
                     RoomAvatarEventJson.self,
                     from: event.data(using: .utf8)!
                 )
@@ -316,7 +301,7 @@ class NotificationService: UNNotificationServiceExtension {
             if roomNameResult.next(),
                 let event = roomNameResult.string(forColumn: "v")
             {
-                let roomNameEvent = try! JSONDecoder().decode(
+                let roomNameEvent = try JSONDecoder().decode(
                     RoomNameEventJson.self,
                     from: event.data(using: .utf8)!
                 )
@@ -374,8 +359,10 @@ class NotificationService: UNNotificationServiceExtension {
         return []
     }
     
-    func downloadAttachment(url: String, containerPath: URL) throws -> UNNotificationAttachment {
-        let downloadDirectory = containerPath.appendingPathComponent("hermes_download_cache")
+    func downloadAttachment(url: String, containerPath: URL, clientName: String) throws -> UNNotificationAttachment {
+        let downloadDirectory = containerPath
+            .appendingPathComponent("media", isDirectory: true)
+            .appendingPathComponent(clientName, isDirectory: true)
         
         let mxcComponents = url.replacingOccurrences(of: "mxc://", with: "").split(separator: "/")
         guard mxcComponents.count == 2 else {
@@ -386,8 +373,22 @@ class NotificationService: UNNotificationServiceExtension {
         let mediaId = String(mxcComponents[1])
         let fileName = "notification_\(host)_\(mediaId).jpg"
         let fileUrl = downloadDirectory.appendingPathComponent(fileName)
-        
-        return try UNNotificationAttachment(identifier: "image", url: fileUrl, options: nil)
+        // Cached rounded avatars may be PNG data despite the legacy .jpg name.
+        var options: [AnyHashable: Any]?
+        if let source = CGImageSourceCreateWithURL(fileUrl as CFURL, nil),
+           let type = CGImageSourceGetType(source) {
+            options = [UNNotificationAttachmentOptionsTypeHintKey: type]
+        }
+        // The system moves attachments after delivery; preserve the cached avatar.
+        let attachmentUrl = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString)-\(fileName)")
+        try FileManager.default.copyItem(at: fileUrl, to: attachmentUrl)
+        do {
+            return try UNNotificationAttachment(identifier: "image", url: attachmentUrl, options: options)
+        } catch {
+            try? FileManager.default.removeItem(at: attachmentUrl)
+            throw error
+        }
     }
 }
 

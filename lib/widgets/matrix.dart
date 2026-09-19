@@ -247,6 +247,7 @@ class MatrixState extends State<Matrix> {
   }
 
   AppLifecycleListener? _listener;
+  Future<bool?>? _localNotificationsInitialized;
 
   void _registerSubs(String name) {
     final c = getClientByName(name);
@@ -327,26 +328,48 @@ class MatrixState extends State<Matrix> {
             ),
           );
         });
-    if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
-      FlutterLocalNotificationsPlugin().initialize(
-        settings: InitializationSettings(
-          linux: LinuxInitializationSettings(
-            defaultActionName: HermesNotificationActions.open.name,
-          ),
-        ),
-        onDidReceiveNotificationResponse: (response) => notificationTap(
-          response,
-          clients: widget.clients,
-          router: HermesApp.router,
-          l10n: null,
-        ),
-      );
-      c.onSync.stream.first.then((s) {
-        html.Notification.requestPermission();
-        onNotification[name] ??= c.onNotification.stream.listen(
-          showLocalNotification,
-        );
-      });
+    if (PlatformInfos.isWeb || PlatformInfos.isLinux || PlatformInfos.isMacOS) {
+      _localNotificationsInitialized ??= FlutterLocalNotificationsPlugin()
+          .initialize(
+            settings: InitializationSettings(
+              linux: LinuxInitializationSettings(
+                defaultActionName: HermesNotificationActions.open.name,
+              ),
+              macOS: const DarwinInitializationSettings(
+                defaultPresentAlert: true,
+                defaultPresentSound: true,
+                defaultPresentBadge: true,
+              ),
+            ),
+            onDidReceiveNotificationResponse: (response) {
+              if (!mounted) return;
+              unawaited(
+                notificationTap(
+                  response,
+                  clients: widget.clients,
+                  router: HermesApp.router,
+                  l10n: null,
+                ),
+              );
+            },
+          );
+      Future.wait([_localNotificationsInitialized!, c.onSync.stream.first])
+          .then((_) {
+            if (!mounted || !widget.clients.contains(c)) return;
+            if (PlatformInfos.isWeb) html.Notification.requestPermission();
+            onNotification[name] ??= c.onNotification.stream.listen((
+              event,
+            ) async {
+              try {
+                await showLocalNotification(event);
+              } catch (e, s) {
+                Logs().w('Unable to display local notification', e, s);
+              }
+            });
+          })
+          .catchError((Object e, StackTrace s) {
+            Logs().w('Unable to initialize local notifications', e, s);
+          });
     }
   }
 

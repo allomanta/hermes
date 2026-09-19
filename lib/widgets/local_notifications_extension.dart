@@ -24,6 +24,7 @@ extension LocalNotificationsExtension on MatrixState {
     ..load();
 
   Future<void> showLocalNotification(Event event) async {
+    if (!mounted) return;
     Logs().v(
       '[Notifications] event received for ${event.room.id} (${event.type})',
     );
@@ -45,13 +46,15 @@ extension LocalNotificationsExtension on MatrixState {
 
     final l10n = L10n.of(context);
     final roomId = event.room.id;
-    if (activeRoomId == roomId) {
-      if (kIsWeb && webHasFocus) return;
-      if (!kIsWeb &&
-          WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
-        return;
-      }
-    }
+    final notificationClient = event.room.client;
+    bool roomIsVisible() =>
+        notificationClient == client &&
+        activeRoomId == roomId &&
+        (kIsWeb
+            ? webHasFocus
+            : WidgetsBinding.instance.lifecycleState ==
+                  AppLifecycleState.resumed);
+    if (roomIsVisible()) return;
 
     final title = event.room.getLocalizedDisplayname(
       MatrixLocals(L10n.of(context)),
@@ -60,7 +63,7 @@ extension LocalNotificationsExtension on MatrixState {
       MatrixLocals(L10n.of(context)),
       withSenderNamePrefix:
           !event.room.isDirectChat ||
-          event.room.lastEvent?.senderId == client.userID,
+          event.room.lastEvent?.senderId == notificationClient.userID,
       plaintextBody: true,
       hideReply: true,
       hideEdit: true,
@@ -71,10 +74,10 @@ extension LocalNotificationsExtension on MatrixState {
     const size = 128;
     const thumbnailMethod = ThumbnailMethod.crop;
 
-    if (avatarUrl != null) {
+    if (kIsWeb && avatarUrl != null) {
       // Pre-cache so that we can later just set the thumbnail uri as icon:
       try {
-        await client.downloadMxcCached(
+        await notificationClient.downloadMxcCached(
           avatarUrl,
           width: size,
           height: size,
@@ -87,11 +90,11 @@ extension LocalNotificationsExtension on MatrixState {
       }
     }
 
-    final notificationClient = event.room.client;
+    if (!mounted || roomIsVisible()) return;
     final notificationId = '${notificationClient.clientName}_$roomId'.hashCode;
     if (kIsWeb) {
       final thumbnailUri = await avatarUrl?.getThumbnailUri(
-        client,
+        notificationClient,
         width: size,
         height: size,
         method: thumbnailMethod,
