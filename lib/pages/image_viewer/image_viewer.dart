@@ -59,16 +59,24 @@ class ImageViewerController extends State<ImageViewer> {
 
   late final List<Event> allEvents;
 
-  void onKeyEvent(KeyEvent event) {
+  KeyEventResult onKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent || ModalRoute.of(context)?.isCurrent != true) {
+      return KeyEventResult.ignored;
+    }
     switch (event.logicalKey) {
+      case LogicalKeyboardKey.escape:
+        Navigator.of(context).pop();
+        return KeyEventResult.handled;
       case LogicalKeyboardKey.arrowUp:
       case LogicalKeyboardKey.keyK:
         if (canGoBack) prevImage();
-        break;
+        return KeyEventResult.handled;
       case LogicalKeyboardKey.keyJ:
       case LogicalKeyboardKey.arrowDown:
         if (canGoNext) nextImage();
-        break;
+        return KeyEventResult.handled;
+      default:
+        return KeyEventResult.ignored;
     }
   }
 

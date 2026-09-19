@@ -25,61 +25,62 @@ class ImageViewerView extends StatelessWidget {
       backgroundColor: Colors.black.withAlpha(200),
       foregroundColor: Colors.white,
     );
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: Scaffold(
-        backgroundColor: Colors.black.withAlpha(128),
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          elevation: 0,
-          leading: IconButton(
-            style: iconButtonStyle,
-            icon: const Icon(Icons.close),
-            onPressed: Navigator.of(context).pop,
-            color: Colors.white,
-            tooltip: L10n.of(context).close,
-          ),
-          backgroundColor: Colors.transparent,
-          actions: [
-            IconButton(
+    return Focus(
+      autofocus: true,
+      focusNode: controller.focusNode,
+      onKeyEvent: controller.onKeyEvent,
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Scaffold(
+          backgroundColor: Colors.black.withAlpha(128),
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            elevation: 0,
+            leading: IconButton(
               style: iconButtonStyle,
-              icon: const Icon(Icons.reply_outlined),
-              onPressed: controller.forwardAction,
+              icon: const Icon(Icons.close),
+              onPressed: Navigator.of(context).pop,
               color: Colors.white,
-              tooltip: L10n.of(context).share,
+              tooltip: L10n.of(context).close,
             ),
-            const SizedBox(width: 8),
-            IconButton(
-              style: iconButtonStyle,
-              icon: const Icon(Icons.download_outlined),
-              onPressed: () => controller.saveFileAction(context),
-              color: Colors.white,
-              tooltip: L10n.of(context).downloadFile,
-            ),
-            const SizedBox(width: 8),
-            if (PlatformInfos.isMobile)
-              // Use builder context to correctly position the share dialog on iPad
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: Builder(
-                  builder: (context) => IconButton(
-                    style: iconButtonStyle,
-                    onPressed: () => controller.shareFileAction(context),
-                    tooltip: L10n.of(context).share,
-                    color: Colors.white,
-                    icon: Icon(Icons.adaptive.share_outlined),
+            backgroundColor: Colors.transparent,
+            actions: [
+              IconButton(
+                style: iconButtonStyle,
+                icon: const Icon(Icons.reply_outlined),
+                onPressed: controller.forwardAction,
+                color: Colors.white,
+                tooltip: L10n.of(context).share,
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                style: iconButtonStyle,
+                icon: const Icon(Icons.download_outlined),
+                onPressed: () => controller.saveFileAction(context),
+                color: Colors.white,
+                tooltip: L10n.of(context).downloadFile,
+              ),
+              const SizedBox(width: 8),
+              if (PlatformInfos.isMobile)
+                // Use builder context to correctly position the share dialog on iPad
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      style: iconButtonStyle,
+                      onPressed: () => controller.shareFileAction(context),
+                      tooltip: L10n.of(context).share,
+                      color: Colors.white,
+                      icon: Icon(Icons.adaptive.share_outlined),
+                    ),
                   ),
                 ),
-              ),
-          ],
-        ),
-        body: HoverBuilder(
-          builder: (context, hovered) => Stack(
-            children: [
-              KeyboardListener(
-                focusNode: controller.focusNode,
-                onKeyEvent: controller.onKeyEvent,
-                child: PointersListener(
+            ],
+          ),
+          body: HoverBuilder(
+            builder: (context, hovered) => Stack(
+              children: [
+                PointersListener(
                   builder: (context, moreThanOnePointer) => PageView.builder(
                     physics: !moreThanOnePointer
                         ? BouncingScrollPhysics()
@@ -129,37 +130,37 @@ class ImageViewerView extends StatelessWidget {
                     },
                   ),
                 ),
-              ),
-              if (hovered)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Column(
-                    mainAxisSize: .min,
-                    children: [
-                      if (controller.canGoBack)
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: IconButton(
-                            style: iconButtonStyle,
-                            tooltip: L10n.of(context).previous,
-                            icon: const Icon(Icons.arrow_upward_outlined),
-                            onPressed: controller.prevImage,
+                if (hovered)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Column(
+                      mainAxisSize: .min,
+                      children: [
+                        if (controller.canGoBack)
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: IconButton(
+                              style: iconButtonStyle,
+                              tooltip: L10n.of(context).previous,
+                              icon: const Icon(Icons.arrow_upward_outlined),
+                              onPressed: controller.prevImage,
+                            ),
                           ),
-                        ),
-                      if (controller.canGoNext)
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: IconButton(
-                            style: iconButtonStyle,
-                            tooltip: L10n.of(context).next,
-                            icon: const Icon(Icons.arrow_downward_outlined),
-                            onPressed: controller.nextImage,
+                        if (controller.canGoNext)
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: IconButton(
+                              style: iconButtonStyle,
+                              tooltip: L10n.of(context).next,
+                              icon: const Icon(Icons.arrow_downward_outlined),
+                              onPressed: controller.nextImage,
+                            ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
