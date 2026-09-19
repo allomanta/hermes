@@ -44,7 +44,6 @@ class BackgroundPush {
   String? get fcmToken => _fcmToken;
   void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
-  Timer? _macosPollingTimer;
 
   static const Set<String> _legacyPushGatewayUrls = {
     'https://push.hermes.im/_matrix/push/v1/notify',
@@ -179,7 +178,6 @@ class BackgroundPush {
     instance.matrix = matrix;
     // ignore: prefer_initializing_formals
     instance.onFcmError = onFcmError;
-    instance._maybeStartMacPolling();
     return instance;
   }
 
@@ -351,24 +349,6 @@ class BackgroundPush {
       }
       onFcmError?.call(l10n!.oopsPushError);
     });
-  }
-
-  void _maybeStartMacPolling() {
-    if (!PlatformInfos.isMacOS || _macosPollingTimer != null) return;
-    Logs().v('[Push] Starting macOS poll timer');
-    _macosPollingTimer = Timer.periodic(
-      const Duration(minutes: 1),
-      (_) => _pollMacNotifications(),
-    );
-    unawaited(_pollMacNotifications());
-  }
-
-  Future<void> _pollMacNotifications() async {
-    if (!PlatformInfos.isMacOS || matrix == null) return;
-    for (final client in clients) {
-      if (client.onLoginStateChanged.value != LoginState.loggedIn) continue;
-      await client.oneShotSync(timeout: const Duration(seconds: 20));
-    }
   }
 
   Future<void> setupFirebase(Client client) async {
