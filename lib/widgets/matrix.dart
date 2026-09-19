@@ -305,7 +305,7 @@ class MatrixState extends State<Matrix> {
     onLogoutSub[name] ??= c.onLoginStateChanged.stream
         .where((state) => state == LoginState.loggedOut)
         .listen((_) {
-          unawaited(AndroidShareShortcuts.clear());
+          unawaited(AndroidShareShortcuts.clear(clientName: c.clientName));
           final loggedInWithMultipleClients = widget.clients.length > 1;
 
           _cancelSubs(c.clientName);

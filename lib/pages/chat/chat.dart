@@ -29,6 +29,7 @@ import 'package:hermes/pages/chat/event_info_dialog.dart';
 import 'package:hermes/pages/chat/trust_user_key_dialog.dart';
 import 'package:hermes/pages/chat/utils/web_file_to_x_file.dart';
 import 'package:hermes/pages/chat_details/chat_details.dart';
+import 'package:hermes/utils/android_share_shortcuts.dart';
 import 'package:hermes/utils/error_reporter.dart';
 import 'package:hermes/utils/file_selector.dart';
 import 'package:hermes/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
@@ -302,7 +303,8 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void> _shareItems() async {
     final shareItems = widget.shareItems;
     if (shareItems == null || shareItems.isEmpty) return;
-    if (!room.otherPartyCanReceiveMessages) {
+    final shareRoom = widget.room;
+    if (!shareRoom.otherPartyCanReceiveMessages) {
       final theme = Theme.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -317,12 +319,21 @@ class ChatController extends State<ChatPageWithRoom>
       );
       return;
     }
-    final proceed = await showTrustUserInRoomDialog(context, room);
+    final proceed = await showTrustUserInRoomDialog(context, shareRoom);
     if (!mounted || !proceed) return;
     for (final item in shareItems) {
-      if (item is FileShareItem) continue;
-      if (item is TextShareItem) room.sendTextEvent(item.value);
-      if (item is ContentShareItem) room.sendEvent(item.value.copy());
+      final send = switch (item) {
+        TextShareItem() => shareRoom.sendTextEvent(item.value),
+        ContentShareItem() => shareRoom.sendEvent(item.value.copy()),
+        _ => null,
+      };
+      unawaited(
+        send?.then((eventId) async {
+          if (eventId != null) {
+            await AndroidShareShortcuts.recordShare(shareRoom);
+          }
+        }),
+      );
     }
     final files = shareItems
         .whereType<FileShareItem>()
@@ -333,7 +344,8 @@ class ChatController extends State<ChatPageWithRoom>
       context: context,
       builder: (c) => SendFileDialog(
         files: files,
-        room: room,
+        room: shareRoom,
+        onSent: () => AndroidShareShortcuts.recordShare(shareRoom),
         outerContext: context,
         threadRootEventId: activeThreadId,
         threadLastEventId: threadLastEventId,
@@ -478,6 +490,12 @@ class ChatController extends State<ChatPageWithRoom>
   @override
   void didUpdateWidget(covariant ChatPageWithRoom oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.shareItems != widget.shareItems &&
+        widget.shareItems?.isNotEmpty == true) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_shareItems());
+      });
+    }
     if (oldWidget.room.id != widget.room.id) {
       _tryLoadTimeline();
       return;

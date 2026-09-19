@@ -30,6 +30,7 @@ import '../../utils/resize_video.dart';
 
 class SendFileDialog extends StatefulWidget {
   final Room room;
+  final VoidCallback? onSent;
   final List<XFile> files;
   final BuildContext outerContext;
   final String? threadLastEventId, threadRootEventId;
@@ -40,6 +41,7 @@ class SendFileDialog extends StatefulWidget {
     required this.outerContext,
     required this.threadLastEventId,
     required this.threadRootEventId,
+    this.onSent,
     super.key,
   });
 
@@ -154,8 +156,9 @@ class SendFileDialogState extends State<SendFileDialog> {
 
         final label = _labelTextController.text.trim();
 
+        String? eventId;
         try {
-          await widget.room.sendFileEvent(
+          eventId = await widget.room.sendFileEvent(
             file,
             thumbnail: thumbnail,
             shrinkImageMaxDimension: compress ? 1600 : null,
@@ -174,13 +177,14 @@ class SendFileDialogState extends State<SendFileDialog> {
 
           await Future.delayed(retryAfterDuration);
 
-          await widget.room.sendFileEvent(
+          eventId = await widget.room.sendFileEvent(
             file,
             thumbnail: thumbnail,
             shrinkImageMaxDimension: compress ? 1600 : null,
             extraContent: label.isEmpty ? null : {'body': label},
           );
         }
+        if (eventId != null) widget.onSent?.call();
       }
     } finally {
       if (ForegroundServices.platformSupported) {

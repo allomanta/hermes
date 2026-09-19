@@ -3,34 +3,79 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:matrix/matrix.dart';
-
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/client_download_content_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:hermes/utils/platform_infos.dart';
+import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AndroidShareShortcuts {
   static const _channel = MethodChannel(
     'im.hermes.hermes/direct_share_shortcuts',
   );
-  static const _maxShortcuts = 10;
+  static const _maxShortcuts = 5;
+  static const _historyKey = 'im.hermes.direct_share.recent';
+  static const _idPrefix = 'hermes-share:';
 
-  static final Map<String, String?> _avatarCache = <String, String?>{};
-  static Client? _latestClient;
+  static final Map<String, String> _avatarCache = {};
+  static List<Client> _latestClients = [];
   static MatrixLocals? _latestLocals;
   static bool _isPublishing = false;
   static bool _publishQueued = false;
+  static int _generation = 0;
+  static Completer<void> _invalidated = Completer<void>();
   static String? _lastPublishedSignature;
-  static final Set<String> _lastPublishedShortcutIds = <String>{};
+  static final Set<String> _pendingUsage = {};
+
+  static bool get _supported =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  static String _shortcutId(Room room) =>
+      '$_idPrefix${jsonEncode([room.client.clientName, room.id])}';
+
+  static int _invalidatePublication() {
+    _invalidated.complete();
+    _invalidated = Completer<void>();
+    return ++_generation;
+  }
+
+  /// Record only a successfully sent share, never opening a preview or receiving
+  /// a message. Persist the order so startup does not replace it with sync order.
+  static Future<void> recordShare(Room room) async {
+    if (!_supported) return;
+    try {
+      final store = await SharedPreferences.getInstance();
+      if (!_latestClients.contains(room.client) || !room.client.isLogged()) {
+        return;
+      }
+      final id = _shortcutId(room);
+      final recent = store.getStringList(_historyKey) ?? [];
+      recent.remove(id);
+      recent.insert(0, id);
+      final saved = store.setStringList(
+        _historyKey,
+        recent.take(_maxShortcuts).toList(),
+      );
+      _pendingUsage.add(id);
+      final generation = _invalidatePublication();
+      await saved;
+      final locals = _latestLocals;
+      if (generation != _generation || locals == null) return;
+      await schedulePublish(_latestClients, locals);
+    } catch (error, stackTrace) {
+      debugPrint('Failed to record Android share shortcut: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
 
   static Future<void> schedulePublish(
-    Client client,
+    List<Client> clients,
     MatrixLocals locals,
   ) async {
-    if (!PlatformInfos.isAndroid) return;
-    _latestClient = client;
+    if (!_supported) return;
+    _latestClients = clients.where((client) => client.isLogged()).toList();
     _latestLocals = locals;
+    _invalidatePublication();
     if (_isPublishing) {
       _publishQueued = true;
       return;
@@ -43,99 +88,83 @@ class AndroidShareShortcuts {
         _publishQueued = false;
         await _publishCurrentSelection();
       }
+    } catch (error, stackTrace) {
+      debugPrint('Failed to publish Android share shortcuts: $error');
+      debugPrintStack(stackTrace: stackTrace);
     } finally {
       _isPublishing = false;
     }
   }
 
   static Future<void> _publishCurrentSelection() async {
-    final client = _latestClient;
+    final clients = _latestClients;
     final locals = _latestLocals;
-    if (client == null || locals == null) return;
+    final generation = _generation;
+    final invalidated = _invalidated.future;
+    if (locals == null) return;
 
-    await client.roomsLoading;
-    final rooms =
-        client.rooms
-            .where(
-              (room) =>
-                  room.membership == Membership.join &&
-                  !room.isSpace &&
-                  room.canSendDefaultMessages,
-            )
-            .toList()
-          ..sort((a, b) {
-            final bTs = _roomTimestamp(b);
-            final aTs = _roomTimestamp(a);
-            return bTs.compareTo(aTs);
-          });
-
-    final shortcuts = <Map<String, dynamic>>[];
-    final shortcutIds = <String>{};
-    for (final room in rooms.take(_maxShortcuts)) {
-      final label = room.getLocalizedDisplayname(locals);
-      shortcuts.add({
-        'id': room.id,
-        'shortLabel': label,
-        'longLabel': label,
-        'action': AppConfig.inviteLinkPrefix + room.id,
-        'icon': await _loadAvatar(room),
-        'isImportant': room.isFavourite,
-        'isBot': false,
-        'isConversation': true,
-      });
-      shortcutIds.add(room.id);
-    }
+    final store = await SharedPreferences.getInstance();
+    await Future.any([
+      Future.wait(clients.map((client) async => await client.roomsLoading)),
+      invalidated,
+    ]);
+    if (generation != _generation) return;
+    final rooms = {
+      for (final client in clients)
+        if (client.isLogged())
+          for (final room in client.rooms)
+            if (room.membership == Membership.join &&
+                !room.isSpace &&
+                room.canSendDefaultMessages)
+              _shortcutId(room): room,
+    };
+    final selected = (store.getStringList(_historyKey) ?? [])
+        .where(rooms.containsKey)
+        .take(_maxShortcuts)
+        .toList();
+    final shortcuts = await Future.wait(
+      selected.map((id) async {
+        final room = rooms[id]!;
+        final label = room.getLocalizedDisplayname(locals);
+        return <String, dynamic>{
+          'id': id,
+          'shortLabel': label,
+          'longLabel': label,
+          'action': AppConfig.inviteLinkPrefix + room.id,
+          'icon': await _loadAvatar(room, generation),
+          'isBot': false,
+          'isConversation': true,
+        };
+      }),
+    );
+    if (generation != _generation) return;
 
     final signature = jsonEncode(shortcuts);
-    final removedShortcutIds = _lastPublishedShortcutIds
-        .difference(shortcutIds)
-        .toList();
-    final hasChanges =
-        signature != _lastPublishedSignature || removedShortcutIds.isNotEmpty;
-    if (!hasChanges) {
-      return;
-    }
-
-    if (removedShortcutIds.isNotEmpty) {
-      await _removeShortcuts(removedShortcutIds);
-    }
-
-    if (shortcuts.isEmpty) {
+    if (signature != _lastPublishedSignature) {
+      // Send empty selections too: native shortcuts survive process restarts.
+      final published = await _channel.invokeMethod<bool>(
+        'publishShareShortcuts',
+        shortcuts,
+      );
+      if (generation != _generation || published != true) return;
       _lastPublishedSignature = signature;
-      _lastPublishedShortcutIds
-        ..clear()
-        ..addAll(shortcutIds);
-      return;
     }
-
-    try {
-      await _channel.invokeMethod('publishShareShortcuts', shortcuts);
-      _lastPublishedSignature = signature;
-      _lastPublishedShortcutIds
-        ..clear()
-        ..addAll(shortcutIds);
-    } on PlatformException catch (error, stackTrace) {
-      debugPrint('Failed to publish Android share shortcuts: $error');
-      debugPrintStack(stackTrace: stackTrace);
+    for (final id in selected.where(_pendingUsage.contains).toList()) {
+      await _channel.invokeMethod('reportShareShortcutUsed', id);
+      if (generation != _generation) return;
+      _pendingUsage.remove(id);
     }
+    _pendingUsage.retainAll(selected);
   }
 
-  static Future<void> _removeShortcuts(List<String> shortcutIds) async {
-    if (!PlatformInfos.isAndroid || shortcutIds.isEmpty) return;
-    try {
-      await _channel.invokeMethod('removeShareShortcuts', shortcutIds);
-    } on PlatformException catch (error, stackTrace) {
-      debugPrint('Failed to remove Android share shortcuts: $error');
-      debugPrintStack(stackTrace: stackTrace);
-    }
-  }
-
-  static Future<String?> _loadAvatar(Room room) async {
+  static Future<String?> _loadAvatar(Room room, int generation) async {
     final avatar = room.avatar;
     if (avatar == null) return null;
-    final cacheKey = '${room.id}_${avatar.hashCode}';
-    if (_avatarCache.containsKey(cacheKey)) {
-      return _avatarCache[cacheKey];
+    final cacheKey = jsonEncode([room.client.clientName, avatar.toString()]);
+    final cached = _avatarCache.remove(cacheKey);
+    if (cached != null) {
+      _avatarCache[cacheKey] = cached;
+      return cached;
     }
     try {
       final bytes = await room.client
@@ -150,54 +179,70 @@ class AndroidShareShortcuts {
           )
           .timeout(const Duration(seconds: 3));
       final encoded = base64Encode(bytes);
-      _avatarCache[cacheKey] = encoded;
+      if (generation == _generation) {
+        _avatarCache[cacheKey] = encoded;
+        while (_avatarCache.length > _maxShortcuts) {
+          _avatarCache.remove(_avatarCache.keys.first);
+        }
+      }
       return encoded;
     } catch (error, stackTrace) {
       debugPrint('Failed to load shortcut avatar: $error');
       debugPrintStack(stackTrace: stackTrace);
-      _avatarCache[cacheKey] = null;
+      // Retry on a later refresh instead of permanently caching a failed fetch.
       return null;
     }
   }
 
-  static Future<void> clear() async {
-    if (!PlatformInfos.isAndroid) return;
+  static Future<void> clear({String? clientName}) async {
+    if (!_supported) return;
+    final locals = _latestLocals;
+    _latestClients = clientName == null
+        ? []
+        : _latestClients.where((c) => c.clientName != clientName).toList();
+    final generation = _invalidatePublication();
+    _publishQueued = false;
+    _avatarCache.clear();
+    _lastPublishedSignature = null;
+    _pendingUsage.clear();
     try {
       await _channel.invokeMethod('clearShareShortcuts');
-      _avatarCache.clear();
-      _lastPublishedSignature = null;
-      _lastPublishedShortcutIds.clear();
-    } on PlatformException catch (error, stackTrace) {
+      if (clientName != null) {
+        final store = await SharedPreferences.getInstance();
+        final prefix = '$_idPrefix[${jsonEncode(clientName)},';
+        final recent = store.getStringList(_historyKey) ?? [];
+        await store.setStringList(
+          _historyKey,
+          recent.where((id) => !id.startsWith(prefix)).toList(),
+        );
+      }
+      if (generation == _generation &&
+          _latestClients.isNotEmpty &&
+          locals != null) {
+        await schedulePublish(_latestClients, locals);
+      }
+    } catch (error, stackTrace) {
       debugPrint('Failed to clear Android share shortcuts: $error');
       debugPrintStack(stackTrace: stackTrace);
     }
   }
 
-  static Future<String?> takePendingShortcutRoomId() async {
-    if (!PlatformInfos.isAndroid) return null;
+  static Future<({String clientName, String roomId})?>
+  takePendingShortcut() async {
+    if (!_supported) return null;
     try {
-      final roomId = await _channel.invokeMethod<String>(
-        'takePendingShortcutRoomId',
-      );
-      if (roomId == null || roomId.isEmpty) {
-        return null;
+      final id = await _channel.invokeMethod<String>('takePendingShortcut');
+      if (id == null || !id.startsWith(_idPrefix)) return null;
+      final target = jsonDecode(id.substring(_idPrefix.length));
+      if (target case [final String clientName, final String roomId]) {
+        if (clientName.isNotEmpty && roomId.isNotEmpty) {
+          return (clientName: clientName, roomId: roomId);
+        }
       }
-      return roomId;
-    } on PlatformException catch (error, stackTrace) {
+    } catch (error, stackTrace) {
       debugPrint('Failed to obtain pending Direct Share shortcut: $error');
       debugPrintStack(stackTrace: stackTrace);
-      return null;
     }
-  }
-
-  static int _roomTimestamp(Room room) {
-    final Object? timestamp = room.lastEvent?.originServerTs;
-    if (timestamp is int) {
-      return timestamp;
-    }
-    if (timestamp is DateTime) {
-      return timestamp.millisecondsSinceEpoch;
-    }
-    return 0;
+    return null;
   }
 }

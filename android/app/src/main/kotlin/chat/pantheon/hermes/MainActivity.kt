@@ -23,14 +23,14 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         DirectShareShortcuts.handleIntent(intent)
+        super.onCreate(savedInstanceState)
     }
 
     override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
         DirectShareShortcuts.handleIntent(intent)
+        setIntent(intent)
+        super.onNewIntent(intent)
     }
 
     companion object {

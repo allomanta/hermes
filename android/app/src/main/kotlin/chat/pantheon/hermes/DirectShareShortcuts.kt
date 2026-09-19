@@ -35,23 +35,26 @@ object DirectShareShortcuts : MethodChannel.MethodCallHandler {
     }
 
     fun handleIntent(intent: Intent?) {
-        val shortcutId = intent?.getStringExtra(Intent.EXTRA_SHORTCUT_ID)
-        if (!shortcutId.isNullOrEmpty()) {
-            pendingShortcutId = shortcutId
-        }
+        pendingShortcutId = if (intent != null &&
+            (intent.action == Intent.ACTION_SEND || intent.action == Intent.ACTION_SEND_MULTIPLE)) {
+            intent.getStringExtra(Intent.EXTRA_SHORTCUT_ID)
+        } else null
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "takePendingShortcutRoomId" -> {
+            "takePendingShortcut" -> {
                 result.success(pendingShortcutId)
                 pendingShortcutId = null
             }
             "publishShareShortcuts" -> {
                 @Suppress("UNCHECKED_CAST")
                 val shortcuts = call.arguments as? List<Map<String, Any?>> ?: emptyList()
-                publishShortcuts(shortcuts)
-                result.success(null)
+                try {
+                    result.success(publishShortcuts(shortcuts))
+                } catch (error: RuntimeException) {
+                    result.error("publish_failed", error.message, null)
+                }
             }
             "removeShareShortcuts" -> {
                 @Suppress("UNCHECKED_CAST")
@@ -62,7 +65,13 @@ object DirectShareShortcuts : MethodChannel.MethodCallHandler {
                 result.success(null)
             }
             "clearShareShortcuts" -> {
-                ShortcutManagerCompat.removeAllDynamicShortcuts(appContext)
+                removeShareShortcuts(existingShareShortcutIds())
+                pendingShortcutId = null
+                result.success(null)
+            }
+            "reportShareShortcutUsed" -> {
+                val id = call.arguments as? String
+                if (id != null) ShortcutManagerCompat.reportShortcutUsed(appContext, id)
                 result.success(null)
             }
             else -> result.notImplemented()
@@ -77,26 +86,26 @@ object DirectShareShortcuts : MethodChannel.MethodCallHandler {
         ShortcutManagerCompat.disableShortcuts(appContext, shortcutIds, disableMessage)
     }
 
-    private fun publishShortcuts(shortcuts: List<Map<String, Any?>>) {
-        if (!::appContext.isInitialized) return
-
-        val existingShareShortcutIds = ShortcutManagerCompat
-            .getDynamicShortcuts(appContext)
-            .filter { shortcut ->
-                val categories = shortcut.categories ?: return@filter false
-                SHARE_TARGET_CATEGORIES.all { categories.contains(it) }
-            }
-            .map { it.id }
-        if (existingShareShortcutIds.isNotEmpty()) {
-            ShortcutManagerCompat.removeDynamicShortcuts(appContext, existingShareShortcutIds)
+    private fun existingShareShortcutIds(): List<String> = ShortcutManagerCompat
+        .getShortcuts(appContext, ShortcutManagerCompat.FLAG_MATCH_DYNAMIC or
+            ShortcutManagerCompat.FLAG_MATCH_CACHED or ShortcutManagerCompat.FLAG_MATCH_PINNED)
+        .filter { shortcut ->
+            shortcut.id.startsWith("hermes-share:") ||
+                shortcut.categories?.containsAll(SHARE_TARGET_CATEGORIES) == true
         }
+        .map { it.id }
 
-        val maxShortcuts = ShortcutManagerCompat.getMaxShortcutCountPerActivity(appContext)
+    private fun publishShortcuts(shortcuts: List<Map<String, Any?>>): Boolean {
+        if (!::appContext.isInitialized) return false
+
+        val maxShortcuts = (ShortcutManagerCompat.getMaxShortcutCountPerActivity(appContext) -
+            ShortcutManagerCompat.getShortcuts(appContext, ShortcutManagerCompat.FLAG_MATCH_MANIFEST).size)
+            .coerceAtLeast(0)
         val shortcutInfos = shortcuts
-            .take(maxShortcuts)
-            .mapNotNull { shortcut ->
-                val id = shortcut["id"] as? String ?: return@mapNotNull null
-                val shortLabel = shortcut["shortLabel"] as? String ?: return@mapNotNull null
+            .take(minOf(5, maxShortcuts))
+            .mapIndexedNotNull { rank, shortcut ->
+                val id = shortcut["id"] as? String ?: return@mapIndexedNotNull null
+                val shortLabel = shortcut["shortLabel"] as? String ?: return@mapIndexedNotNull null
                 val longLabel = shortcut["longLabel"] as? String ?: shortLabel
                 val action = shortcut["action"] as? String
                 val isImportant = shortcut["isImportant"] as? Boolean ?: false
@@ -112,6 +121,7 @@ object DirectShareShortcuts : MethodChannel.MethodCallHandler {
                     .setShortLabel(shortLabel)
                     .setLongLabel(longLabel)
                     .setLongLived(true)
+                    .setRank(rank)
                     .setIntent(intent)
                     .setCategories(SHARE_TARGET_CATEGORIES.toMutableSet())
 
@@ -134,9 +144,15 @@ object DirectShareShortcuts : MethodChannel.MethodCallHandler {
 
                 builder.build()
             }
-        shortcutInfos.forEach { shortcutInfo ->
-            ShortcutManagerCompat.pushDynamicShortcut(appContext, shortcutInfo)
-        }
+        val ids = shortcutInfos.map { it.id }
+        val existingIds = existingShareShortcutIds()
+        removeShareShortcuts(existingIds.filter { it !in ids })
+        ShortcutManagerCompat.enableShortcuts(appContext, ids)
+        val otherShortcuts = ShortcutManagerCompat.getDynamicShortcuts(appContext)
+            .filter { it.id !in existingIds && it.id !in ids }
+            .take((maxShortcuts - shortcutInfos.size).coerceAtLeast(0))
+        // Updating ranks must not report every target as used on every sync.
+        return ShortcutManagerCompat.setDynamicShortcuts(appContext, shortcutInfos + otherShortcuts)
     }
 
     private fun decodeIcon(icon: String?): IconCompat? {
