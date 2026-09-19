@@ -147,7 +147,7 @@ object DirectShareShortcuts : MethodChannel.MethodCallHandler {
         val ids = shortcutInfos.map { it.id }
         val existingIds = existingShareShortcutIds()
         removeShareShortcuts(existingIds.filter { it !in ids })
-        ShortcutManagerCompat.enableShortcuts(appContext, ids)
+        ShortcutManagerCompat.enableShortcuts(appContext, shortcutInfos)
         val otherShortcuts = ShortcutManagerCompat.getDynamicShortcuts(appContext)
             .filter { it.id !in existingIds && it.id !in ids }
             .take((maxShortcuts - shortcutInfos.size).coerceAtLeast(0))
