@@ -18,6 +18,7 @@ jobs:
         with:
           flutter-version-file: .tool_versions.yaml
           cache: true
+      - uses: dtolnay/rust-toolchain@stable
       - name: Fetch dependencies
         run: |
           rm -f .dart_tool/package_graph.json
@@ -90,6 +91,7 @@ jobs:
       - run: flutter pub get
       - name: Prepare web
         run: ./scripts/prepare-web.sh
+      - run: git diff --exit-code
       - run: flutter build web
       - name: Upload Web Build
         uses: actions/upload-artifact@v7

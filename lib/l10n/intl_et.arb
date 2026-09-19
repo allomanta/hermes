@@ -2826,5 +2826,13 @@
                 "type": "String"
             }
         }
+    },
+    "serverRespondedWithError": "Serveri vastuseks oli veateade: {error}",
+    "@serverRespondedWithError": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
     }
 }

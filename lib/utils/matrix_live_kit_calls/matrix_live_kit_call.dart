@@ -34,7 +34,10 @@ extension MatrixRtcClientExtension on Client {
             ?.map((foci) => foci.tryGet<String>('livekit_service_url'))
             .whereType<String>()
             .toList() ??
-        [];
+        [
+          if (AppSettings.fallbackLiveKitInstance.value.isNotEmpty)
+            AppSettings.fallbackLiveKitInstance.value,
+        ];
   }
 
   Stream<CallKeysEvent> get onCallEncryptionKeys => onToDeviceEvent.stream
@@ -232,6 +235,7 @@ extension MatrixRtcRoomExtension on Room {
 
   Future<MatrixRtcCredentials> joinMatrixRtcCall({
     MatrixRtcCallIntent intent = MatrixRtcCallIntent.video,
+    List<String>? urls,
   }) async {
     await postLoad();
     if (ownMatrixRtcMembership != null) {
@@ -243,7 +247,7 @@ extension MatrixRtcRoomExtension on Room {
 
     final hasActiveMatrixRtcCall = this.hasActiveMatrixRtcCall;
 
-    final urls = getActiveMatrixRtcMembers()
+    urls ??= getActiveMatrixRtcMembers()
         .map(
           (state) =>
               state.fociPreferred.map((focus) => focus.livekitServiceUrl),

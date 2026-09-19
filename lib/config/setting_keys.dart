@@ -145,7 +145,11 @@ enum AppSettings<T> {
   benchmarksInLogs<bool>('chat.pantheon.benchmarks_in_logs', false),
   autoSendErrorReports<bool?>('chat.pantheon.auto_send_error_reports', null),
   knownErrorHashes<List<String>>('chat.pantheon.known_crash_hashes', []),
-  customLiveKitInstance<String>('chat.pantheon.custom_live_kit_instance', '');
+  customLiveKitInstance<String>('chat.pantheon.custom_live_kit_instance', ''),
+  fallbackLiveKitInstance<String>(
+    'chat.pantheon.fallback_live_kit_instance',
+    'https://livekit-jwt.fluffy.chat',
+  );
 
   final String key;
   final T _defaultValue;

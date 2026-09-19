@@ -163,6 +163,7 @@ class SettingsHomeserverView extends StatelessWidget {
                         title: Text(L10n.of(context).federationBaseUrl),
                         subtitle: Linkify(
                           text: data.federationBaseUrl.toString(),
+                          style: TextStyle(color: theme.colorScheme.onSurface),
                           textScaleFactor: MediaQuery.textScalerOf(
                             context,
                           ).scale(1),
@@ -223,6 +224,7 @@ class SettingsHomeserverView extends StatelessWidget {
                         title: Text(L10n.of(context).baseUrl),
                         subtitle: Linkify(
                           text: wellKnown.mHomeserver.baseUrl.toString(),
+                          style: TextStyle(color: theme.colorScheme.onSurface),
                           textScaleFactor: MediaQuery.textScalerOf(
                             context,
                           ).scale(1),
@@ -239,6 +241,9 @@ class SettingsHomeserverView extends StatelessWidget {
                           title: Text(L10n.of(context).identityServer),
                           subtitle: Linkify(
                             text: identityServer.baseUrl.toString(),
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                            ),
                             textScaleFactor: MediaQuery.textScalerOf(
                               context,
                             ).scale(1),
