@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -12,8 +13,6 @@ import 'package:hermes/utils/platform_infos.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'package:http/retry.dart' as retry;
-import 'package:hermes/utils/platform_infos.dart';
-import 'package:hermes/config/isrg_x1.dart';
 
 /// Custom Client to add an additional certificate. This is for the isrg X1
 /// certificate which is needed for LetsEncrypt certificates. It is shipped
@@ -37,7 +36,33 @@ class CustomHttpClient {
     return HttpClient(context: context);
   }
 
-  static http.Client createHTTPClient() => retry.RetryClient(
-    PlatformInfos.isAndroid ? IOClient(customHttpClient()) : http.Client(),
-  );
+  static http.Client createHTTPClient() {
+    final client = retry.RetryClient(
+      PlatformInfos.isAndroid ? IOClient(customHttpClient()) : http.Client(),
+    );
+    return PlatformInfos.isDesktop
+        ? ResponseHeaderTimeoutClient(client, const Duration(minutes: 2))
+        : client;
+  }
+}
+
+class ResponseHeaderTimeoutClient extends http.BaseClient {
+  ResponseHeaderTimeoutClient(this.inner, this.timeout);
+
+  final http.Client inner;
+  final Duration timeout;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) => inner
+      .send(request)
+      .timeout(
+        // Large uploads can take longer before the server sends headers.
+        request.url.path.contains('/media/') &&
+                request.url.path.contains('/upload')
+            ? const Duration(minutes: 30)
+            : timeout,
+      );
+
+  @override
+  void close() => inner.close();
 }

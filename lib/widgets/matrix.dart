@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/android_share_shortcuts.dart';
 import 'package:hermes/utils/client_manager.dart';
+import 'package:hermes/utils/custom_http_client.dart';
 import 'package:hermes/utils/init_with_restore.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:hermes/utils/notification_background_handler.dart';
@@ -239,6 +240,12 @@ class MatrixState extends State<Matrix> {
   void initState() {
     super.initState();
     _listener = AppLifecycleListener(onStateChange: didChangeAppLifecycleState);
+    if (PlatformInfos.isDesktop) {
+      _desktopSyncWatchdog = Timer.periodic(
+        const Duration(minutes: 1),
+        (_) => checkDesktopSync(),
+      );
+    }
     if (kIsWeb) {
       onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);
       onBlurSub = html.window.onBlur.listen((_) => webHasFocus = false);
@@ -247,6 +254,11 @@ class MatrixState extends State<Matrix> {
   }
 
   AppLifecycleListener? _listener;
+  Timer? _desktopSyncWatchdog;
+  static const desktopSyncStallTimeout = Duration(minutes: 5);
+  final Map<Client, DateTime> _lastDesktopSync = {};
+  final Set<Client> _recoveringDesktopSync = {};
+  final onSyncStatus = <String, StreamSubscription<SyncStatusUpdate>>{};
   Future<bool?>? _localNotificationsInitialized;
   static bool _handledMacNotificationLaunch = false;
 
@@ -267,6 +279,14 @@ class MatrixState extends State<Matrix> {
         'Attempted to register subscriptions for non-existing client $name',
       );
       return;
+    }
+    if (PlatformInfos.isDesktop) {
+      _lastDesktopSync.putIfAbsent(c, DateTime.now);
+      onSyncStatus[name] ??= c.onSyncStatus.stream.listen((status) {
+        if (status.status == SyncStatus.finished) {
+          _lastDesktopSync[c] = DateTime.now();
+        }
+      });
     }
     onRoomKeyRequestSub[name] ??= c.onRoomKeyRequest.stream.listen((
       RoomKeyRequest request,
@@ -404,6 +424,9 @@ class MatrixState extends State<Matrix> {
   }
 
   void _cancelSubs(String name) {
+    onSyncStatus.remove(name)?.cancel();
+    final client = getClientByName(name);
+    if (client != null) _lastDesktopSync.remove(client);
     onRoomKeyRequestSub[name]?.cancel();
     onRoomKeyRequestSub.remove(name);
     onKeyVerificationRequestSub[name]?.cancel();
@@ -465,11 +488,40 @@ class MatrixState extends State<Matrix> {
         Logs().v('Set background sync to', foreground);
       }
     }
+    if (PlatformInfos.isDesktop && state == AppLifecycleState.resumed) {
+      checkDesktopSync();
+    }
   }
 
+  Future<void> _recoverDesktopSync(Client client) async {
+    try {
+      Logs().w('Restarting stalled sync for ${client.clientName}');
+      // Re-enabling backgroundSync alone would reuse the pending sync request.
+      final oldHttpClient = client.httpClient;
+      if (oldHttpClient is TimeoutHttpClient) {
+        oldHttpClient.inner.close();
+      } else {
+        oldHttpClient.close();
+      }
+      await client.abortSync();
+      if (!mounted || !widget.clients.contains(client) || !client.isLogged()) {
+        return;
+      }
+      client.httpClient = FixedTimeoutHttpClient(
+        CustomHttpClient.createHTTPClient(),
+        ClientManager.networkRequestTimeout,
+      );
+      client.backgroundSync = true;
+    } catch (e, s) {
+      Logs().e('Unable to restart stalled sync', e, s);
+    } finally {
+      _recoveringDesktopSync.remove(client);
+    }
+  }
   @override
   void dispose() {
     _listener?.dispose();
+    _desktopSyncWatchdog?.cancel();
     onFocusSub?.cancel();
     onBlurSub?.cancel();
 
@@ -488,6 +540,9 @@ class MatrixState extends State<Matrix> {
     for (final sub in onReadNotifications.values) {
       sub.cancel();
     }
+    for (final sub in onSyncStatus.values) {
+      sub.cancel();
+    }
     for (final sub in onUiaRequest.values) {
       sub.cancel();
     }
@@ -496,6 +551,7 @@ class MatrixState extends State<Matrix> {
     onLogoutSub.clear();
     onNotification.clear();
     onReadNotifications.clear();
+    onSyncStatus.clear();
     onUiaRequest.clear();
 
     voiceMessageEventId.dispose();
