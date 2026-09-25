@@ -25,6 +25,7 @@ import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 
 abstract class ClientManager {
   static const String clientNamespace = 'im.hermes.store.clients';
+  static const Duration networkRequestTimeout = Duration(minutes: 30);
 
   static Future<List<Client>> getClients({
     bool initialize = true,
@@ -142,7 +143,7 @@ abstract class ClientManager {
         AuthenticationTypes.sso,
       },
       nativeImplementations: nativeImplementations,
-      defaultNetworkRequestTimeout: const Duration(minutes: 30),
+      defaultNetworkRequestTimeout: networkRequestTimeout,
       enableDehydratedDevices: true,
       shareKeysWith:
           ShareKeysWith.values.singleWhereOrNull(
