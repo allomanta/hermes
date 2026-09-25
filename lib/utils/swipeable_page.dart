@@ -108,7 +108,7 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
 
   /// Enable native-style pop gestures when allowed by configuration.
   @override
-  bool get popGestureEnabled => enableFullScreenDrag;
+  bool get popGestureEnabled => enableFullScreenDrag && !isFirst;
 
   /// Build the underlying page contents without wrapping animations.
   @override
@@ -234,6 +234,7 @@ class _FullScreenPopGestureDetectorState<T>
 
   /// Start a new gesture controller when the finger begins moving.
   void _handleDragStart(DragStartDetails details) {
+    if (!widget.route.popGestureEnabled) return;
     widget.route.popGestureController.stop();
     _controller = _FullScreenPopGestureController<T>(
       route: widget.route,
@@ -339,7 +340,7 @@ class _FullScreenPopGestureController<T> {
 
   /// Decide whether to complete the pop or restore the pushed page.
   void dragEnd({required double velocity, required double dragFraction}) {
-    if (!getIsCurrent()) {
+    if (!getIsCurrent() || !navigator.canPop()) {
       _animateToPushed();
       return;
     }
