@@ -58,6 +58,7 @@ class ChatListController extends State<ChatList>
   StreamSubscription? _intentDataStreamSubscription;
 
   StreamSubscription? _intentFileStreamSubscription;
+  bool _receivingShareIntents = false;
   StreamSubscription<bool>? _directShareShortcutSubscription;
   List<Client> _directShareShortcutClients = [];
 
@@ -217,16 +218,34 @@ class ChatListController extends State<ChatList>
   String? get activeChat =>
       PantheonThemes.isColumnMode(context) ? widget.activeChat : null;
 
-  void _processIncomingSharedMedia(List<SharedMediaFile> files) {
-    unawaited(_handleIncomingSharedMedia(files));
+  Future<void> _processIncomingSharedMedia(
+    List<SharedMediaFile> files, [
+    Uri? routeAtDelivery,
+  ]) async {
+    if (!mounted) return;
+    routeAtDelivery ??= GoRouter.of(context).routeInformationProvider.value.uri;
+    final sharedFiles = List<SharedMediaFile>.of(files);
+    try {
+      await ReceiveSharingIntent.instance.reset();
+    } catch (e, s) {
+      Logs().w('Unable to reset received share intent', e, s);
+    }
+    if (!mounted) return;
+    await _handleIncomingSharedMedia(sharedFiles, routeAtDelivery);
   }
 
-  Future<void> _handleIncomingSharedMedia(List<SharedMediaFile> files) async {
+  Future<void> _handleIncomingSharedMedia(
+    List<SharedMediaFile> files,
+    Uri routeAtDelivery,
+  ) async {
     files.removeWhere(
       (file) => file.path.startsWith(AppConfig.deepLinkPrefix) == true,
     );
     if (files.isEmpty || !mounted) return;
-
+    if (GoRouter.of(context).routeInformationProvider.value.uri !=
+        routeAtDelivery) {
+      return;
+    }
     final shareItems = files.map((file) {
       if ({SharedMediaType.text, SharedMediaType.url}.contains(file.type)) {
         return TextShareItem(file.path);
@@ -245,6 +264,10 @@ class ChatListController extends State<ChatList>
       );
       if (client != null) await client.roomsLoading;
       if (!mounted) return;
+      if (GoRouter.of(context).routeInformationProvider.value.uri !=
+          routeAtDelivery) {
+        return;
+      }
       final room = target == null || client?.isLogged() != true
           ? null
           : client!.getRoomById(target.roomId);
@@ -252,14 +275,22 @@ class ChatListController extends State<ChatList>
           room.membership == Membership.join &&
           !room.isSpace &&
           room.canSendDefaultMessages) {
-        while (context.canPop()) {
-          context.pop();
+        final currentUri = routeAtDelivery;
+        final alreadyInTargetChat =
+            currentUri.path == '/rooms/${room.id}' &&
+            Matrix.of(context).client == client;
+        if (!alreadyInTargetChat) {
+          while (context.canPop()) {
+            context.pop();
+          }
         }
         context.go(
-          Uri(
-            path: '/rooms/${room.id}',
-            queryParameters: {'client': client!.clientName},
-          ).toString(),
+          alreadyInTargetChat
+              ? currentUri.toString()
+              : Uri(
+                  path: '/rooms/${room.id}',
+                  queryParameters: {'client': client!.clientName},
+                ).toString(),
           extra: shareItems,
         );
         return;
@@ -281,8 +312,11 @@ class ChatListController extends State<ChatList>
         .listen(_processIncomingSharedMedia, onError: print);
 
     // For sharing images coming from outside the app while the app is closed
+    final initialRoute = GoRouter.of(
+      context,
+    ).routeInformationProvider.value.uri;
     ReceiveSharingIntent.instance.getInitialMedia().then(
-      _processIncomingSharedMedia,
+      (files) => _processIncomingSharedMedia(files, initialRoute),
     );
 
     if (PlatformInfos.isAndroid) {
@@ -339,7 +373,6 @@ class ChatListController extends State<ChatList>
 
   @override
   void initState() {
-    _initReceiveSharingIntent();
     _activeSpaceId = widget.activeSpace;
 
     scrollController.addListener(_onScroll);
@@ -401,6 +434,10 @@ class ChatListController extends State<ChatList>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!_receivingShareIntents) {
+      _receivingShareIntents = true;
+      _initReceiveSharingIntent();
+    }
     Matrix.of(context).activeSpaceId = _activeSpaceId;
     _setupDirectShareShortcuts();
   }

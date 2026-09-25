@@ -118,6 +118,8 @@ class ChatPageWithRoom extends StatefulWidget {
 
 class ChatController extends State<ChatPageWithRoom>
     with WidgetsBindingObserver {
+  static final Expando<bool> _consumedShareItems = Expando<bool>();
+
   Room get room => sendingClient.getRoomById(roomId) ?? widget.room;
 
   late Client sendingClient;
@@ -302,7 +304,12 @@ class ChatController extends State<ChatPageWithRoom>
 
   Future<void> _shareItems() async {
     final shareItems = widget.shareItems;
-    if (shareItems == null || shareItems.isEmpty) return;
+    if (shareItems == null ||
+        shareItems.isEmpty ||
+        _consumedShareItems[shareItems] == true) {
+      return;
+    }
+    _consumedShareItems[shareItems] = true;
     final shareRoom = widget.room;
     if (!shareRoom.otherPartyCanReceiveMessages) {
       final theme = Theme.of(context);

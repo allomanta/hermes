@@ -195,6 +195,23 @@ void main() {
           hasLength(2),
           reason: 'Unrelated rebuilds must not resend shares',
         );
+        final recreatedController = _ShareController()
+          ..widget = ChatPageWithRoom(
+            room: room,
+            shareItems: controller.widget.shareItems,
+          )
+          ..sendingRoom = room
+          ..context = controller.context;
+        addTearDown(recreatedController.scrollController.dispose);
+        addTearDown(recreatedController.sendController.dispose);
+        recreatedController.didUpdateWidget(ChatPageWithRoom(room: room));
+        tester.binding.scheduleFrame();
+        await tester.pump();
+        expect(
+          room.sent,
+          hasLength(2),
+          reason: 'A remount must not resend a share',
+        );
         final previous = controller.widget;
         controller.widget = ChatPageWithRoom(
           room: room,
