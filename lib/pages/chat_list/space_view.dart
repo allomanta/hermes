@@ -13,6 +13,8 @@ import 'package:hermes/pages/chat_list/active_call_indicator.dart';
 import 'package:hermes/pages/chat_list/unread_bubble.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:hermes/utils/matrix_sdk_extensions/room_force_read.dart';
+import 'package:hermes/utils/push_helper.dart';
 import 'package:hermes/utils/stream_extension.dart';
 import 'package:hermes/utils/string_color.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -21,6 +23,7 @@ import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/hover_builder.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart' as sdk;
 import 'package:matrix/matrix.dart';
@@ -256,20 +259,20 @@ class _SpaceViewState extends State<SpaceView> {
             ),
           ),
           PopupMenuItem(
-            value: room.markedUnread
+            value: room.isUnread || room.hasNewMessages
                 ? SpaceChildAction.markAsRead
                 : SpaceChildAction.markAsUnread,
             child: Row(
               mainAxisSize: .min,
               children: [
                 Icon(
-                  room.markedUnread
-                      ? Icons.mark_as_unread
+                  room.isUnread || room.hasNewMessages
+                      ? Icons.done_all
                       : Icons.mark_as_unread_outlined,
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  room.isUnread
+                  room.isUnread || room.hasNewMessages
                       ? L10n.of(context).markAsRead
                       : L10n.of(context).markAsUnread,
                 ),
@@ -353,10 +356,21 @@ class _SpaceViewState extends State<SpaceView> {
           future: () => room!.markUnread(true),
         );
       case SpaceChildAction.markAsRead:
-        await showFutureLoadingDialog(
+        final result = await showFutureLoadingDialog(
           context: context,
-          future: () => room!.markUnread(false),
+          future: room!.forceMarkRead,
         );
+        if (result.asValue?.value == true && mounted) {
+          setState(() {});
+          unawaited(
+            clearReadNotifications(
+              client: room.client,
+              openedRoomId: room.id,
+              flutterLocalNotificationsPlugin:
+                  FlutterLocalNotificationsPlugin(),
+            ),
+          );
+        }
       case SpaceChildAction.leave:
         await showFutureLoadingDialog(
           context: context,

@@ -16,7 +16,9 @@ import 'package:hermes/utils/android_share_shortcuts.dart';
 import 'package:hermes/utils/error_reporter.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:hermes/utils/matrix_sdk_extensions/room_force_read.dart';
 import 'package:hermes/utils/platform_infos.dart';
+import 'package:hermes/utils/push_helper.dart';
 import 'package:hermes/utils/show_scaffold_dialog.dart';
 import 'package:hermes/utils/show_update_snackbar.dart';
 import 'package:hermes/utils/stream_extension.dart';
@@ -29,6 +31,7 @@ import 'package:hermes/widgets/share_scaffold_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_shortcuts_new/flutter_shortcuts_new.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -542,18 +545,20 @@ class ChatListController extends State<ChatList>
             ),
           ),
           PopupMenuItem(
-            value: ChatContextAction.markUnread,
+            value: room.isUnread || room.hasNewMessages
+                ? ChatContextAction.markRead
+                : ChatContextAction.markUnread,
             child: Row(
               mainAxisSize: .min,
               children: [
                 Icon(
-                  room.markedUnread
-                      ? Icons.mark_as_unread
+                  room.isUnread || room.hasNewMessages
+                      ? Icons.done_all
                       : Icons.mark_as_unread_outlined,
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  room.markedUnread
+                  room.isUnread || room.hasNewMessages
                       ? L10n.of(context).markAsRead
                       : L10n.of(context).markAsUnread,
                 ),
@@ -716,8 +721,25 @@ class ChatListController extends State<ChatList>
       case ChatContextAction.markUnread:
         await showFutureLoadingDialog(
           context: context,
-          future: () => room.markUnread(!room.markedUnread),
+          future: () => room.markUnread(true),
         );
+        return;
+      case ChatContextAction.markRead:
+        final result = await showFutureLoadingDialog(
+          context: context,
+          future: room.forceMarkRead,
+        );
+        if (result.asValue?.value == true && mounted) {
+          setState(() {});
+          unawaited(
+            clearReadNotifications(
+              client: room.client,
+              openedRoomId: room.id,
+              flutterLocalNotificationsPlugin:
+                  FlutterLocalNotificationsPlugin(),
+            ),
+          );
+        }
         return;
       case ChatContextAction.mute:
         await showFutureLoadingDialog(
@@ -1041,6 +1063,7 @@ enum ChatContextAction {
   addTag,
   removeTag,
   markUnread,
+  markRead,
   mute,
   leave,
   addToSpace,
