@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hermes/widgets/matrix.dart';
+import 'package:http/http.dart' as http;
 import 'package:matrix/encryption/key_manager.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
@@ -31,7 +32,49 @@ class _Client extends Fake implements Client {
   @override
   final onSync = CachedStreamController<SyncUpdate>();
   @override
+  final onSyncStatus = CachedStreamController<SyncStatusUpdate>();
+  @override
   final onNotification = CachedStreamController<Event>();
+}
+
+class _ClosableClient extends http.BaseClient {
+  bool closed = false;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) =>
+      throw UnimplementedError();
+
+  @override
+  void close() => closed = true;
+}
+
+class _StalledClient extends _Client {
+  _StalledClient(this.transport) {
+    _httpClient = FixedTimeoutHttpClient(
+      transport,
+      const Duration(minutes: 30),
+    );
+  }
+
+  final _ClosableClient transport;
+  late http.Client _httpClient;
+  @override
+  http.Client get httpClient => _httpClient;
+  @override
+  set httpClient(http.Client client) => _httpClient = client;
+  int aborts = 0;
+  bool restarted = false;
+
+  @override
+  bool isLogged() => true;
+
+  @override
+  Future<void> abortSync() async {
+    aborts++;
+  }
+
+  @override
+  set backgroundSync(bool enabled) => restarted = enabled;
 }
 
 class _Matrix extends Matrix {
@@ -58,6 +101,61 @@ class _MatrixState extends MatrixState {
 }
 
 void main() {
+  testWidgets('desktop restarts a stalled sync with a fresh HTTP client', (
+    tester,
+  ) async {
+    MacOSFlutterLocalNotificationsPlugin.registerWith();
+    SharedPreferences.setMockInitialValues({});
+    final store = await SharedPreferences.getInstance();
+    final transport = _ClosableClient();
+    final client = _StalledClient(transport);
+    addTearDown(() async {
+      if (client.httpClient is TimeoutHttpClient) {
+        (client.httpClient as TimeoutHttpClient).inner.close();
+      }
+      await Future.wait([
+        client.onRoomKeyRequest.close(),
+        client.onKeyVerificationRequest.close(),
+        client.onLoginStateChanged.close(),
+        client.onUiaRequest.close(),
+        client.onSync.close(),
+        client.onSyncStatus.close(),
+        client.onNotification.close(),
+      ]);
+    });
+    const channel = MethodChannel('dexterous.com/flutter/local_notifications');
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      channel,
+      (call) async => call.method == 'initialize' ? true : null,
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      ),
+    );
+
+    await tester.pumpWidget(_Matrix(clients: [client], store: store));
+    final state = tester.state<MatrixState>(find.byType(_Matrix));
+    final oldHttpClient = client.httpClient;
+    client.onSync.add(SyncUpdate(nextBatch: 'initial'));
+    await tester.pump();
+    state.checkDesktopSync(DateTime.now());
+    expect(client.aborts, 0);
+    client.onSyncStatus.add(const SyncStatusUpdate(SyncStatus.finished));
+    await tester.pump();
+    state.checkDesktopSync(DateTime.now().add(const Duration(minutes: 4)));
+    expect(client.aborts, 0);
+
+    state.checkDesktopSync(DateTime.now().add(const Duration(minutes: 6)));
+    await tester.pump();
+    expect(client.aborts, 1);
+    expect(transport.closed, isTrue);
+    expect(client.restarted, isTrue);
+    expect(client.httpClient, isNot(same(oldHttpClient)));
+    await tester.pumpWidget(const SizedBox());
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
   for (final disposeBeforeReady in [false, true]) {
     testWidgets(
       disposeBeforeReady
@@ -75,6 +173,7 @@ void main() {
             client.onLoginStateChanged.close(),
             client.onUiaRequest.close(),
             client.onSync.close(),
+            client.onSyncStatus.close(),
             client.onNotification.close(),
           ]);
         });
@@ -145,6 +244,7 @@ void main() {
             client.onLoginStateChanged.close(),
             client.onUiaRequest.close(),
             client.onSync.close(),
+            client.onSyncStatus.close(),
             client.onNotification.close(),
           ]);
         }

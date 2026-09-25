@@ -493,6 +493,25 @@ class MatrixState extends State<Matrix> {
     }
   }
 
+  @visibleForTesting
+  void checkDesktopSync([DateTime? now]) {
+    if (!mounted || !PlatformInfos.isDesktop) return;
+    final currentTime = now ?? DateTime.now();
+    for (final client in widget.clients) {
+      if (!client.isLogged()) {
+        _lastDesktopSync[client] = currentTime;
+        continue;
+      }
+      final lastSync = _lastDesktopSync.putIfAbsent(client, () => currentTime);
+      if (currentTime.difference(lastSync) < desktopSyncStallTimeout ||
+          !_recoveringDesktopSync.add(client)) {
+        continue;
+      }
+      _lastDesktopSync[client] = currentTime;
+      unawaited(_recoverDesktopSync(client));
+    }
+  }
+
   Future<void> _recoverDesktopSync(Client client) async {
     try {
       Logs().w('Restarting stalled sync for ${client.clientName}');
@@ -518,6 +537,7 @@ class MatrixState extends State<Matrix> {
       _recoveringDesktopSync.remove(client);
     }
   }
+
   @override
   void dispose() {
     _listener?.dispose();
