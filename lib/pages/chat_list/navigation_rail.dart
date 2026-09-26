@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:hermes/config/app_config.dart';
@@ -42,6 +43,8 @@ class SpacesNavigationRail extends StatefulWidget {
 
 class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
   final ScrollController _scrollController = ScrollController();
+  String? _spaceOrderKey;
+  List<String> _spaceOrder = [];
 
   @override
   void dispose() {
@@ -56,12 +59,21 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
     final onGoToChats = widget.onGoToChats;
     final onGoToUnread = widget.onGoToUnread;
     final onGoToSpaceId = widget.onGoToSpaceId;
-    final client = Matrix.of(context).client;
+    final matrix = Matrix.of(context);
+    final client = matrix.client;
+    final spaceOrderKey = 'chat.pantheon.space_order.${client.clientName}';
+    if (_spaceOrderKey != spaceOrderKey) {
+      _spaceOrderKey = spaceOrderKey;
+      _spaceOrder = matrix.store.getStringList(spaceOrderKey) ?? [];
+    }
     final isSettings = GoRouter.of(
       context,
     ).routeInformationProvider.value.uri.path.startsWith('/rooms/settings');
     final coloredMode = !PantheonThemes.isColumnMode(context);
     final theme = Theme.of(context);
+    final useLongPressDrag =
+        theme.platform == TargetPlatform.android ||
+        theme.platform == TargetPlatform.iOS;
     return Material(
       color: coloredMode ? theme.colorScheme.surfaceContainer : null,
       child: SafeArea(
@@ -83,6 +95,21 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
                   ),
                 )
                 .toList();
+            final savedPositions = {
+              for (var i = 0; i < _spaceOrder.length; i++) _spaceOrder[i]: i,
+            };
+            final originalPositions = {
+              for (var i = 0; i < rootSpaces.length; i++) rootSpaces[i].id: i,
+            };
+            rootSpaces.sort(
+              (a, b) =>
+                  (savedPositions[a.id] ??
+                          _spaceOrder.length + originalPositions[a.id]!)
+                      .compareTo(
+                        savedPositions[b.id] ??
+                            _spaceOrder.length + originalPositions[b.id]!,
+                      ),
+            );
             final hasUnreadChats = client.rooms.any(
               (room) => !room.isSpace && room.isUnreadOrInvited,
             );
@@ -117,55 +144,70 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
                           ),
                         ],
                       ),
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        padding: EdgeInsets.symmetric(vertical: 4),
+                      child: ReorderableListView.builder(
+                        scrollController: _scrollController,
+                        padding: const EdgeInsets.symmetric(vertical: 4),
                         scrollDirection: Axis.vertical,
-                        itemCount: rootSpaces.length + 2,
+                        buildDefaultDragHandles: false,
+                        itemCount: rootSpaces.length,
+                        onReorderItem: (oldIndex, newIndex) {
+                          if (oldIndex == newIndex) return;
+                          setState(() {
+                            final moved = rootSpaces.removeAt(oldIndex);
+                            rootSpaces.insert(newIndex, moved);
+                            _spaceOrder = rootSpaces
+                                .map((space) => space.id)
+                                .toList();
+                          });
+                          unawaited(
+                            matrix.store.setStringList(
+                              spaceOrderKey,
+                              _spaceOrder,
+                            ),
+                          );
+                        },
+                        header: ChatFilterToggle(
+                          hasUnreadChats: hasUnreadChats,
+                          selection: isSettings || activeSpaceId != null
+                              ? ChatFilterSelection.none
+                              : unreadSelected && hasUnreadChats
+                              ? ChatFilterSelection.unread
+                              : ChatFilterSelection.all,
+                          onAllTap: onGoToChats,
+                          onUnreadTap: onGoToUnread,
+                        ),
+                        footer: NaviRailItem(
+                          isSelected: false,
+                          onTap: () => context.go('/rooms/newspace'),
+                          icon: const Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: Icon(Icons.add),
+                          ),
+                          toolTip: L10n.of(context).createNewSpace,
+                        ),
                         itemBuilder: (context, i) {
-                          if (i == 0) {
-                            return ChatFilterToggle(
-                              hasUnreadChats: hasUnreadChats,
-                              selection: isSettings || activeSpaceId != null
-                                  ? ChatFilterSelection.none
-                                  : unreadSelected && hasUnreadChats
-                                  ? ChatFilterSelection.unread
-                                  : ChatFilterSelection.all,
-                              onAllTap: onGoToChats,
-                              onUnreadTap: onGoToUnread,
-                            );
-                          }
-                          i--;
-                          if (i == rootSpaces.length) {
-                            return NaviRailItem(
-                              isSelected: false,
-                              onTap: () => context.go('/rooms/newspace'),
-                              icon: const Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: Icon(Icons.add),
-                              ),
-                              toolTip: L10n.of(context).createNewSpace,
-                            );
-                          }
                           final space = rootSpaces[i];
                           final displayname = wellFormedText(
-                            rootSpaces[i].getLocalizedDisplayname(
+                            space.getLocalizedDisplayname(
                               MatrixLocals(L10n.of(context)),
                             ),
                           );
                           final spaceChildrenIds = space.spaceChildren
                               .map((c) => c.roomId)
                               .toSet();
-                          return NaviRailItem(
+                          final item = NaviRailItem(
                             toolTip: displayname,
+                            tooltipTriggerMode: useLongPressDrag
+                                ? TooltipTriggerMode.manual
+                                : null,
                             isSelected:
                                 activeSpaceId == space.id && !isSettings,
                             showSelectionIndicator: false,
-                            onTap: () => onGoToSpaceId(rootSpaces[i].id),
+                            onTap: () => onGoToSpaceId(space.id),
                             unreadBadgeFilter: (room) =>
                                 spaceChildrenIds.contains(room.id),
                             icon: Avatar(
-                              mxContent: rootSpaces[i].avatar,
+                              mxContent: space.avatar,
                               name: displayname,
                               //size: 36,
                               shapeBorder: RoundedSuperellipseBorder(
@@ -182,6 +224,17 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
                               ),
                             ),
                           );
+                          return useLongPressDrag
+                              ? ReorderableDelayedDragStartListener(
+                                  key: ValueKey(space.id),
+                                  index: i,
+                                  child: item,
+                                )
+                              : ReorderableDragStartListener(
+                                  key: ValueKey(space.id),
+                                  index: i,
+                                  child: item,
+                                );
                         },
                       ),
                     ),

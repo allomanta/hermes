@@ -19,6 +19,7 @@ class NaviRailItem extends StatelessWidget {
   final Widget? selectedIcon;
   final bool Function(Room)? unreadBadgeFilter;
   final bool showSelectionIndicator;
+  final TooltipTriggerMode? tooltipTriggerMode;
 
   const NaviRailItem({
     required this.toolTip,
@@ -28,6 +29,7 @@ class NaviRailItem extends StatelessWidget {
     this.selectedIcon,
     this.unreadBadgeFilter,
     this.showSelectionIndicator = true,
+    this.tooltipTriggerMode,
     super.key,
   });
   @override
@@ -76,6 +78,7 @@ class NaviRailItem extends StatelessWidget {
                       : theme.colorScheme.surfaceContainerHigh,
                   child: Tooltip(
                     message: toolTip,
+                    triggerMode: tooltipTriggerMode,
                     child: InkWell(
                       borderRadius: borderRadius,
                       onTap: onTap,

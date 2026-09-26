@@ -16,6 +16,7 @@ import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:matrix/src/utils/space_child.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _Room extends Fake implements Room {
   bool unread = false;
@@ -64,20 +65,112 @@ class _Client extends Fake implements Client {
   @override
   String get userID => '@me:example.org';
   @override
+  String get clientName => 'test-client';
+  @override
   final onSync = CachedStreamController<SyncUpdate>();
 }
 
 class _Matrix extends Fake with Diagnosticable implements MatrixState {
-  _Matrix(this.client);
+  _Matrix(this.client, this.store);
 
   @override
   final _Client client;
+  @override
+  final SharedPreferences store;
 }
 
 void main() {
+  testWidgets('dragging spaces saves their order without blocking taps', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SharedPreferences.getInstance();
+    final client = _Client();
+    addTearDown(client.onSync.close);
+    String? selectedSpace;
+    final router = GoRouter(
+      initialLocation: '/rooms',
+      routes: [
+        GoRoute(
+          path: '/rooms',
+          builder: (context, state) => Scaffold(
+            body: SpacesNavigationRail(
+              activeSpaceId: null,
+              unreadSelected: false,
+              onGoToChats: () {},
+              onGoToUnread: () {},
+              onGoToSpaceId: (id) => selectedSpace = id,
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    Widget app(TargetPlatform platform) => Provider<MatrixState>.value(
+      value: _Matrix(client, store),
+      child: MaterialApp.router(
+        theme: ThemeData(platform: platform),
+        routerConfig: router,
+        localizationsDelegates: L10n.localizationsDelegates,
+        supportedLocales: L10n.supportedLocales,
+      ),
+    );
+
+    await tester.pumpWidget(app(TargetPlatform.macOS));
+    await tester.pumpAndSettle();
+    final first = find.byKey(const ValueKey('!space:example.org'));
+    final second = find.byKey(const ValueKey('!second:example.org'));
+    expect(tester.getTopLeft(first).dy, lessThan(tester.getTopLeft(second).dy));
+
+    await tester.tap(second);
+    expect(selectedSpace, '!second:example.org');
+    await tester.timedDrag(
+      first,
+      const Offset(0, 100),
+      const Duration(milliseconds: 500),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(first).dy,
+      greaterThan(tester.getTopLeft(second).dy),
+    );
+    expect(store.getStringList('chat.pantheon.space_order.test-client'), [
+      '!second:example.org',
+      '!space:example.org',
+    ]);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(app(TargetPlatform.macOS));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(first).dy,
+      greaterThan(tester.getTopLeft(second).dy),
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(app(TargetPlatform.android));
+    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(tester.getCenter(second));
+    await tester.pump(const Duration(milliseconds: 600));
+    await gesture.moveBy(const Offset(0, 30));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0, 70));
+    await tester.pump(const Duration(milliseconds: 200));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(first).dy, lessThan(tester.getTopLeft(second).dy));
+    expect(store.getStringList('chat.pantheon.space_order.test-client'), [
+      '!space:example.org',
+      '!second:example.org',
+    ]);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('filter and space indicators slide and fade independently', (
     tester,
   ) async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SharedPreferences.getInstance();
     final client = _Client();
     final unreadSelected = ValueNotifier(false);
     final activeSpaceId = ValueNotifier<String?>(null);
@@ -108,7 +201,7 @@ void main() {
 
     await tester.pumpWidget(
       Provider<MatrixState>.value(
-        value: _Matrix(client),
+        value: _Matrix(client, store),
         child: MaterialApp.router(
           routerConfig: router,
           localizationsDelegates: L10n.localizationsDelegates,
