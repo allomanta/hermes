@@ -516,22 +516,15 @@ class ChatListController extends State<ChatList>
 
   Future<void> chatContextAction(
     Room room,
-    BuildContext posContext, [
+    BuildContext posContext,
+    Offset globalPosition, [
     Room? space,
   ]) async {
     final overlay =
         Overlay.of(posContext).context.findRenderObject() as RenderBox;
-
-    final button = posContext.findRenderObject() as RenderBox;
-
+    final menuPosition = overlay.globalToLocal(globalPosition);
     final position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        button.localToGlobal(const Offset(0, -65), ancestor: overlay),
-        button.localToGlobal(
-          button.size.bottomRight(Offset.zero) + const Offset(-50, 0),
-          ancestor: overlay,
-        ),
-      ),
+      menuPosition & Size.zero,
       Offset.zero & overlay.size,
     );
 
@@ -560,8 +553,12 @@ class ChatListController extends State<ChatList>
                   name: space.getLocalizedDisplayname(),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  L10n.of(context).goToSpace(space.getLocalizedDisplayname()),
+                Flexible(
+                  child: Text(
+                    L10n.of(context).goToSpace(space.getLocalizedDisplayname()),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -578,10 +575,14 @@ class ChatListController extends State<ChatList>
                       : Icons.notifications_off,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  room.pushRuleState == PushRuleState.notify
-                      ? L10n.of(context).muteChat
-                      : L10n.of(context).unmuteChat,
+                Flexible(
+                  child: Text(
+                    room.pushRuleState == PushRuleState.notify
+                        ? L10n.of(context).muteChat
+                        : L10n.of(context).unmuteChat,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -599,10 +600,14 @@ class ChatListController extends State<ChatList>
                       : Icons.mark_as_unread_outlined,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  room.isUnread || room.hasNewMessages
-                      ? L10n.of(context).markAsRead
-                      : L10n.of(context).markAsUnread,
+                Flexible(
+                  child: Text(
+                    room.isUnread || room.hasNewMessages
+                        ? L10n.of(context).markAsRead
+                        : L10n.of(context).markAsUnread,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -617,10 +622,14 @@ class ChatListController extends State<ChatList>
                     room.isFavourite ? Icons.push_pin : Icons.push_pin_outlined,
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    room.isFavourite
-                        ? L10n.of(context).unpin
-                        : L10n.of(context).pin,
+                  Flexible(
+                    child: Text(
+                      room.isFavourite
+                          ? L10n.of(context).unpin
+                          : L10n.of(context).pin,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -636,12 +645,16 @@ class ChatListController extends State<ChatList>
                 color: Theme.of(context).colorScheme.onErrorContainer,
               ),
               const SizedBox(width: 12),
-              Text(
-                room.membership == Membership.invite
-                    ? L10n.of(context).delete
-                    : L10n.of(context).leave,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onErrorContainer,
+              Flexible(
+                child: Text(
+                  room.membership == Membership.invite
+                      ? L10n.of(context).delete
+                      : L10n.of(context).leave,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
                 ),
               ),
             ],
@@ -658,10 +671,14 @@ class ChatListController extends State<ChatList>
                   color: Theme.of(context).colorScheme.onErrorContainer,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  L10n.of(context).block,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onErrorContainer,
+                Flexible(
+                  child: Text(
+                    L10n.of(context).block,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
                   ),
                 ),
               ],
@@ -675,7 +692,13 @@ class ChatListController extends State<ChatList>
               children: [
                 Icon(Icons.adaptive.more_outlined),
                 const SizedBox(width: 12),
-                Text(L10n.of(context).more),
+                Flexible(
+                  child: Text(
+                    L10n.of(context).more,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
           ),
@@ -699,10 +722,14 @@ class ChatListController extends State<ChatList>
                         : Icons.low_priority_outlined,
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    room.isLowPriority
-                        ? L10n.of(context).unsetLowPriority
-                        : L10n.of(context).setLowPriority,
+                  Flexible(
+                    child: Text(
+                      room.isLowPriority
+                          ? L10n.of(context).unsetLowPriority
+                          : L10n.of(context).setLowPriority,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -715,7 +742,13 @@ class ChatListController extends State<ChatList>
                 children: [
                   Icon(Icons.bookmark_add_outlined),
                   const SizedBox(width: 12),
-                  Text(L10n.of(context).addTag),
+                  Flexible(
+                    child: Text(
+                      L10n.of(context).addTag,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             )
@@ -727,7 +760,13 @@ class ChatListController extends State<ChatList>
                 children: [
                   Icon(Icons.bookmark_remove_outlined),
                   const SizedBox(width: 12),
-                  Text(L10n.of(context).removeTag),
+                  Flexible(
+                    child: Text(
+                      L10n.of(context).removeTag,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -739,7 +778,13 @@ class ChatListController extends State<ChatList>
                 children: [
                   const Icon(Icons.group_work_outlined),
                   const SizedBox(width: 12),
-                  Text(L10n.of(context).addToSpace),
+                  Flexible(
+                    child: Text(
+                      L10n.of(context).addToSpace,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),

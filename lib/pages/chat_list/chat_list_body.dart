@@ -82,8 +82,13 @@ class ChatListViewBody extends StatelessWidget {
                       key: Key('chat_list_item_${room.id}'),
                       filter: filter,
                       onTap: () => controller.onChatTap(room),
-                      onLongPress: (context) =>
-                          controller.chatContextAction(room, context, space),
+                      onLongPress: (context, globalPosition) =>
+                          controller.chatContextAction(
+                            room,
+                            context,
+                            globalPosition,
+                            space,
+                          ),
                       activeChat: controller.activeChat == room.id,
                     );
                   },

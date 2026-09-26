@@ -17,7 +17,7 @@ class ChatListItem extends StatelessWidget {
   final Room room;
   final Room? space;
   final bool activeChat;
-  final void Function(BuildContext context)? onLongPress;
+  final void Function(BuildContext context, Offset globalPosition)? onLongPress;
   final void Function()? onForget;
   final void Function() onTap;
   final String? filter;
@@ -70,61 +70,35 @@ class ChatListItem extends StatelessWidget {
           future: room.name.isEmpty ? room.loadHeroUsers() : null,
           builder: (context, snapshot) => HoverBuilder(
             builder: (context, listTileHovered) => GestureDetector(
-              onSecondaryTap: () => onLongPress?.call(context),
+              onSecondaryTapUp: (details) =>
+                  onLongPress?.call(context, details.globalPosition),
+              onLongPressStart: (details) =>
+                  onLongPress?.call(context, details.globalPosition),
               child: ListTile(
                 visualDensity: const VisualDensity(vertical: -0.5),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                 horizontalTitleGap: 8,
-                onLongPress: () => onLongPress?.call(context),
-                leading: SizedBox(
-                  width: Avatar.defaultSize,
-                  height: Avatar.defaultSize,
-                  child: Stack(
-                    children: [
-                      if (space != null)
-                        Positioned(
-                          top: 0,
-                          left: 0,
-                          child: Avatar(
-                            shapeBorder: RoundedSuperellipseBorder(
-                              side: BorderSide(
-                                width: 2,
-                                color:
-                                    backgroundColor ??
-                                    theme.colorScheme.surface,
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                AppConfig.spaceBorderRadius * 0.75,
-                              ),
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              AppConfig.borderRadius / 4,
-                            ),
-                            mxContent: space.avatar,
-                            size: Avatar.defaultSize * 0.75,
-                            name: wellFormedText(
-                              space.getLocalizedDisplayname(),
-                            ),
-                            onTap: () => onLongPress?.call(context),
-                          ),
-                        ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Avatar(
-                          shapeBorder: space == null
-                              ? room.isSpace
-                                    ? RoundedSuperellipseBorder(
-                                        side: BorderSide(
-                                          width: 1,
-                                          color: theme.dividerColor,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          AppConfig.spaceBorderRadius,
-                                        ),
-                                      )
-                                    : null
-                              : RoundedRectangleBorder(
+                leading: Builder(
+                  builder: (avatarContext) {
+                    void showAvatarMenu() {
+                      final box = avatarContext.findRenderObject() as RenderBox;
+                      onLongPress?.call(
+                        context,
+                        box.localToGlobal(box.size.center(Offset.zero)),
+                      );
+                    }
+
+                    return SizedBox(
+                      width: Avatar.defaultSize,
+                      height: Avatar.defaultSize,
+                      child: Stack(
+                        children: [
+                          if (space != null)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              child: Avatar(
+                                shapeBorder: RoundedSuperellipseBorder(
                                   side: BorderSide(
                                     width: 2,
                                     color:
@@ -132,26 +106,66 @@ class ChatListItem extends StatelessWidget {
                                         theme.colorScheme.surface,
                                   ),
                                   borderRadius: BorderRadius.circular(
-                                    Avatar.defaultSize,
+                                    AppConfig.spaceBorderRadius * 0.75,
                                   ),
                                 ),
-                          borderRadius: room.isSpace
-                              ? BorderRadius.circular(
+                                borderRadius: BorderRadius.circular(
                                   AppConfig.borderRadius / 4,
-                                )
-                              : null,
-                          mxContent: room.avatar,
-                          size: space != null
-                              ? Avatar.defaultSize * 0.75
-                              : Avatar.defaultSize,
-                          name: displayname,
-                          presenceUserId: directChatMatrixId,
-                          presenceBackgroundColor: backgroundColor,
-                          onTap: () => onLongPress?.call(context),
-                        ),
+                                ),
+                                mxContent: space.avatar,
+                                size: Avatar.defaultSize * 0.75,
+                                name: wellFormedText(
+                                  space.getLocalizedDisplayname(),
+                                ),
+                                onTap: showAvatarMenu,
+                              ),
+                            ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Avatar(
+                              shapeBorder: space == null
+                                  ? room.isSpace
+                                        ? RoundedSuperellipseBorder(
+                                            side: BorderSide(
+                                              width: 1,
+                                              color: theme.dividerColor,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              AppConfig.spaceBorderRadius,
+                                            ),
+                                          )
+                                        : null
+                                  : RoundedRectangleBorder(
+                                      side: BorderSide(
+                                        width: 2,
+                                        color:
+                                            backgroundColor ??
+                                            theme.colorScheme.surface,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        Avatar.defaultSize,
+                                      ),
+                                    ),
+                              borderRadius: room.isSpace
+                                  ? BorderRadius.circular(
+                                      AppConfig.borderRadius / 4,
+                                    )
+                                  : null,
+                              mxContent: room.avatar,
+                              size: space != null
+                                  ? Avatar.defaultSize * 0.75
+                                  : Avatar.defaultSize,
+                              name: displayname,
+                              presenceUserId: directChatMatrixId,
+                              presenceBackgroundColor: backgroundColor,
+                              onTap: showAvatarMenu,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 title: Row(
                   children: <Widget>[
