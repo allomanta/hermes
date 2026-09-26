@@ -29,7 +29,9 @@ class ChatListViewBody extends StatelessWidget {
         activeChat: controller.activeChat,
       );
     }
-    final spaces = client.rooms.where((r) => r.isSpace);
+    final spaces = client.rooms.where(
+      (room) => room.isSpace && room.membership == Membership.join,
+    );
     final spaceDelegateCandidates = <String, Room>{};
     for (final space in spaces) {
       for (final spaceChild in space.spaceChildren) {

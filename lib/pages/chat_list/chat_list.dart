@@ -190,9 +190,10 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  List<Room> get filteredRooms => Matrix.of(
-    context,
-  ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).toList();
+  List<Room> get filteredRooms => Matrix.of(context).client.rooms
+      .where((room) => room.membership != Membership.leave)
+      .where(getRoomFilterByActiveFilter(activeFilter))
+      .toList();
 
   bool isSearchMode = false;
   final TextEditingController searchController = TextEditingController();

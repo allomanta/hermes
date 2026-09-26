@@ -44,7 +44,7 @@ class _Space extends Fake implements Room {
   @override
   bool get isUnread => false;
   @override
-  Membership get membership => Membership.join;
+  Membership membership = Membership.join;
   @override
   List<SpaceChild> get spaceChildren => [];
   @override
@@ -86,6 +86,9 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final store = await SharedPreferences.getInstance();
     final client = _Client();
+    client.rooms.add(
+      _Space('!left:example.org', 'Left Space')..membership = Membership.leave,
+    );
     addTearDown(client.onSync.close);
     String? selectedSpace;
     final router = GoRouter(
@@ -120,6 +123,7 @@ void main() {
     await tester.pumpAndSettle();
     final first = find.byKey(const ValueKey('!space:example.org'));
     final second = find.byKey(const ValueKey('!second:example.org'));
+    expect(find.byKey(const ValueKey('!left:example.org')), findsNothing);
     expect(tester.getTopLeft(first).dy, lessThan(tester.getTopLeft(second).dy));
 
     await tester.tap(second);
@@ -146,6 +150,7 @@ void main() {
       tester.getTopLeft(first).dy,
       greaterThan(tester.getTopLeft(second).dy),
     );
+    expect(find.byKey(const ValueKey('!left:example.org')), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpWidget(app(TargetPlatform.android));

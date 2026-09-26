@@ -94,6 +94,12 @@ class _SpaceViewState extends State<SpaceView> {
     final matrix = Matrix.of(context);
     final room = matrix.client.getRoomById(widget.spaceId);
     if (room == null) return;
+    if (room.membership != Membership.join) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onBack();
+      });
+      return;
+    }
 
     final cacheKey = 'spaces_history_cache${room.id}';
     if (_discoveredChildren.isEmpty) {
