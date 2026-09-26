@@ -23,7 +23,7 @@ import 'input_bar.dart';
 class ChatInputRow extends StatelessWidget {
   final ChatController controller;
 
-  static const double height = 56.0;
+  static const double height = 40.0;
 
   const ChatInputRow(this.controller, {super.key});
 
@@ -166,50 +166,61 @@ class ChatInputRow extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2.0),
-                      child: InputBar(
-                        room: controller.room,
-                        minLines: 1,
-                        maxLines: 8,
-                        autofocus: !PlatformInfos.isMobile,
-                        keyboardType: TextInputType.multiline,
-                        textInputAction:
-                            AppSettings.sendOnEnter.value == true &&
-                                PlatformInfos.isMobile
-                            ? TextInputAction.send
-                            : null,
-                        onSubmitted: controller.onInputBarSubmitted,
-                        onSubmitImage: controller.sendImageFromClipBoard,
-                        focusNode: controller.inputFocus,
-                        controller: controller.sendController,
-                        decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.only(
-                            left: 6.0,
-                            right: 6.0,
-                            bottom: 6.0,
-                            top: 3.0,
-                          ),
-                          counter: const SizedBox.shrink(),
-                          hintText: controller.room.encrypted
-                              ? L10n.of(context).encryptedMessage
-                              : L10n.of(context).unencryptedMessage,
-                          hintMaxLines: 1,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          filled: false,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          minHeight: height - 4,
                         ),
-                        onChanged: controller.onInputBarChanged,
-                        suggestionEmojis:
-                            getDefaultEmojiLocale(
-                              AppSettings.emojiSuggestionLocale.value.isNotEmpty
-                                  ? Locale(
-                                      AppSettings.emojiSuggestionLocale.value,
-                                    )
-                                  : Localizations.localeOf(context),
-                            ).fold(
-                              [],
-                              (emojis, category) =>
-                                  emojis..addAll(category.emoji),
+                        child: Center(
+                          child: InputBar(
+                            room: controller.room,
+                            minLines: 1,
+                            maxLines: 8,
+                            autofocus: !PlatformInfos.isMobile,
+                            keyboardType: TextInputType.multiline,
+                            textInputAction:
+                                AppSettings.sendOnEnter.value == true &&
+                                    PlatformInfos.isMobile
+                                ? TextInputAction.send
+                                : null,
+                            onSubmitted: controller.onInputBarSubmitted,
+                            onSubmitImage: controller.sendImageFromClipBoard,
+                            focusNode: controller.inputFocus,
+                            controller: controller.sendController,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 6.0,
+                                vertical: 3.0,
+                              ),
+                              counter: const SizedBox.shrink(),
+                              hintText: controller.room.encrypted
+                                  ? L10n.of(context).encryptedMessage
+                                  : L10n.of(context).unencryptedMessage,
+                              hintMaxLines: 1,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              filled: false,
                             ),
+                            onChanged: controller.onInputBarChanged,
+                            suggestionEmojis:
+                                getDefaultEmojiLocale(
+                                  AppSettings
+                                          .emojiSuggestionLocale
+                                          .value
+                                          .isNotEmpty
+                                      ? Locale(
+                                          AppSettings
+                                              .emojiSuggestionLocale
+                                              .value,
+                                        )
+                                      : Localizations.localeOf(context),
+                                ).fold(
+                                  [],
+                                  (emojis, category) =>
+                                      emojis..addAll(category.emoji),
+                                ),
+                          ),
+                        ),
                       ),
                     ),
                   ),

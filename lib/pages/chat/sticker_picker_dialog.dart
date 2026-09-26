@@ -111,10 +111,10 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                         mxContent: pack.pack.avatarUrl,
                         name: packName,
                         client: widget.room.client,
+                        size: 36,
                       ),
                       title: Text(packName),
                     ),
-                  const SizedBox(height: 6),
                 ],
               ),
             ),
@@ -211,14 +211,14 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                   automaticallyImplyLeading: false,
                   backgroundColor: theme.colorScheme.onInverseSurface,
                   toolbarHeight: packSlugs.isEmpty
-                      ? kToolbarHeight
-                      : kToolbarHeight * 2,
+                      ? kToolbarHeight * 0.8
+                      : kToolbarHeight * 1.6,
                   title: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (packSlugs.isNotEmpty)
                         SizedBox(
-                          height: kToolbarHeight + 4,
+                          height: kToolbarHeight,
                           child: ScrollConfiguration(
                             behavior: ScrollConfiguration.of(context).copyWith(
                               dragDevices: {
