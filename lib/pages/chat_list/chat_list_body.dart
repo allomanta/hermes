@@ -24,6 +24,7 @@ class ChatListViewBody extends StatelessWidget {
         key: ValueKey(activeSpace),
         spaceId: activeSpace,
         onBack: controller.clearActiveSpace,
+        onUnreadChanged: controller.refreshUnreadChats,
         onChatTab: controller.onChatTap,
         activeChat: controller.activeChat,
       );

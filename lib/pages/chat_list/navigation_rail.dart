@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:badges/badges.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
@@ -18,12 +19,16 @@ import 'package:matrix/matrix.dart';
 
 class SpacesNavigationRail extends StatelessWidget {
   final String? activeSpaceId;
+  final bool unreadSelected;
   final void Function() onGoToChats;
+  final void Function() onGoToUnread;
   final void Function(String) onGoToSpaceId;
 
   const SpacesNavigationRail({
     required this.activeSpaceId,
+    required this.unreadSelected,
     required this.onGoToChats,
+    required this.onGoToUnread,
     required this.onGoToSpaceId,
     super.key,
   });
@@ -57,6 +62,9 @@ class SpacesNavigationRail extends StatelessWidget {
                   ),
                 )
                 .toList();
+            final hasUnreadChats = client.rooms.any(
+              (room) => !room.isSpace && room.isUnreadOrInvited,
+            );
 
             return SizedBox(
               width: PantheonThemes.isColumnMode(context)
@@ -71,19 +79,114 @@ class SpacesNavigationRail extends StatelessWidget {
                       itemCount: rootSpaces.length + 2,
                       itemBuilder: (context, i) {
                         if (i == 0) {
-                          return NaviRailItem(
-                            isSelected: activeSpaceId == null && !isSettings,
-                            onTap: onGoToChats,
-                            icon: const Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Icon(Icons.forum_outlined),
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Stack(
+                              children: [
+                                Positioned(
+                                  top: 6,
+                                  left: 0,
+                                  right: 0,
+                                  child: Center(
+                                    child: AnimatedContainer(
+                                      key: const Key('chat_filters_capsule'),
+                                      width: 48,
+                                      height: hasUnreadChats ? 92 : 0,
+                                      duration:
+                                          PantheonThemes.animationDuration,
+                                      curve: PantheonThemes.animationCurve,
+                                      decoration: BoxDecoration(
+                                        color: theme
+                                            .colorScheme
+                                            .surfaceContainerHigh,
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Column(
+                                  children: [
+                                    NaviRailItem(
+                                      height: 52,
+                                      isSelected:
+                                          activeSpaceId == null &&
+                                          !unreadSelected &&
+                                          !isSettings,
+                                      onTap: onGoToChats,
+                                      icon: const Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: Icon(Icons.forum_outlined),
+                                      ),
+                                      selectedIcon: const Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: Icon(Icons.forum),
+                                      ),
+                                      toolTip: L10n.of(context).chats,
+                                    ),
+                                    TweenAnimationBuilder<double>(
+                                      tween: Tween(
+                                        begin: 0,
+                                        end: hasUnreadChats ? 1 : 0,
+                                      ),
+                                      duration:
+                                          PantheonThemes.animationDuration,
+                                      curve: PantheonThemes.animationCurve,
+                                      builder: (context, progress, child) =>
+                                          ClipRect(
+                                            key: const Key(
+                                              'unread_rail_destination',
+                                            ),
+                                            child: Align(
+                                              alignment: Alignment.topCenter,
+                                              heightFactor: progress,
+                                              child: Transform.translate(
+                                                offset: Offset(
+                                                  0,
+                                                  (progress - 1) * 60,
+                                                ),
+                                                child: child,
+                                              ),
+                                            ),
+                                          ),
+                                      child: IgnorePointer(
+                                        ignoring: !hasUnreadChats,
+                                        child: ExcludeSemantics(
+                                          excluding: !hasUnreadChats,
+                                          child: NaviRailItem(
+                                            height: 52,
+                                            isSelected:
+                                                activeSpaceId == null &&
+                                                unreadSelected &&
+                                                !isSettings,
+                                            onTap: onGoToUnread,
+                                            icon: const Padding(
+                                              padding: EdgeInsets.all(12),
+                                              child: Icon(
+                                                Icons.mark_chat_unread_outlined,
+                                              ),
+                                            ),
+                                            selectedIcon: const Padding(
+                                              padding: EdgeInsets.all(12),
+                                              child: Icon(
+                                                Icons.mark_chat_unread,
+                                              ),
+                                            ),
+                                            toolTip: L10n.of(context).unread,
+                                            unreadBadgeFilter: (room) =>
+                                                !room.isSpace,
+                                            unreadBadgePosition:
+                                                BadgePosition.topEnd(
+                                                  top: -4,
+                                                  end: -6,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                            selectedIcon: const Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Icon(Icons.forum),
-                            ),
-                            toolTip: L10n.of(context).chats,
-                            unreadBadgeFilter: (room) => true,
                           );
                         }
                         i--;

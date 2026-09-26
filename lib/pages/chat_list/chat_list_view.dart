@@ -43,7 +43,9 @@ class ChatListView extends StatelessWidget {
               curve: PantheonThemes.animationCurve,
               child: SpacesNavigationRail(
                 activeSpaceId: controller.activeSpaceId,
-                onGoToChats: controller.clearActiveSpace,
+                unreadSelected: controller.activeFilter == ActiveFilter.unread,
+                onGoToChats: controller.showAllChats,
+                onGoToUnread: controller.showUnreadChats,
                 onGoToSpaceId: controller.setActiveSpace,
               ),
             ),

@@ -74,6 +74,31 @@ class ChatListController extends State<ChatList>
 
   String? get activeSpaceId => _activeSpaceId;
 
+  bool get hasUnreadChats => Matrix.of(
+    context,
+  ).client.rooms.any((room) => !room.isSpace && room.isUnreadOrInvited);
+
+  void showAllChats() => setState(() {
+    activeFilter = ActiveFilter.allChats;
+    _activeSpaceId = null;
+    Matrix.of(context).activeSpaceId = null;
+  });
+
+  void showUnreadChats() => setState(() {
+    activeFilter = ActiveFilter.unread;
+    _activeSpaceId = null;
+    Matrix.of(context).activeSpaceId = null;
+  });
+
+  void refreshUnreadChats() {
+    if (!mounted) return;
+    setState(() {
+      if (activeFilter == ActiveFilter.unread && !hasUnreadChats) {
+        activeFilter = ActiveFilter.allChats;
+      }
+    });
+  }
+
   Future<void> setActiveSpace(String spaceId) async {
     await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
     if (!mounted) return;
@@ -159,7 +184,7 @@ class ChatListController extends State<ChatList>
       case ActiveFilter.groups:
         return (room) => !room.isSpace && !room.isDirectChat;
       case ActiveFilter.unread:
-        return (room) => room.isUnreadOrInvited;
+        return (room) => !room.isSpace && room.isUnreadOrInvited;
       case ActiveFilter.tag:
         return (room) => room.tags.keys.contains(activeTag);
     }
@@ -373,6 +398,18 @@ class ChatListController extends State<ChatList>
   }
 
   StreamSubscription? _onRoomTagUpdate;
+  StreamSubscription? _onUnreadUpdate;
+
+  void _listenForUnreadUpdates(Client client) {
+    _onUnreadUpdate?.cancel();
+    _onUnreadUpdate = client.onSync.stream
+        .where((sync) => sync.hasRoomUpdate)
+        .listen((_) {
+          if (activeFilter == ActiveFilter.unread && !hasUnreadChats) {
+            refreshUnreadChats();
+          }
+        });
+  }
 
   @override
   void initState() {
@@ -428,6 +465,10 @@ class ChatListController extends State<ChatList>
           ) ??
           ActiveFilter.allChats;
     }
+    if (activeFilter == ActiveFilter.unread && !hasUnreadChats) {
+      activeFilter = ActiveFilter.allChats;
+    }
+    _listenForUnreadUpdates(Matrix.of(context).client);
 
     _processPushHelperCrashReport();
 
@@ -452,6 +493,7 @@ class ChatListController extends State<ChatList>
     _callEventSubscription?.cancel();
     _directShareShortcutSubscription?.cancel();
     _onRoomTagUpdate?.cancel();
+    _onUnreadUpdate?.cancel();
     scrollController.removeListener(_onScroll);
     searchController.dispose();
     searchFocusNode.dispose();
@@ -730,7 +772,7 @@ class ChatListController extends State<ChatList>
           future: room.forceMarkRead,
         );
         if (result.asValue?.value == true && mounted) {
-          setState(() {});
+          refreshUnreadChats();
           unawaited(
             clearReadNotifications(
               client: room.client,
@@ -955,6 +997,7 @@ class ChatListController extends State<ChatList>
       _activeSpaceId = null;
       Matrix.of(context).setActiveClient(client);
     });
+    _listenForUnreadUpdates(client);
     _clientStream.add(client);
     _directShareShortcutClients = [];
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -975,6 +1018,7 @@ class ChatListController extends State<ChatList>
         ).setActiveClient(Matrix.of(context).currentBundle!.first);
       }
     });
+    _listenForUnreadUpdates(Matrix.of(context).client);
   }
 
   Future<void> editBundlesForAccount(

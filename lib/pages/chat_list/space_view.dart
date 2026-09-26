@@ -42,12 +42,14 @@ enum SpaceActions { addChild, settings, leave }
 class SpaceView extends StatefulWidget {
   final String spaceId;
   final void Function() onBack;
+  final void Function() onUnreadChanged;
   final void Function(Room room) onChatTab;
   final String? activeChat;
 
   const SpaceView({
     required this.spaceId,
     required this.onBack,
+    required this.onUnreadChanged,
     required this.onChatTab,
     required this.activeChat,
     super.key,
@@ -362,6 +364,7 @@ class _SpaceViewState extends State<SpaceView> {
         );
         if (result.asValue?.value == true && mounted) {
           setState(() {});
+          widget.onUnreadChanged();
           unawaited(
             clearReadNotifications(
               client: room.client,
