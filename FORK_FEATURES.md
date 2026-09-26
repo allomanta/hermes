@@ -16,6 +16,11 @@ Added features on top of upstream that need to be maintained through any merges 
 - Direct share integration for android [1b0b9854c, 98a65e87d, 24b253b30]
 - Markdown tweaks [4caf7c224, 2eb0c4658, d6c5c6196]
 - Sticker pack picker at the top of the sticker picker to quickly scroll to the right pack [68041b72a, 8f46b38e9, 186828702]
+- Force mark a chat as read to clear stale unread counts [9c356f9bc, 425bf17b6, 82ec9503e]
+- Unread chats filter in the navigation rail [306cfb829]
+- Drag to reorder spaces in the navigation rail [5373d33b6]
+- Open space actions from navigation rail icons [d96f91ce4]
+- Sort space chats like the all chats list [e74b1a1dd]
 
 ## UI tweaks
 - Nav rail resizes [8b642d768, c57b7f39d, 82352a97e, adb6b0dde, 927c18d4b]
@@ -28,6 +33,8 @@ Added features on top of upstream that need to be maintained through any merges 
 - Darken sending message bubbles [8a47c3211]
 - Attachment button is moved to the right of the input [9e5d0a91a, 8769006bf]
 - Login layout spacing tweaks, was off on some devices for me [2bc689cd5]
+- Animated chat filter toggle and sliding space selection indicator [8cb8dcaa1, 5080efdde]
+- Compact chat input and emoji/sticker picker [059b6cc57, 393757b39]
 
 ## Optimizations
 - Different media caching [cfd6ce308]
@@ -46,6 +53,12 @@ Added features on top of upstream that need to be maintained through any merges 
     - Sync updates clear notifications for rooms whose normal unread state is clear, supporting reads on other devices [335a8760a]
     - Don't get stuck on read receipt failure [bf2c95d51]
     - Notifications on macos (weren't working for me before) [0a00dacd4, a6d962f9b, 3e05215bb]
+- Clear pending Android shares after use [cb80b234b]
+- Restart stalled desktop sync after sleep or network loss [ec3867fab, 74398aa56, 2687eec6e]
+- Prevent back swipes from the chat list to a blank page [82cd2cbc2, 957ac4394]
+- Sanitize malformed UTF-16 in rail labels and avatars [8cb8dcaa1]
+- Position chat context menus at the tap or click and prevent overflow [5f53eab66]
+- Hide left spaces and remove stale cached spaces [cc7b0bca1, 868925a36]
 
 ## Miscelanous
 - Name/logo changes because I thought it looked/sounded cool [c5bdac807, 937c1e13d, 88d9c9d29, 0a4b1e85b, 079418639]
