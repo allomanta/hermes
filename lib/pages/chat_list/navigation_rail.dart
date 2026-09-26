@@ -360,6 +360,7 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
                     ),
                     toolTip: L10n.of(context).settings,
                   ),
+                  SizedBox(height: 10),
                 ],
               ),
             );

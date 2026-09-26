@@ -20,6 +20,7 @@ class StartChatFab extends StatelessWidget {
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
       onPressed: () => context.go('/rooms/newprivatechat'),
       extendedIconLabelSpacing: extended ? 10 : 0,
+      shape: CircleBorder(),
       extendedPadding: extended
           ? null
           : const EdgeInsets.symmetric(horizontal: 16),
