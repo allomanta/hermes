@@ -218,7 +218,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                     children: [
                       if (packSlugs.isNotEmpty)
                         SizedBox(
-                          height: kToolbarHeight + 10,
+                          height: kToolbarHeight + 4,
                           child: ScrollConfiguration(
                             behavior: ScrollConfiguration.of(context).copyWith(
                               dragDevices: {
@@ -271,7 +271,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                           ),
                         ),
                       SizedBox(
-                        height: 42,
+                        height: 32,
                         child: TextField(
                           controller: _searchController,
                           autofocus: false,
