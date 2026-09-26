@@ -370,6 +370,43 @@ class _SpaceViewState extends State<SpaceView> {
                   .rateLimit(const Duration(seconds: 1)),
               builder: (context, snapshot) {
                 final filter = _filterController.text.trim().toLowerCase();
+                final roomOrder = {
+                  for (var i = 0; i < room.client.rooms.length; i++)
+                    if (room.client.rooms[i].membership != Membership.leave)
+                      room.client.rooms[i].id: i,
+                };
+                final childrenById = {
+                  for (final child in _discoveredChildren) child.roomId: child,
+                };
+                for (final child in room.spaceChildren) {
+                  final id = child.roomId;
+                  if (id == null || childrenById.containsKey(id)) continue;
+                  final joinedRoom = room.client.getRoomById(id);
+                  if (joinedRoom == null ||
+                      joinedRoom.membership == Membership.leave) {
+                    continue;
+                  }
+                  childrenById[id] = SpaceRoomsChunk$2(
+                    guestCanJoin: false,
+                    numJoinedMembers: 0,
+                    roomId: id,
+                    worldReadable: false,
+                    childrenState: [],
+                    name: joinedRoom.getLocalizedDisplayname(),
+                    avatarUrl: joinedRoom.avatar,
+                    roomType: joinedRoom.isSpace ? 'm.space' : null,
+                  );
+                }
+                final children = childrenById.values.indexed.toList()
+                  ..sort(
+                    (a, b) =>
+                        (roomOrder[a.$2.roomId] ??
+                                room.client.rooms.length + a.$1)
+                            .compareTo(
+                              roomOrder[b.$2.roomId] ??
+                                  room.client.rooms.length + b.$1,
+                            ),
+                  );
                 return CustomScrollView(
                   slivers: [
                     SliverAppBar(
@@ -435,9 +472,9 @@ class _SpaceViewState extends State<SpaceView> {
                       ),
                     ),
                     SliverList.builder(
-                      itemCount: _discoveredChildren.length + 1,
+                      itemCount: children.length + 1,
                       itemBuilder: (context, i) {
-                        if (i == _discoveredChildren.length) {
+                        if (i == children.length) {
                           if (_noMoreRooms) {
                             return const SizedBox.shrink();
                           }
@@ -454,7 +491,7 @@ class _SpaceViewState extends State<SpaceView> {
                             ),
                           );
                         }
-                        final item = _discoveredChildren[i];
+                        final item = children[i].$2;
                         var joinedRoom = room.client.getRoomById(item.roomId);
                         final displayname =
                             item.name ??
