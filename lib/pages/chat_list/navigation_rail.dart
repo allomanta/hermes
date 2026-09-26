@@ -3,14 +3,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:badges/badges.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat_list/chat_filter_toggle.dart';
 import 'package:hermes/pages/chat_list/navi_rail_item.dart';
 import 'package:hermes/pages/chat_list/start_chat_fab.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/stream_extension.dart';
+import 'package:hermes/utils/well_formed_text.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
@@ -79,114 +80,15 @@ class SpacesNavigationRail extends StatelessWidget {
                       itemCount: rootSpaces.length + 2,
                       itemBuilder: (context, i) {
                         if (i == 0) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  top: 6,
-                                  left: 0,
-                                  right: 0,
-                                  child: Center(
-                                    child: AnimatedContainer(
-                                      key: const Key('chat_filters_capsule'),
-                                      width: 48,
-                                      height: hasUnreadChats ? 92 : 0,
-                                      duration:
-                                          PantheonThemes.animationDuration,
-                                      curve: PantheonThemes.animationCurve,
-                                      decoration: BoxDecoration(
-                                        color: theme
-                                            .colorScheme
-                                            .surfaceContainerHigh,
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Column(
-                                  children: [
-                                    NaviRailItem(
-                                      height: 52,
-                                      isSelected:
-                                          activeSpaceId == null &&
-                                          !unreadSelected &&
-                                          !isSettings,
-                                      onTap: onGoToChats,
-                                      icon: const Padding(
-                                        padding: EdgeInsets.all(12),
-                                        child: Icon(Icons.forum_outlined),
-                                      ),
-                                      selectedIcon: const Padding(
-                                        padding: EdgeInsets.all(12),
-                                        child: Icon(Icons.forum),
-                                      ),
-                                      toolTip: L10n.of(context).chats,
-                                    ),
-                                    TweenAnimationBuilder<double>(
-                                      tween: Tween(
-                                        begin: 0,
-                                        end: hasUnreadChats ? 1 : 0,
-                                      ),
-                                      duration:
-                                          PantheonThemes.animationDuration,
-                                      curve: PantheonThemes.animationCurve,
-                                      builder: (context, progress, child) =>
-                                          ClipRect(
-                                            key: const Key(
-                                              'unread_rail_destination',
-                                            ),
-                                            child: Align(
-                                              alignment: Alignment.topCenter,
-                                              heightFactor: progress,
-                                              child: Transform.translate(
-                                                offset: Offset(
-                                                  0,
-                                                  (progress - 1) * 60,
-                                                ),
-                                                child: child,
-                                              ),
-                                            ),
-                                          ),
-                                      child: IgnorePointer(
-                                        ignoring: !hasUnreadChats,
-                                        child: ExcludeSemantics(
-                                          excluding: !hasUnreadChats,
-                                          child: NaviRailItem(
-                                            height: 52,
-                                            isSelected:
-                                                activeSpaceId == null &&
-                                                unreadSelected &&
-                                                !isSettings,
-                                            onTap: onGoToUnread,
-                                            icon: const Padding(
-                                              padding: EdgeInsets.all(12),
-                                              child: Icon(
-                                                Icons.mark_chat_unread_outlined,
-                                              ),
-                                            ),
-                                            selectedIcon: const Padding(
-                                              padding: EdgeInsets.all(12),
-                                              child: Icon(
-                                                Icons.mark_chat_unread,
-                                              ),
-                                            ),
-                                            toolTip: L10n.of(context).unread,
-                                            unreadBadgeFilter: (room) =>
-                                                !room.isSpace,
-                                            unreadBadgePosition:
-                                                BadgePosition.topEnd(
-                                                  top: -4,
-                                                  end: -6,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                          return ChatFilterToggle(
+                            hasUnreadChats: hasUnreadChats,
+                            selection: isSettings || activeSpaceId != null
+                                ? ChatFilterSelection.none
+                                : unreadSelected && hasUnreadChats
+                                ? ChatFilterSelection.unread
+                                : ChatFilterSelection.all,
+                            onAllTap: onGoToChats,
+                            onUnreadTap: onGoToUnread,
                           );
                         }
                         i--;
@@ -202,10 +104,11 @@ class SpacesNavigationRail extends StatelessWidget {
                           );
                         }
                         final space = rootSpaces[i];
-                        final displayname = rootSpaces[i]
-                            .getLocalizedDisplayname(
-                              MatrixLocals(L10n.of(context)),
-                            );
+                        final displayname = wellFormedText(
+                          rootSpaces[i].getLocalizedDisplayname(
+                            MatrixLocals(L10n.of(context)),
+                          ),
+                        );
                         final spaceChildrenIds = space.spaceChildren
                             .map((c) => c.roomId)
                             .toSet();

@@ -18,8 +18,6 @@ class NaviRailItem extends StatelessWidget {
   final Widget icon;
   final Widget? selectedIcon;
   final bool Function(Room)? unreadBadgeFilter;
-  final BadgePosition? unreadBadgePosition;
-  final double height;
 
   const NaviRailItem({
     required this.toolTip,
@@ -28,8 +26,6 @@ class NaviRailItem extends StatelessWidget {
     required this.icon,
     this.selectedIcon,
     this.unreadBadgeFilter,
-    this.unreadBadgePosition,
-    this.height = 60,
     super.key,
   });
   @override
@@ -42,7 +38,7 @@ class NaviRailItem extends StatelessWidget {
     return HoverBuilder(
       builder: (context, hovered) {
         return SizedBox(
-          height: height,
+          height: 60,
           width: PantheonThemes.navRailWidth,
           child: Stack(
             children: [
@@ -82,9 +78,10 @@ class NaviRailItem extends StatelessWidget {
                           ? icon
                           : UnreadRoomsBadge(
                               filter: unreadBadgeFilter,
-                              badgePosition:
-                                  unreadBadgePosition ??
-                                  BadgePosition.topEnd(top: -10, end: -6),
+                              badgePosition: BadgePosition.topEnd(
+                                top: -10,
+                                end: -6,
+                              ),
                               child: icon,
                             ),
                     ),

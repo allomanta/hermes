@@ -4,6 +4,7 @@ import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/room_status_extension.dart';
+import 'package:hermes/utils/well_formed_text.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/hover_builder.dart';
@@ -37,7 +38,7 @@ class ChatListItem extends StatelessWidget {
     final theme = Theme.of(context);
 
     final isMuted = room.pushRuleState != PushRuleState.notify;
-    final typingText = room.getLocalizedTypingText(context);
+    final typingText = wellFormedText(room.getLocalizedTypingText(context));
     final lastEvent = room.lastEvent;
     final ownMessage = lastEvent?.senderId == room.client.userID;
     final directChatMatrixId = room.directChatMatrixID;
@@ -46,8 +47,8 @@ class ChatListItem extends StatelessWidget {
     final backgroundColor = activeChat
         ? theme.colorScheme.secondaryContainer
         : null;
-    final displayname = room.getLocalizedDisplayname(
-      MatrixLocals(L10n.of(context)),
+    final displayname = wellFormedText(
+      room.getLocalizedDisplayname(MatrixLocals(L10n.of(context))),
     );
     final filter = this.filter;
     if (filter != null && !displayname.toLowerCase().contains(filter)) {
@@ -101,7 +102,9 @@ class ChatListItem extends StatelessWidget {
                             ),
                             mxContent: space.avatar,
                             size: Avatar.defaultSize * 0.75,
-                            name: space.getLocalizedDisplayname(),
+                            name: wellFormedText(
+                              space.getLocalizedDisplayname(),
+                            ),
                             onTap: () => onLongPress?.call(context),
                           ),
                         ),
@@ -309,21 +312,25 @@ class ChatListItem extends StatelessWidget {
                                         room.lastEvent?.senderId),
                               ),
                               builder: (context, snapshot) => Text(
-                                room.membership == Membership.invite
-                                    ? room
-                                              .getState(
-                                                EventTypes.RoomMember,
-                                                room.client.userID!,
-                                              )
-                                              ?.content
-                                              .tryGet<String>('reason') ??
-                                          (isDirectChat
-                                              ? L10n.of(context).newChatRequest
-                                              : L10n.of(
-                                                  context,
-                                                ).inviteGroupChat)
-                                    : snapshot.data ??
-                                          L10n.of(context).noMessagesYet,
+                                wellFormedText(
+                                  room.membership == Membership.invite
+                                      ? room
+                                                .getState(
+                                                  EventTypes.RoomMember,
+                                                  room.client.userID!,
+                                                )
+                                                ?.content
+                                                .tryGet<String>('reason') ??
+                                            (isDirectChat
+                                                ? L10n.of(
+                                                    context,
+                                                  ).newChatRequest
+                                                : L10n.of(
+                                                    context,
+                                                  ).inviteGroupChat)
+                                      : snapshot.data ??
+                                            L10n.of(context).noMessagesYet,
+                                ),
                                 softWrap: false,
                                 maxLines: room.notificationCount >= 1 ? 2 : 1,
                                 overflow: TextOverflow.ellipsis,
