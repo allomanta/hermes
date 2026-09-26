@@ -205,10 +205,25 @@ class _SpaceViewState extends State<SpaceView> {
         );
         if (!mounted) return;
         if (confirmed != OkCancelResult.ok) return;
+        if (space == null) {
+          widget.onBack();
+          return;
+        }
 
         final success = await showFutureLoadingDialog(
           context: context,
-          future: () async => await space?.leave(),
+          future: () async {
+            try {
+              await space.leave();
+            } on MatrixException catch (e) {
+              if (e.error != MatrixError.M_FORBIDDEN &&
+                  e.error != MatrixError.M_NOT_FOUND) {
+                rethrow;
+              }
+            }
+            await space.client.database.forgetRoom(space.id);
+            space.client.rooms.removeWhere((room) => room.id == space.id);
+          },
         );
         if (!mounted) return;
         if (success.error != null) return;

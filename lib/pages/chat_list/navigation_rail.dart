@@ -45,6 +45,42 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
   final ScrollController _scrollController = ScrollController();
   String? _spaceOrderKey;
   List<String> _spaceOrder = [];
+  Client? _checkedClient;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final client = Matrix.of(context).client;
+    if (_checkedClient == client) return;
+    _checkedClient = client;
+    unawaited(_removeStaleSpaces(client));
+  }
+
+  Future<void> _removeStaleSpaces(Client client) async {
+    try {
+      await client.roomsLoading;
+      final locallyJoinedSpaces = client.rooms
+          .where((room) => room.isSpace && room.membership == Membership.join)
+          .toList();
+      final joinedIds = (await client.getJoinedRooms()).toSet();
+      final staleSpaces = locallyJoinedSpaces
+          .where((space) => !joinedIds.contains(space.id))
+          .toList();
+      for (final space in staleSpaces) {
+        await client.database.forgetRoom(space.id);
+        client.rooms.removeWhere((room) => room.id == space.id);
+      }
+      if (!mounted || Matrix.of(context).client != client) return;
+      if (staleSpaces.isNotEmpty) {
+        setState(() {});
+        if (staleSpaces.any((space) => space.id == widget.activeSpaceId)) {
+          widget.onGoToChats();
+        }
+      }
+    } catch (e, s) {
+      Logs().w('Unable to check joined spaces', e, s);
+    }
+  }
 
   @override
   void dispose() {

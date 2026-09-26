@@ -55,6 +55,15 @@ class _Space extends Fake implements Room {
   ]) => displayName;
 }
 
+class _Database extends Fake implements DatabaseApi {
+  final forgottenRooms = <String>[];
+
+  @override
+  Future<void> forgetRoom(String roomId) async {
+    forgottenRooms.add(roomId);
+  }
+}
+
 class _Client extends Fake implements Client {
   @override
   final rooms = <Room>[
@@ -66,6 +75,16 @@ class _Client extends Fake implements Client {
   String get userID => '@me:example.org';
   @override
   String get clientName => 'test-client';
+  @override
+  final _Database database = _Database();
+  @override
+  Future<void>? get roomsLoading => Future.value();
+  @override
+  Future<List<String>> getJoinedRooms() async => [
+    '!room:example.org',
+    '!space:example.org',
+    '!second:example.org',
+  ];
   @override
   final onSync = CachedStreamController<SyncUpdate>();
 }
@@ -89,6 +108,7 @@ void main() {
     client.rooms.add(
       _Space('!left:example.org', 'Left Space')..membership = Membership.leave,
     );
+    client.rooms.add(_Space('!ghost:example.org', 'Ghost Space'));
     addTearDown(client.onSync.close);
     String? selectedSpace;
     final router = GoRouter(
@@ -124,6 +144,8 @@ void main() {
     final first = find.byKey(const ValueKey('!space:example.org'));
     final second = find.byKey(const ValueKey('!second:example.org'));
     expect(find.byKey(const ValueKey('!left:example.org')), findsNothing);
+    expect(find.byKey(const ValueKey('!ghost:example.org')), findsNothing);
+    expect(client.database.forgottenRooms, ['!ghost:example.org']);
     expect(tester.getTopLeft(first).dy, lessThan(tester.getTopLeft(second).dy));
 
     await tester.tap(second);
@@ -151,6 +173,7 @@ void main() {
       greaterThan(tester.getTopLeft(second).dy),
     );
     expect(find.byKey(const ValueKey('!left:example.org')), findsNothing);
+    expect(find.byKey(const ValueKey('!ghost:example.org')), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpWidget(app(TargetPlatform.android));
