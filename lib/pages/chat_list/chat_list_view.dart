@@ -9,6 +9,7 @@ import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/chat_list/chat_list.dart';
 import 'package:hermes/pages/chat_list/navigation_rail.dart';
 import 'package:hermes/pages/chat_list/start_chat_fab.dart';
+import 'package:hermes/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'chat_list_body.dart';
@@ -42,6 +43,7 @@ class ChatListView extends StatelessWidget {
               duration: PantheonThemes.animationDuration,
               curve: PantheonThemes.animationCurve,
               child: SpacesNavigationRail(
+                key: ValueKey(Matrix.of(context).client.userID),
                 activeSpaceId: controller.activeSpaceId,
                 unreadSelected: controller.activeFilter == ActiveFilter.unread,
                 onGoToChats: controller.showAllChats,

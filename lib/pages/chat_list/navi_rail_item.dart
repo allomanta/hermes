@@ -18,6 +18,7 @@ class NaviRailItem extends StatelessWidget {
   final Widget icon;
   final Widget? selectedIcon;
   final bool Function(Room)? unreadBadgeFilter;
+  final bool showSelectionIndicator;
 
   const NaviRailItem({
     required this.toolTip,
@@ -26,6 +27,7 @@ class NaviRailItem extends StatelessWidget {
     required this.icon,
     this.selectedIcon,
     this.unreadBadgeFilter,
+    this.showSelectionIndicator = true,
     super.key,
   });
   @override
@@ -47,7 +49,10 @@ class NaviRailItem extends StatelessWidget {
                 bottom: 8,
                 left: 0,
                 child: AnimatedContainer(
-                  width: isSelected && selectedIcon == null
+                  width:
+                      showSelectionIndicator &&
+                          isSelected &&
+                          selectedIcon == null
                       ? PantheonThemes.isColumnMode(context)
                             ? 8
                             : 4

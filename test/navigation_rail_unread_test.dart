@@ -33,8 +33,11 @@ class _Room extends Fake implements Room {
 }
 
 class _Space extends Fake implements Room {
+  _Space(this.id, this.displayName);
+
   @override
-  String get id => '!space:example.org';
+  final String id;
+  final String displayName;
   @override
   bool get isSpace => true;
   @override
@@ -48,12 +51,16 @@ class _Space extends Fake implements Room {
   @override
   String getLocalizedDisplayname([
     MatrixLocalizations i18n = const MatrixDefaultLocalizations(),
-  ]) => '😀 ${String.fromCharCode(0xd800)} Space';
+  ]) => displayName;
 }
 
 class _Client extends Fake implements Client {
   @override
-  final rooms = <Room>[_Room(), _Space()];
+  final rooms = <Room>[
+    _Room(),
+    _Space('!space:example.org', '😀 ${String.fromCharCode(0xd800)} Space'),
+    _Space('!second:example.org', 'Second Space'),
+  ];
   @override
   String get userID => '@me:example.org';
   @override
@@ -68,7 +75,7 @@ class _Matrix extends Fake with Diagnosticable implements MatrixState {
 }
 
 void main() {
-  testWidgets('unread destination slides in and filters the rail selection', (
+  testWidgets('filter and space indicators slide and fade independently', (
     tester,
   ) async {
     final client = _Client();
@@ -114,8 +121,11 @@ void main() {
     const capsuleKey = Key('chat_filters_capsule');
     const selectionKey = Key('chat_filters_selection');
     const opacityKey = Key('chat_filters_selection_opacity');
+    const spaceIndicatorKey = Key('space_selection_indicator');
+    const spaceOpacityKey = Key('space_selection_opacity');
     expect(tester.getSize(find.byKey(unreadKey)).height, 0);
     expect(tester.getSize(find.byKey(capsuleKey)), const Size(48, 48));
+    expect(tester.widget<Opacity>(find.byKey(spaceOpacityKey)).opacity, 0);
 
     (client.rooms.first as _Room).unread = true;
     client.onSync.add(
@@ -178,8 +188,15 @@ void main() {
     final fadingOut = tester.widget<Opacity>(find.byKey(opacityKey)).opacity;
     expect(fadingOut, greaterThan(0));
     expect(fadingOut, lessThan(1));
+    final spaceFadingIn = tester
+        .widget<Opacity>(find.byKey(spaceOpacityKey))
+        .opacity;
+    expect(spaceFadingIn, greaterThan(0));
+    expect(spaceFadingIn, lessThan(1));
     await tester.pumpAndSettle();
     expect(tester.widget<Opacity>(find.byKey(opacityKey)).opacity, 0);
+    expect(tester.widget<Opacity>(find.byKey(spaceOpacityKey)).opacity, 1);
+    final firstSpaceTop = tester.getTopLeft(find.byKey(spaceIndicatorKey)).dy;
     activeSpaceId.value = null;
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 125));
@@ -192,10 +209,46 @@ void main() {
     expect(fadingIn, lessThan(1));
     await tester.pumpAndSettle();
     expect(tester.widget<Opacity>(find.byKey(opacityKey)).opacity, 1);
+    expect(tester.widget<Opacity>(find.byKey(spaceOpacityKey)).opacity, 0);
     expect(
       tester.getTopLeft(find.byKey(selectionKey)).dy,
       closeTo(allChatsSelectionTop + 52, 0.1),
     );
+
+    activeSpaceId.value = '!space:example.org';
+    await tester.pumpAndSettle();
+    activeSpaceId.value = '!second:example.org';
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 160));
+    final movingSpaceTop = tester.getTopLeft(find.byKey(spaceIndicatorKey)).dy;
+    expect(movingSpaceTop, greaterThan(firstSpaceTop));
+    expect(movingSpaceTop, lessThan(firstSpaceTop + 60));
+    expect(
+      tester
+          .widget<Transform>(find.byKey(const Key('space_selection_scale')))
+          .transform
+          .getMaxScaleOnAxis(),
+      greaterThan(1),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.byKey(spaceIndicatorKey)).dy,
+      closeTo(firstSpaceTop + 60, 0.1),
+    );
+    activeSpaceId.value = null;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 125));
+    expect(
+      tester.getTopLeft(find.byKey(spaceIndicatorKey)).dy,
+      closeTo(firstSpaceTop + 60, 0.1),
+    );
+    final spaceFadingOut = tester
+        .widget<Opacity>(find.byKey(spaceOpacityKey))
+        .opacity;
+    expect(spaceFadingOut, greaterThan(0));
+    expect(spaceFadingOut, lessThan(1));
+    await tester.pumpAndSettle();
+    expect(tester.widget<Opacity>(find.byKey(spaceOpacityKey)).opacity, 0);
 
     await tester.tap(find.byIcon(Icons.forum_outlined));
     await tester.pump();
@@ -249,5 +302,20 @@ void main() {
     expect(tester.getSize(find.byKey(capsuleKey)), const Size(48, 48));
     expect(tester.takeException(), isNull);
     await tester.pump(const Duration(seconds: 1));
+
+    tester.view.physicalSize = const Size(800, 220);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    activeSpaceId.value = '!second:example.org';
+    await tester.pumpAndSettle();
+    final beforeScroll = tester.getTopLeft(find.byKey(spaceIndicatorKey)).dy;
+    final scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    scrollable.position.jumpTo(40);
+    await tester.pump();
+    expect(
+      tester.getTopLeft(find.byKey(spaceIndicatorKey)).dy,
+      closeTo(beforeScroll - 40, 0.1),
+    );
   });
 }
