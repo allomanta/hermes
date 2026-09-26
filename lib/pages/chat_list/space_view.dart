@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_list/active_call_indicator.dart';
+import 'package:hermes/pages/chat_list/space_actions.dart';
 import 'package:hermes/pages/chat_list/unread_bubble.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
 import 'package:hermes/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
@@ -22,7 +23,6 @@ import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
 import 'package:hermes/widgets/hover_builder.dart';
 import 'package:hermes/widgets/matrix.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart' as sdk;
@@ -36,8 +36,6 @@ enum SpaceChildAction {
   removeFromSpace,
   leave,
 }
-
-enum SpaceActions { addChild, settings, leave }
 
 class SpaceView extends StatefulWidget {
   final String spaceId;
@@ -180,55 +178,6 @@ class _SpaceViewState extends State<SpaceView> {
     );
     final room = roomResult.result;
     if (room != null) widget.onChatTab(room);
-  }
-
-  Future<void> _onSpaceAction(SpaceActions action) async {
-    final space = Matrix.of(context).client.getRoomById(widget.spaceId);
-
-    switch (action) {
-      case SpaceActions.settings:
-        await space?.postLoad();
-        if (!mounted) return;
-        context.push('/rooms/${widget.spaceId}/details');
-        break;
-      case SpaceActions.addChild:
-        context.go('/rooms/newgroup?space_id=${widget.spaceId}');
-        break;
-      case SpaceActions.leave:
-        final confirmed = await showOkCancelAlertDialog(
-          context: context,
-          title: L10n.of(context).areYouSure,
-          message: L10n.of(context).archiveRoomDescription,
-          okLabel: L10n.of(context).leave,
-          cancelLabel: L10n.of(context).cancel,
-          isDestructive: true,
-        );
-        if (!mounted) return;
-        if (confirmed != OkCancelResult.ok) return;
-        if (space == null) {
-          widget.onBack();
-          return;
-        }
-
-        final success = await showFutureLoadingDialog(
-          context: context,
-          future: () async {
-            try {
-              await space.leave();
-            } on MatrixException catch (e) {
-              if (e.error != MatrixError.M_FORBIDDEN &&
-                  e.error != MatrixError.M_NOT_FOUND) {
-                rethrow;
-              }
-            }
-            await space.client.database.forgetRoom(space.id);
-            space.client.rooms.removeWhere((room) => room.id == space.id);
-          },
-        );
-        if (!mounted) return;
-        if (success.error != null) return;
-        widget.onBack();
-    }
   }
 
   Future<void> _showSpaceChildEditMenu(
@@ -473,33 +422,14 @@ class _SpaceViewState extends State<SpaceView> {
                               ),
                             ),
                             useRootNavigator: true,
-                            onSelected: _onSpaceAction,
-                            itemBuilder: (context) => [
-                              if (isAdmin)
-                                PopupMenuItem(
-                                  value: SpaceActions.addChild,
-                                  child: ListTile(
-                                    leading: Icon(Icons.edit_square),
-                                    title: Text(
-                                      L10n.of(context).addChatOrSubSpace,
-                                    ),
-                                  ),
-                                ),
-                              PopupMenuItem(
-                                value: SpaceActions.settings,
-                                child: ListTile(
-                                  leading: Icon(Icons.settings_outlined),
-                                  title: Text(L10n.of(context).settings),
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: SpaceActions.leave,
-                                child: ListTile(
-                                  leading: Icon(Icons.delete_outlined),
-                                  title: Text(L10n.of(context).leave),
-                                ),
-                              ),
-                            ],
+                            onSelected: (action) => performSpaceAction(
+                              context,
+                              room,
+                              action,
+                              onLeave: widget.onBack,
+                            ),
+                            itemBuilder: (context) =>
+                                spaceActionMenuItems(context, room),
                           ),
                         ),
                       ),

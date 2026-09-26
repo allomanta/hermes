@@ -11,6 +11,7 @@ import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_list/chat_filter_toggle.dart';
 import 'package:hermes/pages/chat_list/navi_rail_item.dart';
+import 'package:hermes/pages/chat_list/space_actions.dart';
 import 'package:hermes/pages/chat_list/start_chat_fab.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/stream_extension.dart';
@@ -46,6 +47,36 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
   String? _spaceOrderKey;
   List<String> _spaceOrder = [];
   Client? _checkedClient;
+  String? _pressedSpaceId;
+  Offset? _pressedPosition;
+  bool _reordered = false;
+  int? _dragStartIndex;
+
+  Future<void> _showSpaceMenu(Room space, Offset globalPosition) async {
+    final overlay =
+        Overlay.of(context, rootOverlay: true).context.findRenderObject()
+            as RenderBox;
+    final position = overlay.globalToLocal(globalPosition);
+    final action = await showMenu<SpaceActions>(
+      context: context,
+      useRootNavigator: true,
+      position: RelativeRect.fromRect(
+        position & Size.zero,
+        Offset.zero & overlay.size,
+      ),
+      items: spaceActionMenuItems(context, space),
+    );
+    if (!mounted || action == null) return;
+    await performSpaceAction(
+      context,
+      space,
+      action,
+      onLeave: () {
+        setState(() {});
+        if (widget.activeSpaceId == space.id) widget.onGoToChats();
+      },
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -188,7 +219,12 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
                         scrollDirection: Axis.vertical,
                         buildDefaultDragHandles: false,
                         itemCount: rootSpaces.length,
+                        onReorderStart: (index) {
+                          _dragStartIndex = index;
+                          _reordered = false;
+                        },
                         onReorderItem: (oldIndex, newIndex) {
+                          _reordered = true;
                           if (oldIndex == newIndex) return;
                           setState(() {
                             final moved = rootSpaces.removeAt(oldIndex);
@@ -203,6 +239,25 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
                               _spaceOrder,
                             ),
                           );
+                        },
+                        onReorderEnd: (index) {
+                          final pressedSpaceId = _pressedSpaceId;
+                          final pressedPosition = _pressedPosition;
+                          final startIndex = _dragStartIndex;
+                          _pressedSpaceId = null;
+                          _pressedPosition = null;
+                          _dragStartIndex = null;
+                          if (!useLongPressDrag ||
+                              _reordered ||
+                              index != startIndex ||
+                              pressedSpaceId == null ||
+                              pressedPosition == null) {
+                            return;
+                          }
+                          final space = client.getRoomById(pressedSpaceId);
+                          if (space != null) {
+                            unawaited(_showSpaceMenu(space, pressedPosition));
+                          }
                         },
                         header: ChatFilterToggle(
                           hasUnreadChats: hasUnreadChats,
@@ -262,17 +317,27 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
                               ),
                             ),
                           );
-                          return useLongPressDrag
-                              ? ReorderableDelayedDragStartListener(
-                                  key: ValueKey(space.id),
-                                  index: i,
-                                  child: item,
-                                )
-                              : ReorderableDragStartListener(
-                                  key: ValueKey(space.id),
-                                  index: i,
-                                  child: item,
-                                );
+                          return GestureDetector(
+                            key: ValueKey(space.id),
+                            onSecondaryTapUp: (details) => unawaited(
+                              _showSpaceMenu(space, details.globalPosition),
+                            ),
+                            child: Listener(
+                              onPointerDown: (event) {
+                                _pressedSpaceId = space.id;
+                                _pressedPosition = event.position;
+                              },
+                              child: useLongPressDrag
+                                  ? ReorderableDelayedDragStartListener(
+                                      index: i,
+                                      child: item,
+                                    )
+                                  : ReorderableDragStartListener(
+                                      index: i,
+                                      child: item,
+                                    ),
+                            ),
+                          );
                         },
                       ),
                     ),

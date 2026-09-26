@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_list/chat_filter_toggle.dart';
 import 'package:hermes/pages/chat_list/navigation_rail.dart';
+import 'package:hermes/pages/chat_list/space_actions.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/unread_rooms_badge.dart';
 import 'package:material_ui/material_ui.dart';
@@ -48,6 +49,8 @@ class _Space extends Fake implements Room {
   @override
   List<SpaceChild> get spaceChildren => [];
   @override
+  bool canChangeStateEvent(String action) => false;
+  @override
   Uri? get avatar => null;
   @override
   String getLocalizedDisplayname([
@@ -85,6 +88,14 @@ class _Client extends Fake implements Client {
     '!space:example.org',
     '!second:example.org',
   ];
+  @override
+  Room? getRoomById(String id) {
+    for (final room in rooms) {
+      if (room.id == id) return room;
+    }
+    return null;
+  }
+
   @override
   final onSync = CachedStreamController<SyncUpdate>();
 }
@@ -148,6 +159,17 @@ void main() {
     expect(client.database.forgottenRooms, ['!ghost:example.org']);
     expect(tester.getTopLeft(first).dy, lessThan(tester.getTopLeft(second).dy));
 
+    final rightClick = await tester.startGesture(
+      tester.getCenter(first),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await rightClick.up();
+    await tester.pumpAndSettle();
+    expect(find.byType(PopupMenuItem<SpaceActions>), findsNWidgets(2));
+    await tester.tapAt(const Offset(500, 500));
+    await tester.pumpAndSettle();
+
     await tester.tap(second);
     expect(selectedSpace, '!second:example.org');
     await tester.timedDrag(
@@ -191,6 +213,13 @@ void main() {
       '!space:example.org',
       '!second:example.org',
     ]);
+    expect(find.byType(PopupMenuItem<SpaceActions>), findsNothing);
+
+    final hold = await tester.startGesture(tester.getCenter(first));
+    await tester.pump(const Duration(milliseconds: 600));
+    await hold.up();
+    await tester.pumpAndSettle();
+    expect(find.byType(PopupMenuItem<SpaceActions>), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 
