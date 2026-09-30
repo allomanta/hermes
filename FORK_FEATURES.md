@@ -9,6 +9,7 @@ Added features on top of upstream that need to be maintained through any merges 
 - Hide nested spaces from navigation rail [349c0db97, 42f34548c]
 - Tapping on a message shows a popup instead of selecting it [789fa6efb, 50aa402ef, 304d2bc04, 281cf98b9, e3bab1225, 7f3bb0eca]
 - Choose whether to open stickers or emojis by default (always shows emojis when typing) [696ede3b3, 2aaafdad9]
+- Built-in emoji search in chat, reaction, and default-reaction pickers
 - Sticker picker stays open when typing on desktop and search grabs focus after opening [c5b472823, 812dabb4c, 9c2dd20e3]
 - Add toggle to switch a chat between a group and direct chat [c2fb42020, 43723c09c]
 - Some backfill options to copy the entire state locally for a faster scrolling/searching etc [d52bc0438, 02ace7168]

@@ -1013,7 +1013,18 @@ class Message extends StatelessWidget {
                                                                             enabled:
                                                                                 false,
                                                                           ),
+                                                                          searchViewConfig: SearchViewConfig(
+                                                                            backgroundColor:
+                                                                                theme.colorScheme.surface,
+                                                                            buttonIconColor:
+                                                                                theme.colorScheme.primary,
+                                                                            hintText: L10n.of(
+                                                                              context,
+                                                                            ).search,
+                                                                          ),
                                                                           categoryViewConfig: CategoryViewConfig(
+                                                                            extraTab:
+                                                                                CategoryExtraTab.SEARCH,
                                                                             initCategory:
                                                                                 Category.SMILEYS,
                                                                             backspaceColor:
