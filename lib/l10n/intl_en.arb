@@ -2151,6 +2151,7 @@
     "searchMore": "Search more...",
     "gallery": "Gallery",
     "files": "Files",
+    "links": "Links",
     "sessionLostBody": "Your session is lost. Please report this error to the developers at {url}. The error message is: {error}",
     "@sessionLostBody": {
         "type": "String",

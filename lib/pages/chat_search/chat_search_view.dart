@@ -1,8 +1,8 @@
-import 'package:hermes/l10n/l10n.dart';
-
 import 'package:hermes/config/themes.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_search/chat_search_files_tab.dart';
 import 'package:hermes/pages/chat_search/chat_search_images_tab.dart';
+import 'package:hermes/pages/chat_search/chat_search_links_tab.dart';
 import 'package:hermes/pages/chat_search/chat_search_message_tab.dart';
 import 'package:hermes/pages/chat_search/chat_search_page.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -76,6 +76,7 @@ class ChatSearchView extends StatelessWidget {
                 Tab(child: Text(L10n.of(context).messages)),
                 Tab(child: Text(L10n.of(context).gallery)),
                 Tab(child: Text(L10n.of(context).files)),
+                Tab(child: Text(L10n.of(context).links)),
               ],
             ),
             Expanded(
@@ -106,6 +107,14 @@ class ChatSearchView extends StatelessWidget {
                     endReached: controller.filesEndReached,
                     isLoading: controller.isLoading,
                     searchedUntil: controller.searchedUntil,
+                  ),
+                  ChatSearchLinksTab(
+                    room: room,
+                    onStartSearch: controller.startSearch,
+                    events: controller.links,
+                    endReached: controller.linksEndReached,
+                    isLoading: controller.linksIsLoading,
+                    searchedUntil: controller.linksSearchedUntil,
                   ),
                 ],
               ),

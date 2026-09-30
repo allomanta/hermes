@@ -2008,6 +2008,7 @@
         }
     },
     "files": "Bestanden",
+    "links": "Links",
     "unreadChatsInApp": "{appname}: {unread} ongelezen chats",
     "@unreadChatsInApp": {
         "type": "String",
