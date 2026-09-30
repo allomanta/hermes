@@ -25,6 +25,14 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (intent.action in shareActions) {
+            if ((intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) {
+                clearShareIntent()
+            } else {
+                // SEND content is in the extras, not a navigation deep link.
+                intent.setDataAndType(null, intent.type)
+            }
+        }
         if (savedInstanceState == null &&
             engine?.dartExecutor?.isExecutingDart == true &&
             (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0 &&
@@ -41,6 +49,8 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onPostResume() {
         super.onPostResume()
+        // Activity-aware plugins have now captured the initial share.
+        clearShareIntent()
         val notificationIntent = pendingNotificationIntent ?: return
         pendingNotificationIntent = null
         super.onNewIntent(notificationIntent)
@@ -51,12 +61,26 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         pendingNotificationIntent = null
+        if (intent.action in shareActions) {
+            intent.setDataAndType(null, intent.type)
+        }
         DirectShareShortcuts.handleIntent(intent)
         setIntent(intent)
         super.onNewIntent(intent)
+        clearShareIntent()
+    }
+
+    private fun clearShareIntent() {
+        if (intent.action !in shareActions) return
+        // Mutate the original too: Android can reuse it when recreating the Activity.
+        intent.action = Intent.ACTION_MAIN
+        intent.setDataAndType(null, null)
+        intent.replaceExtras(Bundle())
+        intent.clipData = null
     }
 
     companion object {
+        private val shareActions = setOf(Intent.ACTION_SEND, Intent.ACTION_SEND_MULTIPLE)
         var engine: FlutterEngine? = null
         fun provideEngine(context: Context): FlutterEngine {
             val applicationContext = context.applicationContext
