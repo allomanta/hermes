@@ -53,6 +53,7 @@ Added features on top of upstream that need to be maintained through any merges 
     - Sync updates clear notifications for rooms whose normal unread state is clear, supporting reads on other devices [335a8760a]
     - Don't get stuck on read receipt failure [bf2c95d51]
     - Notifications on macos (weren't working for me before) [0a00dacd4, a6d962f9b, 3e05215bb]
+    - Deliver fresh notification taps when Android recreates the Activity on a retained Flutter engine
 - Clear pending Android shares after use [cb80b234b]
 - Restart stalled desktop sync after sleep or network loss [ec3867fab, 74398aa56, 2687eec6e]
 - Prevent back swipes from the chat list to a blank page [82cd2cbc2, 957ac4394]
