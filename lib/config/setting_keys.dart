@@ -37,6 +37,7 @@ enum AppSettings<T> {
   ),
   renderHtml<bool>('chat.pantheon.renderHtml', true),
   fontSizeFactor<double>('chat.pantheon.font_size_factor', 1.0),
+  interfaceScale<double>('chat.pantheon.interface_scale', 1.0),
   hideRedactedEvents<bool>('chat.pantheon.hideRedactedEvents', true),
   hideUnknownEvents<bool>('chat.pantheon.hideUnknownEvents', true),
   autoplayImages<bool>('chat.pantheon.autoplay_images', true),

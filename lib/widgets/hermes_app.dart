@@ -13,6 +13,7 @@ import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/widgets/app_lock.dart';
 import 'package:hermes/widgets/escape_back_handler.dart';
+import 'package:hermes/widgets/interface_scale.dart';
 import 'package:hermes/widgets/layouts/call_overlay.dart';
 import 'package:hermes/widgets/theme_builder.dart';
 import 'package:go_router/go_router.dart';
@@ -64,7 +65,7 @@ class HermesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ThemeBuilder(
+    final app = ThemeBuilder(
       builder: (context, themeMode, primaryColor) => MaterialApp.router(
         title: AppSettings.applicationName.value,
         themeMode: themeMode,
@@ -105,5 +106,6 @@ class HermesApp extends StatelessWidget {
         ),
       ),
     );
+    return InterfaceScale(child: app);
   }
 }
