@@ -861,6 +861,7 @@
         }
     },
     "fontSize": "Font size",
+    "interfaceScale": "Interface scale",
     "@fontSize": {
         "type": "String",
         "placeholders": {}

@@ -2,8 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
 import 'dart:ui' show DisplayFeature;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hermes/config/setting_keys.dart';
 import 'package:provider/provider.dart';
@@ -27,6 +30,12 @@ class InterfaceScaleController extends ValueNotifier<double> {
     value = newScale;
     await AppSettings.interfaceScale.setItem(newScale);
   }
+
+  Future<void> zoomIn() => setScale(value + 0.1);
+
+  Future<void> zoomOut() => setScale(value - 0.1);
+
+  Future<void> reset() => setScale(1.0);
 }
 
 class InterfaceScale extends StatefulWidget {
@@ -42,7 +51,58 @@ class _InterfaceScaleState extends State<InterfaceScale> {
   final controller = InterfaceScaleController();
 
   @override
+  void initState() {
+    super.initState();
+    // Modal routes can stop normal focus bubbling, so zoom is handled first.
+    FocusManager.instance.addEarlyKeyEventHandler(_onZoomKey);
+  }
+
+  KeyEventResult _onZoomKey(KeyEvent event) {
+    if (kIsWeb ||
+        !{
+          TargetPlatform.macOS,
+          TargetPlatform.windows,
+          TargetPlatform.linux,
+        }.contains(defaultTargetPlatform) ||
+        (event is! KeyDownEvent && event is! KeyRepeatEvent)) {
+      return KeyEventResult.ignored;
+    }
+    final keyboard = HardwareKeyboard.instance;
+    final isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+    final modifier = isMacOS
+        ? keyboard.isMetaPressed
+        : keyboard.isControlPressed;
+    final otherModifier = isMacOS
+        ? keyboard.isControlPressed
+        : keyboard.isMetaPressed;
+    if (!modifier || otherModifier || keyboard.isAltPressed) {
+      return KeyEventResult.ignored;
+    }
+    final key = event.logicalKey;
+    if ({
+      LogicalKeyboardKey.equal,
+      LogicalKeyboardKey.add,
+      LogicalKeyboardKey.numpadAdd,
+    }.contains(key)) {
+      unawaited(controller.zoomIn());
+    } else if (!keyboard.isShiftPressed &&
+        {
+          LogicalKeyboardKey.minus,
+          LogicalKeyboardKey.numpadSubtract,
+        }.contains(key)) {
+      unawaited(controller.zoomOut());
+    } else if (!keyboard.isShiftPressed &&
+        {LogicalKeyboardKey.digit0, LogicalKeyboardKey.numpad0}.contains(key)) {
+      unawaited(controller.reset());
+    } else {
+      return KeyEventResult.ignored;
+    }
+    return KeyEventResult.handled;
+  }
+
+  @override
   void dispose() {
+    FocusManager.instance.removeEarlyKeyEventHandler(_onZoomKey);
     controller.dispose();
     super.dispose();
   }

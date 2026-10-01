@@ -13,6 +13,7 @@ import 'package:hermes/pages/chat/events/state_message.dart';
 import 'package:hermes/utils/account_config.dart';
 import 'package:hermes/utils/color_value.dart';
 import 'package:hermes/widgets/avatar.dart';
+import 'package:hermes/widgets/interface_scale.dart';
 import 'package:hermes/widgets/layouts/max_width_body.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/mxc_image.dart';
@@ -30,6 +31,7 @@ class SettingsStyleView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final interfaceScale = InterfaceScaleController.of(context);
 
     const colorPickerSize = 32.0;
     final client = Matrix.of(context).client;
@@ -68,6 +70,32 @@ class SettingsStyleView extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            Divider(color: theme.dividerColor),
+            ListTile(
+              title: Text(L10n.of(context).interfaceScale),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${(interfaceScale.value * 100).round()}%'),
+                  IconButton(
+                    tooltip: L10n.of(context).reset,
+                    icon: const Icon(Icons.restart_alt),
+                    onPressed: interfaceScale.value == 1.0
+                        ? null
+                        : interfaceScale.reset,
+                  ),
+                ],
+              ),
+            ),
+            Slider.adaptive(
+              min: InterfaceScaleController.minScale,
+              max: InterfaceScaleController.maxScale,
+              divisions: 15,
+              value: interfaceScale.value,
+              label: '${(interfaceScale.value * 100).round()}%',
+              semanticFormatterCallback: (value) => '${(value * 100).round()}%',
+              onChanged: interfaceScale.setScale,
             ),
             Divider(color: theme.dividerColor),
             ListTile(
