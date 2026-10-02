@@ -4,6 +4,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:hermes/config/themes.dart';
+import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat/read_receipts_dialog.dart';
+import 'package:hermes/utils/matrix_sdk_extensions/event_read_receipts_extension.dart';
 import 'package:hermes/widgets/avatar.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
@@ -11,7 +14,8 @@ import 'package:matrix/matrix.dart';
 
 class SeenByRow extends StatelessWidget {
   final Event event;
-  const SeenByRow({super.key, required this.event});
+  final Timeline? timeline;
+  const SeenByRow({super.key, required this.event, this.timeline});
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +31,9 @@ class SeenByRow extends StatelessWidget {
             false,
       ),
       builder: (context, asyncSnapshot) {
-        final seenByUsers = event.receipts
+        final seenByUsers = event
+            .readReceiptsForMessage(timeline: timeline, includeLater: false)
             .map((r) => r.user)
-            .where(
-              (user) =>
-                  user.id != event.room.client.userID &&
-                  user.id != event.senderId,
-            )
             .toList();
         return Container(
           width: double.infinity,
@@ -63,10 +63,18 @@ class SeenByRow extends StatelessWidget {
                         ? seenByUsers.sublist(0, maxAvatars)
                         : seenByUsers)
                     .map(
-                      (user) => Avatar(
-                        mxContent: user.avatarUrl,
-                        name: user.calcDisplayname(),
-                        size: 16,
+                      (user) => Tooltip(
+                        message: L10n.of(context).readBy,
+                        child: Avatar(
+                          client: event.room.client,
+                          mxContent: user.avatarUrl,
+                          name: user.calcDisplayname(),
+                          size: 16,
+                          onTap: () => event.showReadReceiptsDialog(
+                            context,
+                            timeline: timeline,
+                          ),
+                        ),
                       ),
                     ),
                 if (seenByUsers.length > maxAvatars)
@@ -76,10 +84,20 @@ class SeenByRow extends StatelessWidget {
                     child: Material(
                       color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(32),
-                      child: Center(
-                        child: Text(
-                          '+${seenByUsers.length - maxAvatars}',
-                          style: const TextStyle(fontSize: 9),
+                      child: Tooltip(
+                        message: L10n.of(context).readBy,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(32),
+                          onTap: () => event.showReadReceiptsDialog(
+                            context,
+                            timeline: timeline,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '+${seenByUsers.length - maxAvatars}',
+                              style: const TextStyle(fontSize: 9),
+                            ),
+                          ),
                         ),
                       ),
                     ),

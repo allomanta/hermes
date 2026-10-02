@@ -12,6 +12,7 @@ Added features on top of upstream that need to be maintained through any merges 
 - Built-in emoji search in chat, reaction, and default-reaction pickers
 - Saved global interface scale (75–150%) in Appearance settings, with Ctrl/Cmd +/− and 0 on desktop
 - Links tab in chat search with clickable URLs and jumps to the original messages
+- Open live read-receipt details from message timestamps and reader avatars, including the overflow bubble
 - Sticker picker stays open when typing on desktop and search grabs focus after opening [c5b472823, 812dabb4c, 9c2dd20e3]
 - Add toggle to switch a chat between a group and direct chat [c2fb42020, 43723c09c]
 - Some backfill options to copy the entire state locally for a faster scrolling/searching etc [d52bc0438, 02ace7168]
