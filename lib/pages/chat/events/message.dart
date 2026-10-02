@@ -30,6 +30,7 @@ import '../../../config/app_config.dart';
 import '../sticker_picker_dialog.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
+import 'message_timestamp.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
 import 'dart:ui' as ui;
@@ -817,13 +818,12 @@ class Message extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 if (event.status.isSent &&
                                     (!previousEventSameSender || selected))
-                                  Text(
-                                    ' ${selected ? event.originServerTs.localizedDetailedTime(context) : event.originServerTs.localizedTimeOfDay(context)}',
-                                    style: TextStyle(
-                                      color: eventStateTextColor,
-                                      fontSize: 11,
-                                      shadows: wallpaperTextShadow,
-                                    ),
+                                  MessageTimestamp(
+                                    event: event,
+                                    timeline: timeline,
+                                    detailed: selected,
+                                    color: eventStateTextColor,
+                                    shadows: wallpaperTextShadow,
                                   ),
                                 if (isEdited) ...[
                                   Text(' ', style: TextStyle(fontSize: 11)),
