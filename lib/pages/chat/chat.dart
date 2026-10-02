@@ -36,6 +36,7 @@ import 'package:hermes/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:hermes/utils/matrix_sdk_extensions/room_send_text_extension.dart';
 import 'package:hermes/utils/other_party_can_receive.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/utils/push_helper.dart';
@@ -867,7 +868,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     // ignore: unawaited_futures
-    room.sendTextEvent(
+    room.sendTextEventWithFormatting(
       sendController.text,
       inReplyTo: replyEvent,
       editEventId: editEvent?.eventId,

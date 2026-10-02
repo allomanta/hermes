@@ -10,6 +10,7 @@ import 'dart:ui';
 import 'package:collection/collection.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/client_manager.dart';
+import 'package:hermes/utils/matrix_sdk_extensions/room_send_text_extension.dart';
 import 'package:hermes/utils/push_helper.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
@@ -190,7 +191,7 @@ Future<void> notificationTap(
             );
           }
 
-          await room.sendTextEvent(
+          await room.sendTextEventWithFormatting(
             input,
             parseCommands: false,
             displayPendingEvent: false,

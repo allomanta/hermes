@@ -11,6 +11,7 @@ import 'package:hermes/utils/custom_http_client.dart';
 import 'package:hermes/utils/custom_image_resizer.dart';
 import 'package:hermes/utils/init_with_restore.dart';
 import 'package:hermes/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
+import 'package:hermes/utils/matrix_sdk_extensions/room_send_text_extension.dart';
 import 'package:hermes/utils/notification_background_handler.dart';
 import 'package:hermes/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
@@ -119,7 +120,7 @@ abstract class ClientManager {
     final shareKeysWith = AppSettings.shareKeysWith.value;
     final enableSoftLogout = AppSettings.enableSoftLogout.value;
 
-    return Client(
+    final client = Client(
       clientName,
       httpClient: CustomHttpClient.createHTTPClient(),
       verificationMethods: {
@@ -155,6 +156,26 @@ abstract class ClientManager {
         seconds: AppSettings.sendTimelineEventTimeout.value,
       ),
     );
+    for (final (command, msgtype) in [
+      ('send', MessageTypes.Text),
+      ('me', MessageTypes.Emote),
+    ]) {
+      client.addCommand(command, (args, stdout) {
+        final room = args.room;
+        if (room == null) throw const RoomCommandException();
+        return room.sendTextEventWithFormatting(
+          args.msg,
+          inReplyTo: args.inReplyTo,
+          editEventId: args.editEventId,
+          parseCommands: false,
+          msgtype: msgtype,
+          txid: args.txid,
+          threadRootEventId: args.threadRootEventId,
+          threadLastEventId: args.threadLastEventId,
+        );
+      });
+    }
+    return client;
   }
 
   static Future<void> sendInitNotification(String title, String body) async {

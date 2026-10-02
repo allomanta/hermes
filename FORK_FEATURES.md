@@ -18,6 +18,7 @@ Added features on top of upstream that need to be maintained through any merges 
 - j/k shortcuts for image scrolling [33c315829]
 - Direct share integration for android [1b0b9854c, 98a65e87d, 24b253b30]
 - Markdown tweaks [4caf7c224, 2eb0c4658, d6c5c6196]
+    - Preserve literal angle brackets in outgoing inline and fenced code without double escaping
 - Sticker pack picker at the top of the sticker picker to quickly scroll to the right pack [68041b72a, 8f46b38e9, 186828702]
 - Force mark a chat as read to clear stale unread counts [9c356f9bc, 425bf17b6, 82ec9503e]
 - Unread chats filter in the navigation rail [306cfb829]
