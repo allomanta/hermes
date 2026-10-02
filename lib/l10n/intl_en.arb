@@ -1920,6 +1920,11 @@
         "placeholders": {}
     },
     "messageInfo": "Message info",
+    "readBy": "Read by",
+    "lastReportedRead": "Last reported read",
+    "readReceiptTimesDescription": "Times are the latest reported read receipts. This message may have been read earlier.",
+    "noReadReceipts": "No read receipts available",
+    "readTimeUnavailable": "Read time unavailable",
     "time": "Time",
     "sender": "Sender",
     "openGallery": "Open gallery",
