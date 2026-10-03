@@ -12,6 +12,7 @@ import 'package:hermes/pages/chat_search/chat_search_page.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/event_links_extension.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +24,43 @@ class _Client extends Fake implements Client {
   bool get formatLocalpart => false;
   @override
   bool get mxidLocalPartFallback => true;
+  @override
+  final _Database database = _Database();
+  @override
+  Encryption? get encryption => null;
+  @override
+  Future<GetRoomEventsResponse> getRoomEvents(
+    String roomId,
+    Direction dir, {
+    String? from,
+    String? to,
+    int? limit,
+    String? filter,
+  }) async {
+    final result = await room.searchEvents(
+      nextBatch: from == 'start' ? null : from,
+      searchFunc: (_) => true,
+    );
+    return GetRoomEventsResponse.fromJson({
+      'start': from,
+      if (result.nextBatch != null) 'end': result.nextBatch,
+      'chunk': result.events.map((event) => event.toJson()).toList(),
+    });
+  }
+}
+
+class _Database extends Fake implements DatabaseApi {
+  int reads = 0;
+  @override
+  Future<List<Event>> getEventList(
+    Room room, {
+    int start = 0,
+    bool onlySending = false,
+    int? limit,
+  }) async {
+    reads++;
+    return start == 0 ? (room as _Room).localEvents : [];
+  }
 }
 
 class _Room extends Fake implements Room {
@@ -33,6 +71,10 @@ class _Room extends Fake implements Room {
   final _Client client = _Client();
   @override
   String get id => '!chat:example.org';
+  @override
+  // ignore: non_constant_identifier_names
+  String? prev_batch = 'start';
+  final localEvents = <Event>[];
   @override
   String getLocalizedDisplayname([
     MatrixLocalizations i18n = const MatrixDefaultLocalizations(),
@@ -64,10 +106,16 @@ class _Room extends Fake implements Room {
     queries.add(searchTerm);
     if (fail) throw StateError('Search failed');
     if (pending != null) return pending!.future;
-    final page = batches.length - 1;
+    final page = nextBatch == null
+        ? 0
+        : nextBatch == 'older'
+        ? 1
+        : int.parse(nextBatch);
     return (
       events: pages[page].where(searchFunc!).toList(),
-      nextBatch: page + 1 < pages.length ? 'older' : null,
+      nextBatch: page + 1 < pages.length
+          ? (page == 0 ? 'older' : '${page + 1}')
+          : null,
       searchedUntil: DateTime(2026, 9, 1),
     );
   }
@@ -380,7 +428,7 @@ void main() {
     controller.searchController.text = 'second';
     await controller.startSearch();
     await tester.pumpAndSettle();
-    expect(room.queries, ['first', 'first']);
+    expect(controller.searchQuery, 'first');
     expect(controller.messages.map((event) => event.body), [
       'First match',
       'First older',
@@ -402,13 +450,51 @@ void main() {
     expect(find.text('Try again'), findsOneWidget);
     room.fail = false;
     // The failed call did not consume a history page.
-    room.pages.addAll([
-      [],
-      [_event(room, 'Retry match')],
-    ]);
+    room.pages.add([_event(room, 'Retry match')]);
     await tester.tap(find.text('Try again'));
     await tester.pumpAndSettle();
     expect(find.text('Retry match'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('cached results appear while remote history is pending', (
+    tester,
+  ) async {
+    final room = _Room();
+    room.localEvents.add(_event(room, 'Local match'));
+    final pending = room.pending = Completer();
+    await _mountSearch(tester, room);
+    final controller = tester.state<ChatSearchController>(
+      find.byType(ChatSearchPage),
+    );
+    controller.searchController.text = 'match';
+    controller.restartSearch();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
+    expect(find.text('Local match'), findsOneWidget);
+    expect(controller.searches[0].isLoading, isTrue);
+    await tester.pumpWidget(const SizedBox());
+    pending.complete((events: <Event>[], nextBatch: null, searchedUntil: null));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'typing debounces and clearing cancels a scheduled message search',
+    (tester) async {
+      final room = _Room()..pages.add([]);
+      await _mountSearch(tester, room);
+      final field = find.byType(TextField);
+      await tester.enterText(field, 'first');
+      await tester.pump(const Duration(milliseconds: 299));
+      expect(room.batches, isEmpty);
+      await tester.enterText(field, '');
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(room.batches, isEmpty);
+      await tester.enterText(field, 'latest');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      expect(room.batches, [null]);
+    },
+  );
 }

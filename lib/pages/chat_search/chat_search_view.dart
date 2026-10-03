@@ -52,6 +52,7 @@ class ChatSearchView extends StatelessWidget {
               child: TextField(
                 controller: controller.searchController,
                 onSubmitted: (_) => controller.restartSearch(),
+                onChanged: (_) => controller.restartSearch(debounce: true),
                 autofocus: true,
                 enabled: controller.tabController.index == 0,
                 decoration: InputDecoration(

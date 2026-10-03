@@ -3,6 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
+
+import 'package:hermes/pages/chat_search/chat_search_history.dart';
 import 'package:hermes/pages/chat_search/chat_search_view.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/event_links_extension.dart';
 import 'package:hermes/widgets/matrix.dart';
@@ -19,6 +22,10 @@ class ChatSearchPage extends StatefulWidget {
 
 class ChatSearchState {
   final List<Event> events = [];
+  final eventIds = <String>{};
+  ChatSearchHistory? history;
+  int localOffset = 0;
+  bool localLoaded = false;
   String? nextBatch;
   DateTime? searchedUntil;
   bool initialized = false;
@@ -35,18 +42,52 @@ class ChatSearchController extends State<ChatSearchPage>
   late final TabController tabController;
   final searches = List.generate(4, (_) => ChatSearchState());
   String searchQuery = '';
+  Timer? _debounce;
 
   List<Event> get messages => searches[0].events;
   List<Event> get images => searches[1].events;
   List<Event> get files => searches[2].events;
   List<Event> get links => searches[3].events;
 
-  void restartSearch() {
+  void restartSearch({bool debounce = false}) {
+    _debounce?.cancel();
+    final query = searchController.text.trim();
+    if (query == searchQuery && searches[0].initialized) return;
     setState(() {
-      searchQuery = searchController.text.trim();
+      searchQuery = query;
       searches[0] = ChatSearchState();
     });
-    startSearch(0);
+    if (query.isEmpty) return;
+    if (debounce) {
+      _debounce = Timer(
+        const Duration(milliseconds: 300),
+        () => startSearch(0),
+      );
+    } else {
+      startSearch(0);
+    }
+  }
+
+  bool _isCurrent(int index, ChatSearchState state, Room searchRoom) =>
+      mounted &&
+      identical(searches[index], state) &&
+      identical(room, searchRoom);
+
+  void _appendResults(
+    ChatSearchState state,
+    Iterable<Event> events,
+    int index,
+    String query,
+  ) {
+    setState(() {
+      state.events.addAll(
+        events.where(
+          (event) =>
+              matches(event, index, query) && state.eventIds.add(event.eventId),
+        ),
+      );
+      state.events.sort((a, b) => b.originServerTs.compareTo(a.originServerTs));
+    });
   }
 
   bool matches(Event event, int index, String query) {
@@ -86,24 +127,29 @@ class ChatSearchController extends State<ChatSearchPage>
       state.hasError = false;
     });
     try {
-      final result = await searchRoom.searchEvents(
-        searchTerm: index == 0 ? query : null,
-        searchFunc: (event) => matches(event, index, query),
-        nextBatch: state.nextBatch,
-      );
-      if (!mounted ||
-          !identical(searches[index], state) ||
-          !identical(room, searchRoom)) {
-        return;
+      if (state.history == null) {
+        state.history = ChatSearchHistory(searchRoom);
+        state.nextBatch = state.history!.initialCursor;
       }
+      while (!state.localLoaded) {
+        final events = await state.history!.loadLocal(state.localOffset);
+        if (!_isCurrent(index, state, searchRoom)) return;
+        state.localOffset += ChatSearchHistory.localBatchSize;
+        state.localLoaded =
+            events.isEmpty || events.last.type == EventTypes.RoomCreate;
+        state.endReached =
+            state.localLoaded &&
+            (state.nextBatch == null ||
+                events.lastOrNull?.type == EventTypes.RoomCreate);
+        state.searchedUntil =
+            events.lastOrNull?.originServerTs ?? state.searchedUntil;
+        _appendResults(state, events, index, query);
+      }
+      if (state.endReached) return;
+      final result = await state.history!.loadRemote(state.nextBatch!);
+      if (!_isCurrent(index, state, searchRoom)) return;
+      _appendResults(state, result.events, index, query);
       setState(() {
-        final ids = state.events.map((event) => event.eventId).toSet();
-        state.events.addAll(
-          result.events.where((event) => ids.add(event.eventId)),
-        );
-        state.events.sort(
-          (a, b) => b.originServerTs.compareTo(a.originServerTs),
-        );
         state.nextBatch = result.nextBatch;
         state.endReached = result.nextBatch == null;
         state.searchedUntil = result.searchedUntil ?? state.searchedUntil;
@@ -135,6 +181,7 @@ class ChatSearchController extends State<ChatSearchPage>
 
   @override
   void dispose() {
+    _debounce?.cancel();
     tabController.removeListener(_onTabChanged);
     searchController.dispose();
     tabController.dispose();
