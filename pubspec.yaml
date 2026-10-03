@@ -66,7 +66,8 @@ dependencies:
       url: https://github.com/famedly/matrix-dart-sdk.git
       ref: krille/refactor-device-keys-list-storing
   media_kit_libs_linux: ^1.2.1
-  media_kit_libs_windows_audio: ^1.0.9
+  # media_kit_video is compiled on Windows too and needs its native video libraries.
+  media_kit_libs_windows_video: ^1.0.11
   mime: ^2.1.0
   native_imaging: ^0.5.0
   ogg_caf_converter: ^0.1.4
@@ -94,6 +95,7 @@ dependencies:
   url_launcher: ^6.3.2
   uuid: ^4.6.0
   video_player: ^2.14.0
+  video_player_media_kit: ^2.0.0
   wakelock_plus: ^1.8.0
 
 dev_dependencies:

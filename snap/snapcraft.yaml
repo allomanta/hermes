@@ -83,12 +83,15 @@ parts:
       - curl
       - libpciaccess-dev
       - libpulse-dev
+      - libmpv-dev
+      - libepoxy-dev
     stage-packages:
       - libsecret-1-0
       - libjsoncpp25
       - libpciaccess0
       - libpulse0
       - libmpv2
+      - libepoxy0
       - libblas3
       - liblapack3
     override-prime: | # Workaround for MediaKit:

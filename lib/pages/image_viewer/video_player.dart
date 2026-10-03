@@ -34,12 +34,8 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
 
   double? _downloadProgress;
 
-  // The video_player package only doesn't support Windows and Linux.
-  final _supportsVideoPlayer =
-      !PlatformInfos.isWindows && !PlatformInfos.isLinux;
-
   Future<void> _downloadAction() async {
-    if (!_supportsVideoPlayer) {
+    if (!PlatformInfos.supportsVideoPlayer) {
       widget.event.saveFile(context);
       return;
     }
