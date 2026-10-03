@@ -8,6 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/chat/sticker_picker_dialog.dart';
+import 'package:hermes/widgets/emoji_search_view.dart';
 import 'chat.dart';
 import 'package:hermes/pages/chat/trust_user_key_dialog.dart';
 import 'package:material_ui/material_ui.dart';
@@ -59,6 +60,7 @@ class ChatEmojiPicker extends StatelessWidget {
                               bottomActionBarConfig:
                                   const BottomActionBarConfig(enabled: false),
                               searchViewConfig: SearchViewConfig(
+                                customSearchView: EmojiSearchView.new,
                                 backgroundColor: theme.colorScheme.surface,
                                 buttonIconColor: theme.colorScheme.primary,
                                 hintText: L10n.of(context).search,

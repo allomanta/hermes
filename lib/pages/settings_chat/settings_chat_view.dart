@@ -8,6 +8,7 @@ import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/settings_switch_list_tile.dart';
 import 'package:hermes/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:hermes/widgets/future_loading_dialog.dart';
+import 'package:hermes/widgets/emoji_search_view.dart';
 import 'package:hermes/utils/backfill_service.dart';
 import 'settings_chat.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -169,6 +170,7 @@ class SettingsChatView extends StatelessWidget {
                               bottomActionBarConfig:
                                   const BottomActionBarConfig(enabled: false),
                               searchViewConfig: SearchViewConfig(
+                                customSearchView: EmojiSearchView.new,
                                 backgroundColor: theme.colorScheme.surface,
                                 buttonIconColor: theme.colorScheme.primary,
                                 hintText: L10n.of(context).search,

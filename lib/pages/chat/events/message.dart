@@ -19,6 +19,7 @@ import 'package:hermes/utils/file_description.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/utils/string_color.dart';
 import 'package:hermes/widgets/avatar.dart';
+import 'package:hermes/widgets/emoji_search_view.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/member_actions_popup_menu_button.dart';
 import 'package:hermes/utils/platform_infos.dart';
@@ -1014,6 +1015,8 @@ class Message extends StatelessWidget {
                                                                                 false,
                                                                           ),
                                                                           searchViewConfig: SearchViewConfig(
+                                                                            customSearchView:
+                                                                                EmojiSearchView.new,
                                                                             backgroundColor:
                                                                                 theme.colorScheme.surface,
                                                                             buttonIconColor:
