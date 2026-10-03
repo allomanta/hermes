@@ -8,7 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat/events/video_player.dart';
 import 'package:hermes/pages/chat_search/chat_search_history.dart';
+import 'package:hermes/pages/chat_search/chat_search_images_tab.dart';
 import 'package:hermes/pages/chat_search/chat_search_links_tab.dart';
 import 'package:hermes/pages/chat_search/chat_search_page.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/event_links_extension.dart';
@@ -16,6 +18,7 @@ import 'package:hermes/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
+import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
 
 class _Client extends Fake implements Client {
@@ -30,6 +33,10 @@ class _Client extends Fake implements Client {
   final _Database database = _Database();
   @override
   Encryption? encryption;
+  @override
+  final onTimelineEvent = CachedStreamController<Event>();
+  @override
+  final onHistoryEvent = CachedStreamController<Event>();
   @override
   Future<GetRoomEventsResponse> getRoomEvents(
     String roomId,
@@ -598,6 +605,13 @@ void main() {
         expect(controller.searches[3].hasError, isTrue);
         expect(controller.searches[3].isLoading, isFalse);
         expect(controller.searches[3].endReached, isFalse);
+        room.cursors[cycle ? 'older' : null] = null;
+        final retry = controller.startSearch(3);
+        await tester.pumpAndSettle();
+        await retry;
+        expect(room.batches.length, cycle ? 3 : 2);
+        expect(controller.searches[3].hasError, isFalse);
+        expect(controller.searches[3].endReached, isTrue);
       },
     );
   }
@@ -710,4 +724,246 @@ void main() {
     expect(controller.links, isEmpty);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'cached local and remote history are reused across tabs and queries',
+    (tester) async {
+      final room = _Room();
+      room.localEvents.addAll([
+        _event(room, 'Local alpha', id: 'a'),
+        _event(room, 'Local beta', id: 'b'),
+      ]);
+      room.pages.add([
+        _event(room, 'Remote alpha', id: 'ra'),
+        _event(room, 'Remote beta', id: 'rb'),
+        _event(room, 'https://link.org', id: 'link'),
+      ]);
+      await _mountSearch(tester, room);
+      final controller = tester.state<ChatSearchController>(
+        find.byType(ChatSearchPage),
+      );
+      controller.searchController.text = 'alpha';
+      controller.restartSearch();
+      await tester.pumpAndSettle();
+      final reads = room.client.database.reads;
+      controller.searchController.text = 'beta';
+      controller.restartSearch();
+      await tester.pumpAndSettle();
+      final links = controller.startSearch(3);
+      await tester.pumpAndSettle();
+      await links;
+      expect(room.client.database.reads, reads);
+      expect(room.batches, [null]);
+      expect(controller.messages.map((event) => event.body), [
+        'Local beta',
+        'Remote beta',
+      ]);
+      expect(controller.links.single.body, 'https://link.org');
+    },
+  );
+
+  testWidgets(
+    'a new query ignores stale results while reusing the pending history request',
+    (tester) async {
+      final room = _Room();
+      final pending = room.pending = Completer();
+      await _mountSearch(tester, room);
+      final controller = tester.state<ChatSearchController>(
+        find.byType(ChatSearchPage),
+      );
+      controller.searchController.text = 'alpha';
+      controller.restartSearch();
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump(const Duration(milliseconds: 1));
+      controller.searchController.text = 'beta';
+      controller.restartSearch();
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(room.batches, [null]);
+      pending.complete((
+        events: [
+          _event(room, 'Alpha match', id: 'alpha'),
+          _event(room, 'Beta match', id: 'beta'),
+        ],
+        nextBatch: null,
+        searchedUntil: null,
+      ));
+      await tester.pumpAndSettle();
+      expect(controller.messages.single.body, 'Beta match');
+      expect(controller.searches[0].isLoading, isFalse);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'the history cache evicts old pages while retaining recently used pages',
+    (tester) async {
+      final room = _Room();
+      final history = ChatSearchHistory(room);
+      addTearDown(history.dispose);
+      for (var i = 0; i < ChatSearchHistory.maxCachedPages; i++) {
+        await history.loadLocal(i * ChatSearchHistory.localBatchSize);
+      }
+      await history.loadLocal(0);
+      await history.loadLocal(
+        ChatSearchHistory.maxCachedPages * ChatSearchHistory.localBatchSize,
+      );
+      final reads = room.client.database.reads;
+      await history.loadLocal(0);
+      expect(room.client.database.reads, reads);
+      await history.loadLocal(ChatSearchHistory.localBatchSize);
+      expect(room.client.database.reads, reads + 1);
+    },
+  );
+
+  testWidgets(
+    'concurrent tabs share a pending fetch and can cancel independently',
+    (tester) async {
+      final room = _Room();
+      final pending = room.pending = Completer();
+      await _mountSearch(tester, room);
+      final controller = tester.state<ChatSearchController>(
+        find.byType(ChatSearchPage),
+      );
+      final links = controller.startSearch(3);
+      final files = controller.startSearch(2);
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(room.batches, [null]);
+      controller.stopSearch(3);
+      final file = _event(room, 'report.txt')
+        ..content['msgtype'] = MessageTypes.File;
+      pending.complete((events: [file], nextBatch: null, searchedUntil: null));
+      await tester.pumpAndSettle();
+      await Future.wait([links, files]);
+      expect(controller.links, isEmpty);
+      expect(controller.files.single.body, 'report.txt');
+      expect(controller.searches[2].isLoading, isFalse);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'new room events refresh local cache and redactions refresh remote cache',
+    (tester) async {
+      final room = _Room();
+      final history = ChatSearchHistory(room);
+      addTearDown(history.dispose);
+      room.localEvents.add(_event(room, 'Old body'));
+      room.pages.add([_event(room, 'https://old.org')]);
+      await history.loadLocal(0);
+      await history.loadRemote('start');
+      room.localEvents[0] = _event(room, 'New body');
+      room.client.onTimelineEvent.add(room.localEvents[0]);
+      await tester.pump();
+      expect((await history.loadLocal(0)).single.body, 'New body');
+      expect(room.client.database.reads, 2);
+      room.pages[0] = [_event(room, 'Removed')];
+      room.client.onTimelineEvent.add(
+        _event(room, '', type: EventTypes.Redaction),
+      );
+      await tester.pump();
+      expect((await history.loadRemote('start')).events.single.body, 'Removed');
+      expect(room.batches, [null, null]);
+    },
+  );
+
+  testWidgets(
+    'unreadable encrypted pages are retried and successful decryption is cached',
+    (tester) async {
+      final room = _Room();
+      room.pages.add([_event(room, '', type: EventTypes.Encrypted)]);
+      final history = ChatSearchHistory(room);
+      addTearDown(history.dispose);
+      expect((await history.loadRemote('start')).hasUndecryptedEvents, isTrue);
+      final encryption = room.client.encryption = _Encryption();
+      encryption.pending.complete(_event(room, 'https://decrypted.org'));
+      final decoded = await history.loadRemote('start');
+      expect(decoded.events.single.body, 'https://decrypted.org');
+      expect(decoded.hasUndecryptedEvents, isFalse);
+      expect(identical(await history.loadRemote('start'), decoded), isTrue);
+      expect(encryption.calls, 1);
+      expect(room.batches, [null, null]);
+    },
+  );
+
+  testWidgets('changing accounts clears search results and history cache', (
+    tester,
+  ) async {
+    final oldRoom = _Room()..prev_batch = null;
+    oldRoom.localEvents.add(_event(oldRoom, 'Old account match'));
+    await _mountSearch(tester, oldRoom);
+    final controller = tester.state<ChatSearchController>(
+      find.byType(ChatSearchPage),
+    );
+    controller.searchController.text = 'match';
+    controller.restartSearch();
+    await tester.pumpAndSettle();
+    final newRoom = _Room()..prev_batch = null;
+    newRoom.localEvents.add(_event(newRoom, 'New account match'));
+    await _mountSearch(tester, newRoom);
+    expect(controller.messages.single.body, 'New account match');
+    expect(
+      identical(controller.messages.single.room.client, newRoom.client),
+      isTrue,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final brightness in Brightness.values) {
+    testWidgets(
+      'a large gallery builds visible video cells lazily in ${brightness.name}',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final room = _Room();
+        final events = [
+          for (var i = 0; i < 200; i++)
+            _event(room, 'Clip $i', id: '$i')
+              ..content['msgtype'] = MessageTypes.Video
+              ..content['info'] = {'w': 1920, 'h': 1080},
+        ];
+        final matrix = _Matrix(room.client);
+        await tester.pumpWidget(
+          Provider<MatrixState>.value(
+            value: matrix,
+            child: MaterialApp(
+              theme: ThemeData(brightness: brightness),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: Scaffold(
+                body: ChatSearchImagesTab(
+                  room: room,
+                  events: events,
+                  onStartSearch: () {},
+                  endReached: true,
+                  isLoading: false,
+                  searchedUntil: null,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(GridView), findsNothing);
+        expect(
+          tester
+              .widget<SliverGrid>(find.byType(SliverGrid))
+              .delegate
+              .estimatedChildCount,
+          200,
+        );
+        expect(find.byType(EventVideoPlayer).evaluate().length, lessThan(30));
+        expect(find.byType(EventVideoPlayer), findsWidgets);
+        await tester.tap(find.byIcon(Icons.chevron_right_outlined).first);
+        expect(matrix.openedEvent, '0');
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, -500));
+        await tester.pumpAndSettle();
+        expect(find.byType(EventVideoPlayer).evaluate().length, lessThan(30));
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }

@@ -5,6 +5,7 @@
 
 import 'dart:math';
 
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/utils/file_description.dart';
@@ -13,7 +14,6 @@ import 'package:hermes/utils/platform_infos.dart';
 import 'package:hermes/utils/url_launcher.dart';
 import 'package:hermes/widgets/blur_hash.dart';
 import 'package:hermes/widgets/mxc_image.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -24,12 +24,14 @@ class EventVideoPlayer extends StatelessWidget {
   final Timeline? timeline;
   final Color? textColor;
   final Color? linkColor;
+  final double maxDimension;
 
   const EventVideoPlayer(
     this.event, {
     this.timeline,
     this.textColor,
     this.linkColor,
+    this.maxDimension = 300,
     super.key,
   });
 
@@ -45,7 +47,6 @@ class EventVideoPlayer extends StatelessWidget {
         ) ??
         fallbackBlurHash;
     final fileDescription = event.fileDescription;
-    const maxDimension = 300.0;
     final infoMap = event.content.tryGetMap<String, Object?>('info');
     final videoWidth = infoMap?.tryGet<int>('w') ?? maxDimension;
     final videoHeight = infoMap?.tryGet<int>('h') ?? maxDimension;

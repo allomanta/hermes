@@ -1,14 +1,16 @@
-import 'package:intl/intl.dart';
-import 'package:matrix/matrix.dart';
-import 'package:hermes/l10n/l10n.dart';
+// SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/pages/chat/events/video_player.dart';
+import 'package:hermes/pages/chat_search/search_footer.dart';
 import 'package:hermes/pages/image_viewer/image_viewer.dart';
-import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/mxc_image.dart';
-import 'package:hermes/pages/chat_search/search_footer.dart';
+import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
 
 class ChatSearchImagesTab extends StatelessWidget {
   final Room room;
@@ -25,83 +27,75 @@ class ChatSearchImagesTab extends StatelessWidget {
     required this.onStartSearch,
     required this.endReached,
     required this.isLoading,
+    required this.searchedUntil,
     this.hasError = false,
     this.onCancel,
     super.key,
-    required this.searchedUntil,
   });
 
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(AppConfig.borderRadius / 2);
     final theme = Theme.of(context);
-
     final eventsByMonth = <DateTime, List<Event>>{};
     for (final event in events) {
       final month = DateTime(
         event.originServerTs.year,
         event.originServerTs.month,
       );
-      eventsByMonth[month] ??= [];
-      eventsByMonth[month]!.add(event);
+      eventsByMonth.putIfAbsent(month, () => []).add(event);
     }
-    final eventsByMonthList = eventsByMonth.entries.toList();
-
     const padding = 8.0;
-
-    return ListView.builder(
-      itemCount: eventsByMonth.length + 1,
-      itemBuilder: (context, i) {
-        if (i == eventsByMonth.length) {
-          return SearchFooter(
-            searchedUntil: searchedUntil,
-            endReached: endReached,
-            isLoading: isLoading,
-            hasError: hasError,
-            onStartSearch: onStartSearch,
-            onCancel: onCancel,
-          );
-        }
-
-        final monthEvents = eventsByMonthList[i].value;
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(height: 1, color: theme.dividerColor),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    DateFormat.yMMMM(
-                      Localizations.localeOf(context).languageCode,
-                    ).format(eventsByMonthList[i].key),
-                    style: theme.textTheme.labelSmall,
-                    textAlign: TextAlign.center,
+    return CustomScrollView(
+      key: const PageStorageKey('chat_search_gallery'),
+      slivers: [
+        for (final month in eventsByMonth.entries) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(height: 1, color: theme.dividerColor),
                   ),
-                ),
-                Expanded(
-                  child: Container(height: 1, color: theme.dividerColor),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Text(
+                      DateFormat.yMMMM(
+                        Localizations.localeOf(context).languageCode,
+                      ).format(month.key),
+                      style: theme.textTheme.labelSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(height: 1, color: theme.dividerColor),
+                  ),
+                ],
+              ),
             ),
-            GridView.count(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              mainAxisSpacing: padding,
-              crossAxisSpacing: padding,
-              clipBehavior: Clip.hardEdge,
-              padding: const EdgeInsets.all(padding),
-              crossAxisCount: 3,
-              children: monthEvents.map((event) {
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(padding),
+            sliver: SliverGrid.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: padding,
+                crossAxisSpacing: padding,
+              ),
+              itemCount: month.value.length,
+              itemBuilder: (context, index) {
+                final event = month.value[index];
                 final mediaTile = event.messageType == MessageTypes.Video
                     ? Material(
                         clipBehavior: Clip.hardEdge,
                         borderRadius: borderRadius,
-                        child: EventVideoPlayer(event),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) => EventVideoPlayer(
+                            event,
+                            maxDimension: constraints.maxWidth,
+                          ),
+                        ),
                       )
                     : InkWell(
                         onTap: () => showDialog(
@@ -123,7 +117,6 @@ class ChatSearchImagesTab extends StatelessWidget {
                           ),
                         ),
                       );
-
                 return Stack(
                   children: [
                     Positioned.fill(child: mediaTile),
@@ -144,11 +137,21 @@ class ChatSearchImagesTab extends StatelessWidget {
                     ),
                   ],
                 );
-              }).toList(),
+              },
             ),
-          ],
-        );
-      },
+          ),
+        ],
+        SliverToBoxAdapter(
+          child: SearchFooter(
+            searchedUntil: searchedUntil,
+            endReached: endReached,
+            isLoading: isLoading,
+            hasError: hasError,
+            onStartSearch: onStartSearch,
+            onCancel: onCancel,
+          ),
+        ),
+      ],
     );
   }
 }

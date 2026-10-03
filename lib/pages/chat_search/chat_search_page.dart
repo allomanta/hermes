@@ -11,6 +11,7 @@ import 'package:hermes/utils/matrix_sdk_extensions/event_links_extension.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:provider/provider.dart';
 
 class ChatSearchPage extends StatefulWidget {
   final String roomId;
@@ -57,6 +58,8 @@ class ChatSearchController extends State<ChatSearchPage>
   final searches = List.generate(4, (_) => ChatSearchState());
   String searchQuery = '';
   Timer? _debounce;
+  ChatSearchHistory? _history;
+  Room? _observedRoom;
 
   List<Event> get messages => searches[0].events;
   List<Event> get images => searches[1].events;
@@ -106,36 +109,29 @@ class ChatSearchController extends State<ChatSearchPage>
     int index,
     String query,
   ) {
+    final normalizedQuery = query.toLowerCase();
     setState(() {
       state.events.addAll(
-        events.where(
-          (event) =>
-              matches(event, index, query) && state.eventIds.add(event.eventId),
-        ),
+        events.where((event) {
+          if (event.type != EventTypes.Message || event.redacted) return false;
+          final matches = switch (index) {
+            0 => event.plaintextBody.toLowerCase().contains(normalizedQuery),
+            1 => {
+              MessageTypes.Image,
+              MessageTypes.Video,
+            }.contains(event.messageType),
+            2 =>
+              event.messageType == MessageTypes.File ||
+                  (event.messageType == MessageTypes.Audio &&
+                      !event.content.containsKey('org.matrix.msc3245.voice')),
+            3 => event.sharedLinks.isNotEmpty,
+            _ => false,
+          };
+          return matches && state.eventIds.add(event.eventId);
+        }),
       );
       state.events.sort((a, b) => b.originServerTs.compareTo(a.originServerTs));
     });
-  }
-
-  bool matches(Event event, int index, String query) {
-    if (event.type != EventTypes.Message || event.redacted) return false;
-    switch (index) {
-      case 0:
-        return event.plaintextBody.toLowerCase().contains(query.toLowerCase());
-      case 1:
-        return {
-          MessageTypes.Image,
-          MessageTypes.Video,
-        }.contains(event.messageType);
-      case 2:
-        return event.messageType == MessageTypes.File ||
-            (event.messageType == MessageTypes.Audio &&
-                !event.content.containsKey('org.matrix.msc3245.voice'));
-      case 3:
-        return event.sharedLinks.isNotEmpty;
-      default:
-        return false;
-    }
   }
 
   Future<void> startSearch([int? tab]) async {
@@ -163,7 +159,7 @@ class ChatSearchController extends State<ChatSearchPage>
     final previousCount = state.events.length;
     try {
       if (state.history == null) {
-        state.history = ChatSearchHistory(searchRoom);
+        state.history = _history ??= ChatSearchHistory(searchRoom);
         state.nextBatch = state.history!.initialCursor;
       }
       for (
@@ -204,7 +200,12 @@ class ChatSearchController extends State<ChatSearchPage>
         final result = await Future.any<ChatSearchBatch>([
           state.history!.loadRemote(cursor),
           cancellation.future.then(
-            (_) => (events: <Event>[], nextBatch: null, searchedUntil: null),
+            (_) => (
+              events: <Event>[],
+              nextBatch: null,
+              searchedUntil: null,
+              hasUndecryptedEvents: false,
+            ),
           ),
         ]);
         if (!_isCurrent(index, state, searchRoom, generation)) return;
@@ -220,7 +221,10 @@ class ChatSearchController extends State<ChatSearchPage>
             state.endReached = next == null;
           }
         });
-        if (state.hasError) break;
+        if (state.hasError) {
+          state.history!.invalidateRemote();
+          break;
+        }
       }
     } catch (e, s) {
       if (!_isCurrent(index, state, searchRoom, generation)) return;
@@ -242,6 +246,37 @@ class ChatSearchController extends State<ChatSearchPage>
     }
   }
 
+  void _updateRoom(Room? current) {
+    if (identical(current, _observedRoom)) return;
+    _observedRoom = current;
+    _debounce?.cancel();
+    _history?.dispose();
+    _history = null;
+    for (var i = 0; i < searches.length; i++) {
+      searches[i].cancel();
+      searches[i] = ChatSearchState();
+    }
+    if (searchQuery.isNotEmpty || tabController.index != 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) startSearch();
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateRoom(
+      Provider.of<MatrixState>(context).client.getRoomById(widget.roomId),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatSearchPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.roomId != widget.roomId) _updateRoom(room);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -255,6 +290,7 @@ class ChatSearchController extends State<ChatSearchPage>
     for (final state in searches) {
       state.cancel();
     }
+    _history?.dispose();
     tabController.removeListener(_onTabChanged);
     searchController.dispose();
     tabController.dispose();

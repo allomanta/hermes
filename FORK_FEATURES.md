@@ -13,6 +13,8 @@ Added features on top of upstream that need to be maintained through any merges 
     - Supply Flutter Material and the app theme for the built-in search field
 - Saved global interface scale (75–150%) in Appearance settings, with Ctrl/Cmd +/− and 0 on desktop
 - Links tab in chat search with clickable URLs and jumps to the original messages
+- In-chat search preserves each tab, shows cached matches immediately, and searches while typing
+    - Cancellable history scans with page/time limits, cursor-cycle detection, and recoverable errors
 - Chat-list search also finds message text in the active account's locally stored chats
 - In-app Linux video playback using media-kit with the existing video controls
 - Open live read-receipt details from message timestamps and reader avatars, including the overflow bubble
@@ -45,6 +47,7 @@ Added features on top of upstream that need to be maintained through any merges 
 - Compact chat input and emoji/sticker picker [059b6cc57, 393757b39]
 
 ## Optimizations
+- Shared, bounded search-history cache across tabs and queries, with lazy gallery grids
 - Different media caching [cfd6ce308]
 - Sticker memory caching [b1ff170b8, f5d2f9951, 30d71b447]
 - Load stickers per row [8f46b38e9, e0edab660]
