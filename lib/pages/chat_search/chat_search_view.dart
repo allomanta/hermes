@@ -88,6 +88,7 @@ class ChatSearchView extends StatelessWidget {
                     searchQuery: controller.searchQuery,
                     room: room,
                     onStartSearch: () => controller.startSearch(0),
+                    onCancel: () => controller.stopSearch(0),
                     events: controller.messages,
                     endReached: controller.searches[0].endReached,
                     isLoading: controller.searches[0].isLoading,
@@ -97,6 +98,7 @@ class ChatSearchView extends StatelessWidget {
                   ChatSearchImagesTab(
                     room: room,
                     onStartSearch: () => controller.startSearch(1),
+                    onCancel: () => controller.stopSearch(1),
                     events: controller.images,
                     endReached: controller.searches[1].endReached,
                     isLoading: controller.searches[1].isLoading,
@@ -106,6 +108,7 @@ class ChatSearchView extends StatelessWidget {
                   ChatSearchFilesTab(
                     room: room,
                     onStartSearch: () => controller.startSearch(2),
+                    onCancel: () => controller.stopSearch(2),
                     events: controller.files,
                     endReached: controller.searches[2].endReached,
                     isLoading: controller.searches[2].isLoading,
@@ -115,6 +118,7 @@ class ChatSearchView extends StatelessWidget {
                   ChatSearchLinksTab(
                     room: room,
                     onStartSearch: () => controller.startSearch(3),
+                    onCancel: () => controller.stopSearch(3),
                     events: controller.links,
                     endReached: controller.searches[3].endReached,
                     isLoading: controller.searches[3].isLoading,

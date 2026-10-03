@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/pages/chat_search/chat_search_history.dart';
+import 'package:hermes/pages/chat_search/chat_search_links_tab.dart';
 import 'package:hermes/pages/chat_search/chat_search_page.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/event_links_extension.dart';
 import 'package:hermes/widgets/matrix.dart';
@@ -27,7 +29,7 @@ class _Client extends Fake implements Client {
   @override
   final _Database database = _Database();
   @override
-  Encryption? get encryption => null;
+  Encryption? encryption;
   @override
   Future<GetRoomEventsResponse> getRoomEvents(
     String roomId,
@@ -51,6 +53,7 @@ class _Client extends Fake implements Client {
 
 class _Database extends Fake implements DatabaseApi {
   int reads = 0;
+  Completer<List<Event>>? pending;
   @override
   Future<List<Event>> getEventList(
     Room room, {
@@ -59,6 +62,7 @@ class _Database extends Fake implements DatabaseApi {
     int? limit,
   }) async {
     reads++;
+    if (pending != null) return pending!.future;
     return start == 0 ? (room as _Room).localEvents : [];
   }
 }
@@ -85,6 +89,7 @@ class _Room extends Fake implements Room {
 
   final batches = <String?>[];
   final queries = <String?>[];
+  final cursors = <String?, String?>{};
   bool fail = false;
   final pages = <List<Event>>[];
   Completer<({List<Event> events, String? nextBatch, DateTime? searchedUntil})>?
@@ -113,7 +118,9 @@ class _Room extends Fake implements Room {
         : int.parse(nextBatch);
     return (
       events: pages[page].where(searchFunc!).toList(),
-      nextBatch: page + 1 < pages.length
+      nextBatch: cursors.containsKey(nextBatch)
+          ? cursors[nextBatch]
+          : page + 1 < pages.length
           ? (page == 0 ? 'older' : '${page + 1}')
           : null,
       searchedUntil: DateTime(2026, 9, 1),
@@ -134,6 +141,20 @@ class _Matrix extends Fake with Diagnosticable implements MatrixState {
   }) {
     openedRoom = roomId;
     openedEvent = eventId;
+  }
+}
+
+class _Encryption extends Fake implements Encryption {
+  final pending = Completer<Event>();
+  int calls = 0;
+  @override
+  Future<Event> decryptRoomEvent(
+    Event event, {
+    bool store = false,
+    EventUpdateType updateType = EventUpdateType.timeline,
+  }) {
+    calls++;
+    return pending.future;
   }
 }
 
@@ -257,7 +278,12 @@ void main() {
       final first = _event(room, 'https://first.org', id: r'$first');
       final second = _event(room, 'https://second.org', id: r'$second');
       room.pages.addAll([
-        [first, _event(room, 'No links')],
+        [
+          first,
+          for (var i = 0; i < 19; i++)
+            _event(room, 'https://filler$i.org', id: 'filler$i'),
+          _event(room, 'No links'),
+        ],
         [first, second],
       ]);
       final matrix = await _mountSearch(tester, room);
@@ -265,14 +291,34 @@ void main() {
       await tester.pumpAndSettle();
       expect(room.batches, [null]);
       expect(find.text('https://first.org'), findsOneWidget);
-      expect(find.textContaining('Alice |'), findsOneWidget);
+      expect(find.textContaining('Alice |'), findsWidgets);
       expect(find.text('No links'), findsNothing);
+      final scrollable = find.descendant(
+        of: find.byType(ChatSearchLinksTab),
+        matching: find.byType(Scrollable),
+      );
+      await tester.scrollUntilVisible(
+        find.text('Search more...'),
+        500,
+        scrollable: scrollable,
+      );
       await tester.tap(find.text('Search more...'));
       await tester.pumpAndSettle();
       expect(room.batches, [null, 'older']);
-      expect(find.text('https://first.org'), findsOneWidget);
+      final controller = tester.state<ChatSearchController>(
+        find.byType(ChatSearchPage),
+      );
+      expect(
+        controller.links.where((event) => event.eventId == r'$first'),
+        hasLength(1),
+      );
       expect(find.text('https://second.org'), findsOneWidget);
       expect(find.text('No more results found'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('https://first.org'),
+        -500,
+        scrollable: scrollable,
+      );
       await tester.tap(find.byIcon(Icons.chevron_right_outlined).first);
       expect(matrix.openedRoom, room.id);
       expect(matrix.openedEvent, r'$first');
@@ -362,6 +408,7 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pump();
+        await tester.pump(const Duration(milliseconds: 1));
         expect(room.batches, [null]);
         final controller = tester.state<ChatSearchController>(
           find.byType(ChatSearchPage),
@@ -412,7 +459,11 @@ void main() {
   ) async {
     final room = _Room();
     room.pages.addAll([
-      [_event(room, 'First match', id: r'$first')],
+      [
+        _event(room, 'First match', id: r'$first'),
+        for (var i = 0; i < 19; i++)
+          _event(room, 'First filler $i', id: 'filler$i'),
+      ],
       [
         _event(room, 'First older', id: r'$older'),
         _event(room, 'Second match'),
@@ -429,10 +480,14 @@ void main() {
     await controller.startSearch();
     await tester.pumpAndSettle();
     expect(controller.searchQuery, 'first');
-    expect(controller.messages.map((event) => event.body), [
-      'First match',
-      'First older',
-    ]);
+    expect(
+      controller.messages.map((event) => event.body),
+      contains('First older'),
+    );
+    expect(
+      controller.messages.map((event) => event.body),
+      isNot(contains('Second match')),
+    );
   });
 
   testWidgets('failed searches release loading and can be retried', (
@@ -497,4 +552,162 @@ void main() {
       expect(room.batches, [null]);
     },
   );
+
+  testWidgets(
+    'empty history batches continue, stop at the page budget, and resume',
+    (tester) async {
+      final room = _Room();
+      room.pages.addAll([
+        for (var i = 0; i < 7; i++) <Event>[],
+        [_event(room, 'https://late.org')],
+      ]);
+      await _mountSearch(tester, room);
+      final controller = tester.state<ChatSearchController>(
+        find.byType(ChatSearchPage),
+      );
+      final first = controller.startSearch(3);
+      await tester.pumpAndSettle();
+      await first;
+      expect(room.batches.length, ChatSearchController.maxRemotePages);
+      expect(controller.searches[3].isLoading, isFalse);
+      expect(controller.searches[3].endReached, isFalse);
+      final more = controller.startSearch(3);
+      await tester.pumpAndSettle();
+      await more;
+      expect(controller.links.single.body, 'https://late.org');
+      expect(controller.searches[3].endReached, isTrue);
+    },
+  );
+
+  for (final cycle in [false, true]) {
+    testWidgets(
+      cycle
+          ? 'cycling cursors stop with retry'
+          : 'repeated cursors stop with retry',
+      (tester) async {
+        final room = _Room()..pages.addAll([[], []]);
+        room.cursors[cycle ? 'older' : null] = 'start';
+        await _mountSearch(tester, room);
+        final controller = tester.state<ChatSearchController>(
+          find.byType(ChatSearchPage),
+        );
+        final search = controller.startSearch(3);
+        await tester.pumpAndSettle();
+        await search;
+        expect(room.batches.length, cycle ? 2 : 1);
+        expect(controller.searches[3].hasError, isTrue);
+        expect(controller.searches[3].isLoading, isFalse);
+        expect(controller.searches[3].endReached, isFalse);
+      },
+    );
+  }
+
+  testWidgets(
+    'cancel releases the UI immediately and ignores a late response',
+    (tester) async {
+      final room = _Room();
+      final pending = room.pending = Completer();
+      await _mountSearch(tester, room);
+      await tester.tap(find.widgetWithText(Tab, 'Links'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+      final controller = tester.state<ChatSearchController>(
+        find.byType(ChatSearchPage),
+      );
+      expect(controller.searches[3].isLoading, isTrue);
+      expect(room.batches, [null]);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(controller.searches[3].isLoading, isFalse);
+      pending.complete((
+        events: [_event(room, 'https://cancelled.org')],
+        nextBatch: null,
+        searchedUntil: null,
+      ));
+      await tester.pumpAndSettle();
+      expect(controller.links, isEmpty);
+      expect(find.text('Search more...'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('a hung server request times out and ignores its late response', (
+    tester,
+  ) async {
+    final room = _Room();
+    final pending = room.pending = Completer();
+    await _mountSearch(tester, room);
+    final controller = tester.state<ChatSearchController>(
+      find.byType(ChatSearchPage),
+    );
+    final search = controller.startSearch(3);
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(
+      ChatSearchHistory.requestTimeout + const Duration(seconds: 1),
+    );
+    await tester.pumpAndSettle();
+    await search;
+    expect(controller.searches[3].hasError, isTrue);
+    expect(controller.searches[3].isLoading, isFalse);
+    pending.complete((
+      events: [_event(room, 'https://late.org')],
+      nextBatch: null,
+      searchedUntil: null,
+    ));
+    await tester.pumpAndSettle();
+    expect(controller.links, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the overall deadline releases a hung local database read', (
+    tester,
+  ) async {
+    final room = _Room();
+    final pending = room.client.database.pending = Completer<List<Event>>();
+    await _mountSearch(tester, room);
+    final controller = tester.state<ChatSearchController>(
+      find.byType(ChatSearchPage),
+    );
+    final search = controller.startSearch(3);
+    await tester.pump(
+      ChatSearchController.maxSearchDuration + const Duration(seconds: 1),
+    );
+    await tester.pumpAndSettle();
+    await search;
+    expect(controller.searches[3].hasError, isTrue);
+    expect(controller.searches[3].isLoading, isFalse);
+    expect(room.batches, isEmpty);
+    pending.complete([_event(room, 'https://late.org')]);
+    await tester.pumpAndSettle();
+    expect(controller.links, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('hung decryption times out without advancing the cursor', (
+    tester,
+  ) async {
+    final room = _Room();
+    final encryption = room.client.encryption = _Encryption();
+    room.pages.add([_event(room, '', type: EventTypes.Encrypted)]);
+    await _mountSearch(tester, room);
+    final controller = tester.state<ChatSearchController>(
+      find.byType(ChatSearchPage),
+    );
+    final search = controller.startSearch(3);
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(
+      ChatSearchHistory.decryptionTimeout + const Duration(seconds: 1),
+    );
+    await tester.pumpAndSettle();
+    await search;
+    expect(controller.searches[3].hasError, isTrue);
+    expect(controller.searches[3].isLoading, isFalse);
+    expect(controller.searches[3].nextBatch, 'start');
+    encryption.pending.complete(_event(room, 'https://late.org'));
+    await tester.pumpAndSettle();
+    expect(controller.links, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
 }

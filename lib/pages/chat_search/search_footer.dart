@@ -12,6 +12,7 @@ class SearchFooter extends StatelessWidget {
   final bool endReached, isLoading;
   final bool hasError;
   final void Function() onStartSearch;
+  final void Function()? onCancel;
 
   const SearchFooter({
     super.key,
@@ -20,6 +21,7 @@ class SearchFooter extends StatelessWidget {
     required this.isLoading,
     required this.onStartSearch,
     this.hasError = false,
+    this.onCancel,
   });
 
   @override
@@ -71,6 +73,11 @@ class SearchFooter extends StatelessWidget {
                     : L10n.of(context).searchMore,
               ),
             ),
+            if (isLoading && onCancel != null)
+              TextButton(
+                onPressed: onCancel,
+                child: Text(L10n.of(context).cancel),
+              ),
           ],
         ),
       ),

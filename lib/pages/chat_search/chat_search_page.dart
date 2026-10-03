@@ -32,10 +32,24 @@ class ChatSearchState {
   bool endReached = false;
   bool isLoading = false;
   bool hasError = false;
+  final visitedCursors = <String>{};
+  int generation = 0;
+  Completer<void>? cancellation;
+
+  void cancel() {
+    generation++;
+    if (cancellation?.isCompleted == false) cancellation!.complete();
+    cancellation = null;
+    isLoading = false;
+  }
 }
 
 class ChatSearchController extends State<ChatSearchPage>
     with SingleTickerProviderStateMixin {
+  static const resultsPerPage = 20;
+  static const maxRemotePages = 5;
+  static const maxLocalPages = 20;
+  static const maxSearchDuration = Duration(seconds: 30);
   Room? get room => Matrix.of(context).client.getRoomById(widget.roomId);
 
   final TextEditingController searchController = TextEditingController();
@@ -54,24 +68,37 @@ class ChatSearchController extends State<ChatSearchPage>
     final query = searchController.text.trim();
     if (query == searchQuery && searches[0].initialized) return;
     setState(() {
+      searches[0].cancel();
       searchQuery = query;
       searches[0] = ChatSearchState();
     });
     if (query.isEmpty) return;
     if (debounce) {
-      _debounce = Timer(
-        const Duration(milliseconds: 300),
-        () => startSearch(0),
-      );
+      _debounce = Timer(const Duration(milliseconds: 300), () {
+        if (!searches[0].initialized) startSearch(0);
+      });
     } else {
       startSearch(0);
     }
   }
 
-  bool _isCurrent(int index, ChatSearchState state, Room searchRoom) =>
+  bool _isCurrent(
+    int index,
+    ChatSearchState state,
+    Room searchRoom,
+    int generation,
+  ) =>
       mounted &&
       identical(searches[index], state) &&
+      state.generation == generation &&
       identical(room, searchRoom);
+
+  void stopSearch(int index, {bool hasError = false}) {
+    setState(() {
+      searches[index].cancel();
+      searches[index].hasError = hasError;
+    });
+  }
 
   void _appendResults(
     ChatSearchState state,
@@ -126,14 +153,31 @@ class ChatSearchController extends State<ChatSearchPage>
       state.initialized = state.isLoading = true;
       state.hasError = false;
     });
+    final generation = ++state.generation;
+    final cancellation = state.cancellation = Completer<void>();
+    final timeout = Timer(maxSearchDuration, () {
+      if (_isCurrent(index, state, searchRoom, generation)) {
+        stopSearch(index, hasError: true);
+      }
+    });
+    final previousCount = state.events.length;
     try {
       if (state.history == null) {
         state.history = ChatSearchHistory(searchRoom);
         state.nextBatch = state.history!.initialCursor;
       }
-      while (!state.localLoaded) {
-        final events = await state.history!.loadLocal(state.localOffset);
-        if (!_isCurrent(index, state, searchRoom)) return;
+      for (
+        var page = 0;
+        !state.localLoaded &&
+            page < maxLocalPages &&
+            state.events.length - previousCount < resultsPerPage;
+        page++
+      ) {
+        final events = await Future.any<List<Event>>([
+          state.history!.loadLocal(state.localOffset),
+          cancellation.future.then((_) => <Event>[]),
+        ]);
+        if (!_isCurrent(index, state, searchRoom, generation)) return;
         state.localOffset += ChatSearchHistory.localBatchSize;
         state.localLoaded =
             events.isEmpty || events.last.type == EventTypes.RoomCreate;
@@ -144,22 +188,48 @@ class ChatSearchController extends State<ChatSearchPage>
         state.searchedUntil =
             events.lastOrNull?.originServerTs ?? state.searchedUntil;
         _appendResults(state, events, index, query);
+        // Yield between cached batches so cancel and timeout timers can run.
+        await Future<void>.delayed(Duration.zero);
+        if (!_isCurrent(index, state, searchRoom, generation)) return;
       }
-      if (state.endReached) return;
-      final result = await state.history!.loadRemote(state.nextBatch!);
-      if (!_isCurrent(index, state, searchRoom)) return;
-      _appendResults(state, result.events, index, query);
-      setState(() {
-        state.nextBatch = result.nextBatch;
-        state.endReached = result.nextBatch == null;
-        state.searchedUntil = result.searchedUntil ?? state.searchedUntil;
-      });
+      if (!state.localLoaded || state.endReached) return;
+      for (
+        var page = 0;
+        page < maxRemotePages &&
+            !state.endReached &&
+            state.events.length - previousCount < resultsPerPage;
+        page++
+      ) {
+        final cursor = state.nextBatch!;
+        final result = await Future.any<ChatSearchBatch>([
+          state.history!.loadRemote(cursor),
+          cancellation.future.then(
+            (_) => (events: <Event>[], nextBatch: null, searchedUntil: null),
+          ),
+        ]);
+        if (!_isCurrent(index, state, searchRoom, generation)) return;
+        _appendResults(state, result.events, index, query);
+        state.visitedCursors.add(cursor);
+        final next = result.nextBatch;
+        setState(() {
+          state.searchedUntil = result.searchedUntil ?? state.searchedUntil;
+          if (next != null && state.visitedCursors.contains(next)) {
+            state.hasError = true;
+          } else {
+            state.nextBatch = next;
+            state.endReached = next == null;
+          }
+        });
+        if (state.hasError) break;
+      }
     } catch (e, s) {
-      if (!mounted || !identical(searches[index], state)) return;
+      if (!_isCurrent(index, state, searchRoom, generation)) return;
       Logs().w('Unable to search chat history', e, s);
       setState(() => state.hasError = true);
     } finally {
-      if (mounted && identical(searches[index], state)) {
+      timeout.cancel();
+      if (_isCurrent(index, state, searchRoom, generation)) {
+        state.cancellation = null;
         setState(() => state.isLoading = false);
       }
     }
@@ -182,6 +252,9 @@ class ChatSearchController extends State<ChatSearchPage>
   @override
   void dispose() {
     _debounce?.cancel();
+    for (final state in searches) {
+      state.cancel();
+    }
     tabController.removeListener(_onTabChanged);
     searchController.dispose();
     tabController.dispose();
