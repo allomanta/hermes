@@ -10,6 +10,7 @@ import 'package:material_ui/material_ui.dart';
 class SearchFooter extends StatelessWidget {
   final DateTime? searchedUntil;
   final bool endReached, isLoading;
+  final bool hasError;
   final void Function() onStartSearch;
 
   const SearchFooter({
@@ -18,11 +19,12 @@ class SearchFooter extends StatelessWidget {
     required this.endReached,
     required this.isLoading,
     required this.onStartSearch,
+    this.hasError = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (endReached) {
+    if (endReached && !hasError) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -38,6 +40,7 @@ class SearchFooter extends StatelessWidget {
         child: Column(
           mainAxisSize: .min,
           children: [
+            if (hasError) Text(L10n.of(context).oopsSomethingWentWrong),
             if (searchedUntil != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
@@ -62,7 +65,11 @@ class SearchFooter extends StatelessWidget {
                       ),
                     )
                   : const Icon(Icons.arrow_downward_outlined),
-              label: Text(L10n.of(context).searchMore),
+              label: Text(
+                hasError
+                    ? L10n.of(context).tryAgain
+                    : L10n.of(context).searchMore,
+              ),
             ),
           ],
         ),

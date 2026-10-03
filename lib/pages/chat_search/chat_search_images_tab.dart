@@ -15,6 +15,7 @@ class ChatSearchImagesTab extends StatelessWidget {
   final List<Event> events;
   final void Function() onStartSearch;
   final bool endReached, isLoading;
+  final bool hasError;
   final DateTime? searchedUntil;
 
   const ChatSearchImagesTab({
@@ -23,6 +24,7 @@ class ChatSearchImagesTab extends StatelessWidget {
     required this.onStartSearch,
     required this.endReached,
     required this.isLoading,
+    this.hasError = false,
     super.key,
     required this.searchedUntil,
   });
@@ -53,6 +55,7 @@ class ChatSearchImagesTab extends StatelessWidget {
             searchedUntil: searchedUntil,
             endReached: endReached,
             isLoading: isLoading,
+            hasError: hasError,
             onStartSearch: onStartSearch,
           );
         }

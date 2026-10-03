@@ -17,150 +17,112 @@ class ChatSearchPage extends StatefulWidget {
   ChatSearchController createState() => ChatSearchController();
 }
 
+class ChatSearchState {
+  final List<Event> events = [];
+  String? nextBatch;
+  DateTime? searchedUntil;
+  bool initialized = false;
+  bool endReached = false;
+  bool isLoading = false;
+  bool hasError = false;
+}
+
 class ChatSearchController extends State<ChatSearchPage>
     with SingleTickerProviderStateMixin {
   Room? get room => Matrix.of(context).client.getRoomById(widget.roomId);
 
   final TextEditingController searchController = TextEditingController();
   late final TabController tabController;
+  final searches = List.generate(4, (_) => ChatSearchState());
+  String searchQuery = '';
 
-  final List<Event> messages = [];
-  final List<Event> images = [];
-  final List<Event> files = [];
-  final List<Event> links = [];
-  String? messagesNextBatch, imagesNextBatch, filesNextBatch, linksNextBatch;
-  bool messagesEndReached = false;
-  bool imagesEndReached = false;
-  bool filesEndReached = false;
-  bool linksEndReached = false;
-  bool linksIsLoading = false;
-  int _linksSearchGeneration = 0;
-  DateTime? linksSearchedUntil;
-  bool isLoading = false;
-  DateTime? searchedUntil;
+  List<Event> get messages => searches[0].events;
+  List<Event> get images => searches[1].events;
+  List<Event> get files => searches[2].events;
+  List<Event> get links => searches[3].events;
 
   void restartSearch() {
     setState(() {
-      messages.clear();
-      images.clear();
-      files.clear();
-      links.clear();
-      linksNextBatch = linksSearchedUntil = null;
-      linksEndReached = linksIsLoading = false;
-      _linksSearchGeneration++;
-      messagesNextBatch = imagesNextBatch = filesNextBatch = searchedUntil =
-          null;
-      messagesEndReached = imagesEndReached = filesEndReached = false;
+      searchQuery = searchController.text.trim();
+      searches[0] = ChatSearchState();
     });
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      startSearch();
-    });
+    startSearch(0);
   }
 
-  Future<void> startSearch() async {
-    switch (tabController.index) {
+  bool matches(Event event, int index, String query) {
+    if (event.type != EventTypes.Message || event.redacted) return false;
+    switch (index) {
       case 0:
-        final searchQuery = searchController.text.trim();
-        if (searchQuery.isEmpty) return;
-        setState(() {
-          isLoading = true;
-        });
-        final result = await room!.searchEvents(
-          searchTerm: searchController.text.trim(),
-          nextBatch: messagesNextBatch,
-        );
-        setState(() {
-          isLoading = false;
-          messages.addAll(result.events);
-          messagesNextBatch = result.nextBatch;
-          messagesEndReached = result.nextBatch == null;
-          searchedUntil = result.searchedUntil;
-        });
-        return;
+        return event.plaintextBody.toLowerCase().contains(query.toLowerCase());
       case 1:
-        setState(() {
-          isLoading = true;
-        });
-        final result = await room!.searchEvents(
-          searchFunc: (event) => {
-            MessageTypes.Image,
-            MessageTypes.Video,
-          }.contains(event.messageType),
-          nextBatch: imagesNextBatch,
-        );
-        setState(() {
-          isLoading = false;
-          images.addAll(result.events);
-          imagesNextBatch = result.nextBatch;
-          imagesEndReached = result.nextBatch == null;
-          searchedUntil = result.searchedUntil;
-        });
-        return;
+        return {
+          MessageTypes.Image,
+          MessageTypes.Video,
+        }.contains(event.messageType);
       case 2:
-        setState(() {
-          isLoading = true;
-        });
-        final result = await room!.searchEvents(
-          searchFunc: (event) =>
-              event.messageType == MessageTypes.File ||
-              (event.messageType == MessageTypes.Audio &&
-                  !event.content.containsKey('org.matrix.msc3245.voice')),
-          nextBatch: filesNextBatch,
-        );
-        setState(() {
-          isLoading = false;
-          files.addAll(result.events);
-          filesNextBatch = result.nextBatch;
-          filesEndReached = result.nextBatch == null;
-          searchedUntil = result.searchedUntil;
-        });
-        return;
+        return event.messageType == MessageTypes.File ||
+            (event.messageType == MessageTypes.Audio &&
+                !event.content.containsKey('org.matrix.msc3245.voice'));
       case 3:
-        if (linksIsLoading || linksEndReached) return;
-        final generation = _linksSearchGeneration;
-        setState(() {
-          linksIsLoading = true;
-        });
-        try {
-          final result = await room!.searchEvents(
-            searchFunc: (event) => event.sharedLinks.isNotEmpty,
-            nextBatch: linksNextBatch,
-          );
-          if (!mounted || generation != _linksSearchGeneration) return;
-          setState(() {
-            final eventIds = links.map((event) => event.eventId).toSet();
-            links.addAll(
-              result.events.where((event) => eventIds.add(event.eventId)),
-            );
-            linksNextBatch = result.nextBatch;
-            linksEndReached = result.nextBatch == null;
-            linksSearchedUntil = result.searchedUntil;
-          });
-        } finally {
-          if (mounted && generation == _linksSearchGeneration) {
-            setState(() {
-              linksIsLoading = false;
-            });
-          }
-        }
-        return;
+        return event.sharedLinks.isNotEmpty;
       default:
+        return false;
+    }
+  }
+
+  Future<void> startSearch([int? tab]) async {
+    final index = tab ?? tabController.index;
+    final state = searches[index];
+    final searchRoom = room;
+    final query = searchQuery;
+    if (searchRoom == null ||
+        state.isLoading ||
+        state.endReached ||
+        (index == 0 && query.isEmpty)) {
+      return;
+    }
+    setState(() {
+      state.initialized = state.isLoading = true;
+      state.hasError = false;
+    });
+    try {
+      final result = await searchRoom.searchEvents(
+        searchTerm: index == 0 ? query : null,
+        searchFunc: (event) => matches(event, index, query),
+        nextBatch: state.nextBatch,
+      );
+      if (!mounted ||
+          !identical(searches[index], state) ||
+          !identical(room, searchRoom)) {
         return;
+      }
+      setState(() {
+        final ids = state.events.map((event) => event.eventId).toSet();
+        state.events.addAll(
+          result.events.where((event) => ids.add(event.eventId)),
+        );
+        state.events.sort(
+          (a, b) => b.originServerTs.compareTo(a.originServerTs),
+        );
+        state.nextBatch = result.nextBatch;
+        state.endReached = result.nextBatch == null;
+        state.searchedUntil = result.searchedUntil ?? state.searchedUntil;
+      });
+    } catch (e, s) {
+      if (!mounted || !identical(searches[index], state)) return;
+      Logs().w('Unable to search chat history', e, s);
+      setState(() => state.hasError = true);
+    } finally {
+      if (mounted && identical(searches[index], state)) {
+        setState(() => state.isLoading = false);
+      }
     }
   }
 
   void _onTabChanged() {
-    if (tabController.indexIsChanging) return;
-    switch (tabController.index) {
-      case 1:
-      case 2:
-      case 3:
-        startSearch();
-        break;
-      case 0:
-      default:
-        restartSearch();
-        break;
+    if (!tabController.indexIsChanging &&
+        !searches[tabController.index].initialized) {
+      startSearch();
     }
   }
 

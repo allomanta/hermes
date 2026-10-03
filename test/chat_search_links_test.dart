@@ -42,6 +42,8 @@ class _Room extends Fake implements Room {
       User(id, room: this, displayName: 'Alice');
 
   final batches = <String?>[];
+  final queries = <String?>[];
+  bool fail = false;
   final pages = <List<Event>>[];
   Completer<({List<Event> events, String? nextBatch, DateTime? searchedUntil})>?
   pending;
@@ -59,6 +61,8 @@ class _Room extends Fake implements Room {
     },
   }) async {
     batches.add(nextBatch);
+    queries.add(searchTerm);
+    if (fail) throw StateError('Search failed');
     if (pending != null) return pending!.future;
     final page = batches.length - 1;
     return (
@@ -301,7 +305,7 @@ void main() {
     testWidgets(
       dispose
           ? 'a pending link search is safe after disposal'
-          : 'returning to Messages invalidates a pending link search',
+          : 'returning to Messages preserves a pending link search',
       (tester) async {
         final room = _Room();
         final pending = room.pending = Completer();
@@ -332,9 +336,79 @@ void main() {
           searchedUntil: DateTime(2026, 9, 1),
         ));
         await tester.pumpAndSettle();
-        expect(controller.links, isEmpty);
+        expect(controller.links, dispose ? isEmpty : hasLength(1));
         expect(tester.takeException(), isNull);
       },
     );
   }
+
+  testWidgets(
+    'tab changes preserve results and do not restart completed searches',
+    (tester) async {
+      final room = _Room();
+      room.pages.add([_event(room, 'https://kept.org')]);
+      await _mountSearch(tester, room);
+      await tester.tap(find.widgetWithText(Tab, 'Links'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(Tab, 'Messages'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(Tab, 'Links'));
+      await tester.pumpAndSettle();
+      expect(room.batches, [null]);
+      expect(find.text('https://kept.org'), findsOneWidget);
+    },
+  );
+
+  testWidgets('pagination uses the submitted query, not unsent field edits', (
+    tester,
+  ) async {
+    final room = _Room();
+    room.pages.addAll([
+      [_event(room, 'First match', id: r'$first')],
+      [
+        _event(room, 'First older', id: r'$older'),
+        _event(room, 'Second match'),
+      ],
+    ]);
+    await _mountSearch(tester, room);
+    final controller = tester.state<ChatSearchController>(
+      find.byType(ChatSearchPage),
+    );
+    controller.searchController.text = 'first';
+    controller.restartSearch();
+    await tester.pumpAndSettle();
+    controller.searchController.text = 'second';
+    await controller.startSearch();
+    await tester.pumpAndSettle();
+    expect(room.queries, ['first', 'first']);
+    expect(controller.messages.map((event) => event.body), [
+      'First match',
+      'First older',
+    ]);
+  });
+
+  testWidgets('failed searches release loading and can be retried', (
+    tester,
+  ) async {
+    final room = _Room()..fail = true;
+    await _mountSearch(tester, room);
+    final controller = tester.state<ChatSearchController>(
+      find.byType(ChatSearchPage),
+    );
+    controller.searchController.text = 'match';
+    controller.restartSearch();
+    await tester.pumpAndSettle();
+    expect(controller.searches[0].isLoading, isFalse);
+    expect(find.text('Try again'), findsOneWidget);
+    room.fail = false;
+    // The failed call did not consume a history page.
+    room.pages.addAll([
+      [],
+      [_event(room, 'Retry match')],
+    ]);
+    await tester.tap(find.text('Try again'));
+    await tester.pumpAndSettle();
+    expect(find.text('Retry match'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

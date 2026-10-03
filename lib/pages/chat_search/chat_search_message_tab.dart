@@ -20,6 +20,7 @@ class ChatSearchMessageTab extends StatelessWidget {
   final List<Event> events;
   final void Function() onStartSearch;
   final bool endReached, isLoading;
+  final bool hasError;
   final DateTime? searchedUntil;
 
   const ChatSearchMessageTab({
@@ -30,6 +31,7 @@ class ChatSearchMessageTab extends StatelessWidget {
     required this.searchedUntil,
     required this.endReached,
     required this.isLoading,
+    this.hasError = false,
     super.key,
   });
 
@@ -66,6 +68,7 @@ class ChatSearchMessageTab extends StatelessWidget {
               searchedUntil: searchedUntil,
               endReached: endReached,
               isLoading: isLoading,
+              hasError: hasError,
               onStartSearch: onStartSearch,
             );
           }
