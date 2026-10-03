@@ -1,6 +1,8 @@
 import 'package:hermes/config/setting_keys.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_list/chat_list.dart';
 import 'package:hermes/pages/chat_list/chat_list_item.dart';
+import 'package:hermes/pages/chat_list/chat_list_message_search.dart';
 import 'package:hermes/pages/chat_list/dummy_chat_list_item.dart';
 import 'package:hermes/pages/chat_list/space_view.dart';
 import 'package:hermes/utils/stream_extension.dart';
@@ -42,7 +44,7 @@ class ChatListViewBody extends StatelessWidget {
     }
 
     const dummyChatCount = 4;
-    final filter = controller.searchController.text.toLowerCase();
+    final filter = controller.searchController.text.trim().toLowerCase();
     return StreamBuilder(
       key: ValueKey(client.userID.toString()),
       stream: client.onSync.stream
@@ -72,6 +74,16 @@ class ChatListViewBody extends StatelessWidget {
                     childCount: dummyChatCount,
                   ),
                 ),
+              if (client.prevBatch != null && filter.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      L10n.of(context).chats,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                ),
               if (client.prevBatch != null)
                 SliverList.builder(
                   itemCount: rooms.length,
@@ -95,6 +107,8 @@ class ChatListViewBody extends StatelessWidget {
                     );
                   },
                 ),
+              if (client.prevBatch != null && filter.isNotEmpty)
+                ChatListMessageSearch(client: client, query: filter),
             ],
           ),
         );

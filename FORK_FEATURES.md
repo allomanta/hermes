@@ -13,6 +13,7 @@ Added features on top of upstream that need to be maintained through any merges 
     - Supply Flutter Material and the app theme for the built-in search field
 - Saved global interface scale (75–150%) in Appearance settings, with Ctrl/Cmd +/− and 0 on desktop
 - Links tab in chat search with clickable URLs and jumps to the original messages
+- Chat-list search also finds message text in the active account's locally stored chats
 - In-app Linux video playback using media-kit with the existing video controls
 - Open live read-receipt details from message timestamps and reader avatars, including the overflow bubble
 - Sticker picker stays open when typing on desktop and search grabs focus after opening [c5b472823, 812dabb4c, 9c2dd20e3]
