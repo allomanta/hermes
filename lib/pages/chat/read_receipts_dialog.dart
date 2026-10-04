@@ -39,13 +39,6 @@ class ReadReceiptsDialog extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              l10n.readReceiptTimesDescription,
-              style: theme.textTheme.bodySmall,
-            ),
-          ),
           Expanded(
             child: StreamBuilder<SyncUpdate>(
               stream: event.room.client.onSync.stream.where(
