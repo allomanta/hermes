@@ -32,36 +32,40 @@ class DummyChatListItem extends StatelessWidget {
                 )
               : const SizedBox.shrink(),
         ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 14,
-                decoration: BoxDecoration(
-                  color: titleColor,
-                  borderRadius: BorderRadius.circular(3),
+        title: LayoutBuilder(
+          builder: (context, constraints) => Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: titleColor,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 36),
-            Container(
-              height: 14,
-              width: 14,
-              decoration: BoxDecoration(
-                color: subtitleColor,
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              height: 14,
-              width: 14,
-              decoration: BoxDecoration(
-                color: subtitleColor,
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-          ],
+              if (constraints.maxWidth >= 96) ...[
+                const SizedBox(width: 36),
+                Container(
+                  height: 14,
+                  width: 14,
+                  decoration: BoxDecoration(
+                    color: subtitleColor,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  height: 14,
+                  width: 14,
+                  decoration: BoxDecoration(
+                    color: subtitleColor,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
         subtitle: Container(
           decoration: BoxDecoration(
