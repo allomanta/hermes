@@ -432,7 +432,9 @@ class ChatView extends StatelessWidget {
                                             : theme
                                                   .colorScheme
                                                   .surfaceContainer,
-                                        borderRadius: BorderRadius.circular(32),
+                                        borderRadius: BorderRadius.circular(
+                                          ChatInputRow.height / 2,
+                                        ),
                                         child:
                                             controller.room.isAbandonedDMRoom ==
                                                 true

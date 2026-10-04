@@ -28,7 +28,7 @@ class ReplyDisplay extends StatelessWidget {
           ? Material(
               color: theme.colorScheme.surfaceContainer,
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: EdgeInsets.zero,
                 child: Row(
                   children: <Widget>[
                     Padding(
