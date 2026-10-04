@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hermes/config/routes.dart';
@@ -9,6 +10,7 @@ import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/column_layout_controller.dart';
+import 'package:hermes/utils/swipeable_page.dart';
 import 'package:hermes/widgets/interface_scale.dart';
 import 'package:hermes/widgets/layouts/two_column_layout.dart';
 import 'package:material_ui/material_ui.dart';
@@ -194,6 +196,54 @@ void main() {
   setUp(() async => AppSettings.store.clear());
 
   for (final direction in TextDirection.values) {
+    testWidgets('divider collapse enables swipe-back in ${direction.name}', (
+      tester,
+    ) async {
+      final app = await _mountApp(tester, direction: direction);
+      final chat = tester.state<_ChatState>(find.byType(_Chat));
+      final route = ModalRoute.of(chat.context)! as SwipePopPageRoute;
+      final sign = direction == TextDirection.ltr ? 1.0 : -1.0;
+      expect(route.popGestureEnabled, isFalse);
+      expect(route.transitionDuration, Duration.zero);
+      await tester.enterText(find.byType(TextField), 'Retained draft');
+      chat.focus.unfocus();
+      await tester.drag(find.byKey(_divider), Offset(-300 * sign, 0));
+      await tester.pumpAndSettle();
+      expect(ModalRoute.of(chat.context), same(route));
+      expect(route.popGestureEnabled, isTrue);
+      expect(route.popGestureController.reverseDuration, route.duration);
+      final start = Offset(sign > 0 ? 200 : 1000, 300);
+      // Cancelling a short swipe keeps both the page and its editor state.
+      final gesture = await tester.startGesture(start);
+      await gesture.moveBy(
+        Offset(200 * sign, 0),
+        timeStamp: const Duration(seconds: 1),
+      );
+      await tester.pump();
+      expect(route.popGestureNavigator.userGestureInProgress, isTrue);
+      await gesture.up(timeStamp: const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+      expect(
+        app.router.routeInformationProvider.value.uri.path,
+        '/rooms/first',
+      );
+      expect(chat.text.text, 'Retained draft');
+      // Reopening the split disables swiping without replacing the route.
+      await tester.drag(find.byKey(_divider), Offset(300 * sign, 0));
+      await tester.pumpAndSettle();
+      expect(route.popGestureEnabled, isFalse);
+      expect(route.transitionDuration, Duration.zero);
+      expect(tester.state<_ChatState>(find.byType(_Chat)), same(chat));
+      expect(chat.text.text, 'Retained draft');
+      await tester.drag(find.byKey(_divider), Offset(-300 * sign, 0));
+      await tester.pumpAndSettle();
+      await tester.dragFrom(start, Offset(700 * sign, 0));
+      await tester.pumpAndSettle();
+      expect(app.router.routeInformationProvider.value.uri.path, '/rooms');
+      expect(find.text('Chat list'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('divider resizes both panes in ${direction.name}', (
       tester,
     ) async {
@@ -211,6 +261,91 @@ void main() {
       expect(tester.getSize(find.byKey(_mainPane)).width, 550);
       expect(tester.takeException(), isNull);
     });
+  }
+
+  testWidgets('trackpad swipe-back works after collapsing the list', (
+    tester,
+  ) async {
+    final app = await _mountApp(tester);
+    await tester.drag(find.byKey(_divider), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    final gesture = await tester.createGesture(
+      kind: PointerDeviceKind.trackpad,
+    );
+    await gesture.panZoomStart(const Offset(200, 300));
+    await gesture.panZoomUpdate(
+      const Offset(200, 300),
+      pan: const Offset(700, 0),
+    );
+    await tester.pump();
+    await gesture.panZoomEnd();
+    await tester.pumpAndSettle();
+    expect(app.router.routeInformationProvider.value.uri.path, '/rooms');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('restoring the split during a swipe cancels it safely', (
+    tester,
+  ) async {
+    final app = await _mountApp(tester);
+    final chat = tester.state<_ChatState>(find.byType(_Chat));
+    final route = ModalRoute.of(chat.context)! as SwipePopPageRoute;
+    await tester.drag(find.byKey(_divider), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(const Offset(200, 300));
+    await gesture.moveBy(const Offset(200, 0));
+    await tester.pump();
+    expect(route.popGestureNavigator.userGestureInProgress, isTrue);
+    app.layout.value = null;
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(route.popGestureNavigator.userGestureInProgress, isFalse);
+    expect(app.router.routeInformationProvider.value.uri.path, '/rooms/first');
+    expect(tester.state<_ChatState>(find.byType(_Chat)), same(chat));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('window resizing keeps the same swipe route and draft', (
+    tester,
+  ) async {
+    final app = await _mountApp(tester);
+    final chat = tester.state<_ChatState>(find.byType(_Chat));
+    final route = ModalRoute.of(chat.context);
+    await tester.enterText(find.byType(TextField), 'Retained draft');
+    chat.focus.unfocus();
+    await tester.binding.setSurfaceSize(const Size(800, 600));
+    await tester.pumpAndSettle();
+    expect(ModalRoute.of(tester.element(find.byType(_Chat))), same(route));
+    expect(chat.text.text, 'Retained draft');
+    await tester.dragFrom(const Offset(200, 300), const Offset(500, 0));
+    await tester.pumpAndSettle();
+    expect(app.router.routeInformationProvider.value.uri.path, '/rooms');
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final afterMount in [false, true]) {
+    testWidgets(
+      'divider collapse respects disabling swipes ${afterMount ? 'after' : 'before'} opening the chat',
+      (tester) async {
+        if (!afterMount) {
+          await AppSettings.swipePopEnableFullScreenDrag.setItem(false);
+        }
+        final app = await _mountApp(tester);
+        if (afterMount) {
+          await AppSettings.swipePopEnableFullScreenDrag.setItem(false);
+        }
+        await tester.drag(find.byKey(_divider), const Offset(-300, 0));
+        await tester.pumpAndSettle();
+        await tester.dragFrom(const Offset(200, 300), const Offset(700, 0));
+        await tester.pumpAndSettle();
+        expect(
+          app.router.routeInformationProvider.value.uri.path,
+          '/rooms/first',
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
   testWidgets('collapsing the list preserves the chat and enables back', (
@@ -370,6 +505,23 @@ void main() {
     expect(
       app.router.routeInformationProvider.value.uri.path,
       '/rooms/settings/style',
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a collapsed settings page swipes back within its navigator', (
+    tester,
+  ) async {
+    final app = await _mountApp(tester);
+    app.router.go('/rooms/settings/style');
+    await tester.pumpAndSettle();
+    await tester.drag(find.byKey(_divider), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    await tester.dragFrom(const Offset(200, 300), const Offset(700, 0));
+    await tester.pumpAndSettle();
+    expect(
+      app.router.routeInformationProvider.value.uri.path,
+      '/rooms/settings',
     );
     expect(tester.takeException(), isNull);
   });

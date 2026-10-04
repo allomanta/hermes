@@ -522,13 +522,12 @@ abstract class AppRoutes {
       final client = matrix.getClientByName(clientName);
       if (client != null) matrix.setActiveClient(client);
     }
-    // Collapsing a pane keeps the existing routes and their state alive.
-    return PantheonThemes.isColumnModeByWidth(MediaQuery.sizeOf(context).width)
-        ? noTransitionPageBuilder(context, state, child)
-        : SwipePopPage(
-            key: state.pageKey,
-            restorationId: state.pageKey.value,
-            child: child,
-          );
+    // Keep the route and page state while the layout enables/disables swiping.
+    return SwipePopPage(
+      key: state.pageKey,
+      restorationId: state.pageKey.value,
+      enableTransitions: !PantheonThemes.isColumnMode(context),
+      child: child,
+    );
   }
 }

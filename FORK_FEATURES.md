@@ -33,6 +33,7 @@ Added features on top of upstream that need to be maintained through any merges 
 - Sort space chats like the all chats list [e74b1a1dd]
 - Reply with stickers
 - Draggable divider between the chat list and chat, with automatic pane collapse and edge handles to reopen
+    - Swipe-back follows single-column mode after divider collapse or window resizing without recreating the current page
     - Narrow chat-list rows hide timestamps before reducing secondary badges; loading rows and edit previews also adapt to pane width
 
 ## UI tweaks

@@ -15,6 +15,7 @@ class SwipePopPage<T> extends Page<T> {
     Duration? duration,
     this.curve = Curves.decelerate,
     this.reverseCurve = Curves.easeOutCubic,
+    this.enableTransitions = true,
     bool? enableFullScreenDrag,
     double? minimumDragFraction,
     double? velocityThreshold,
@@ -39,6 +40,7 @@ class SwipePopPage<T> extends Page<T> {
   final Duration duration;
   final Curve curve;
   final Curve reverseCurve;
+  final bool enableTransitions;
   final bool enableFullScreenDrag;
   final double minimumDragFraction;
   final double velocityThreshold;
@@ -46,37 +48,24 @@ class SwipePopPage<T> extends Page<T> {
   /// Builds the concrete [PageRoute] wired with swipe handling.
   @override
   Route<T> createRoute(BuildContext context) {
-    return SwipePopPageRoute<T>(
-      duration: duration,
-      curve: curve,
-      reverseCurve: reverseCurve,
-      enableFullScreenDrag: enableFullScreenDrag,
-      minimumDragFraction: minimumDragFraction,
-      velocityThreshold: velocityThreshold,
-      settings: this,
-    );
+    return SwipePopPageRoute<T>(settings: this);
   }
 }
 
 /// A [PageRoute] that supports configurable swipe-to-pop gestures.
 class SwipePopPageRoute<T> extends PageRoute<T> {
-  /// Configures a swipe-enabled route with the provided animation options.
-  SwipePopPageRoute({
-    required this.duration,
-    required this.curve,
-    required this.reverseCurve,
-    required this.enableFullScreenDrag,
-    required this.minimumDragFraction,
-    required this.velocityThreshold,
-    super.settings,
-  }) : assert(minimumDragFraction >= 0 && minimumDragFraction <= 1);
+  /// Uses the current page options even when a layout change keeps this route.
+  SwipePopPageRoute({required SwipePopPage<T> settings})
+    : super(settings: settings);
 
-  final Duration duration;
-  final Curve curve;
-  final Curve reverseCurve;
-  final bool enableFullScreenDrag;
-  final double minimumDragFraction;
-  final double velocityThreshold;
+  SwipePopPage<T> get _page => settings as SwipePopPage<T>;
+
+  Duration get duration => _page.duration;
+  Curve get curve => _page.curve;
+  Curve get reverseCurve => _page.reverseCurve;
+  bool get enableFullScreenDrag => _page.enableFullScreenDrag;
+  double get minimumDragFraction => _page.minimumDragFraction;
+  double get velocityThreshold => _page.velocityThreshold;
 
   /// Always render the page as opaque so the previous route stays hidden.
   @override
@@ -100,15 +89,29 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
 
   /// Use the configured forward duration for pushes.
   @override
-  Duration get transitionDuration => duration;
+  Duration get transitionDuration =>
+      enableTransitions ? duration : Duration.zero;
 
   /// Mirror the forward duration when popping the route.
   @override
-  Duration get reverseTransitionDuration => duration;
+  Duration get reverseTransitionDuration =>
+      enableTransitions ? duration : Duration.zero;
+
+  /// Update layout behavior without replacing the route or its page state.
+  bool get enableTransitions => _page.enableTransitions;
+
+  @override
+  void changedInternalState() {
+    controller
+      ?..duration = transitionDuration
+      ..reverseDuration = reverseTransitionDuration;
+    super.changedInternalState();
+  }
 
   /// Enable native-style pop gestures when allowed by configuration.
   @override
-  bool get popGestureEnabled => enableFullScreenDrag && !isFirst;
+  bool get popGestureEnabled =>
+      enableTransitions && enableFullScreenDrag && !isFirst;
 
   /// Build the underlying page contents without wrapping animations.
   @override
@@ -116,7 +119,7 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-  ) => (settings as SwipePopPage<T>).child;
+  ) => _page.child;
 
   /// Wrap the page with gesture handling and Cupertino-style animations.
   @override
@@ -126,20 +129,20 @@ class SwipePopPageRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final wrapped = enableFullScreenDrag
-        ? _FullScreenPopGestureDetector<T>(
-            route: this,
-            minimumDragFraction: minimumDragFraction,
-            velocityThreshold: velocityThreshold,
-            child: child,
-          )
-        : child;
-
     return CupertinoPageTransition(
-      primaryRouteAnimation: animation,
-      secondaryRouteAnimation: secondaryAnimation,
+      primaryRouteAnimation: enableTransitions
+          ? animation
+          : const AlwaysStoppedAnimation(1.0),
+      secondaryRouteAnimation: enableTransitions
+          ? secondaryAnimation
+          : const AlwaysStoppedAnimation(0.0),
       linearTransition: navigator?.userGestureInProgress ?? false,
-      child: wrapped,
+      child: _FullScreenPopGestureDetector<T>(
+        route: this,
+        minimumDragFraction: minimumDragFraction,
+        velocityThreshold: velocityThreshold,
+        child: child,
+      ),
     );
   }
 
@@ -202,6 +205,14 @@ class _FullScreenPopGestureDetectorState<T>
     _recognizer
       ..gestureSettings = MediaQuery.maybeGestureSettingsOf(context)
       ..allowedSign = textDirection == TextDirection.rtl ? -1 : 1;
+  }
+
+  @override
+  void didUpdateWidget(_FullScreenPopGestureDetector<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.route.enableTransitions || !widget.route.enableFullScreenDrag) {
+      _handleDragCancel();
+    }
   }
 
   /// Dispose the recognizer and ensure the navigator ends any active gesture.
