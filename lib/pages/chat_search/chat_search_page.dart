@@ -240,8 +240,9 @@ class ChatSearchController extends State<ChatSearchPage>
   }
 
   void _onTabChanged() {
-    if (!tabController.indexIsChanging &&
-        !searches[tabController.index].initialized) {
+    if (tabController.indexIsChanging) return;
+    setState(() {});
+    if (!searches[tabController.index].initialized) {
       startSearch();
     }
   }

@@ -461,6 +461,43 @@ void main() {
     },
   );
 
+  for (final tab in ['Links', 'Gallery', 'Files']) {
+    testWidgets(
+      'returning from $tab re-enables search without reloading history',
+      (tester) async {
+        final room = _Room();
+        room.pages.add([
+          _event(room, 'First match', id: 'first'),
+          _event(room, 'Second match', id: 'second'),
+        ]);
+        await _mountSearch(tester, room);
+        final field = find.byType(TextField);
+        await tester.enterText(field, 'first');
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pumpAndSettle();
+        final controller = tester.state<ChatSearchController>(
+          find.byType(ChatSearchPage),
+        );
+        final messageState = controller.searches[0];
+        await tester.tap(find.widgetWithText(Tab, tab));
+        await tester.pumpAndSettle();
+        expect(tester.widget<TextField>(field).enabled, isFalse);
+        final requests = room.batches.length;
+        await tester.tap(find.widgetWithText(Tab, 'Messages'));
+        await tester.pumpAndSettle();
+        expect(tester.widget<TextField>(field).enabled, isTrue);
+        expect(identical(controller.searches[0], messageState), isTrue);
+        expect(room.batches.length, requests);
+        await tester.tap(field);
+        await tester.enterText(field, 'second');
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pumpAndSettle();
+        expect(controller.messages.single.body, 'Second match');
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('pagination uses the submitted query, not unsent field edits', (
     tester,
   ) async {
