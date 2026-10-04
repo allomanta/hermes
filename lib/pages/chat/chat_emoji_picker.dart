@@ -4,14 +4,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:matrix/matrix.dart';
-import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/config/themes.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat/sticker_picker_dialog.dart';
-import 'package:hermes/widgets/emoji_search_view.dart';
-import 'chat.dart';
 import 'package:hermes/pages/chat/trust_user_key_dialog.dart';
+import 'package:hermes/widgets/emoji_search_view.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:matrix/matrix.dart';
+
+import 'chat.dart';
 
 class ChatEmojiPicker extends StatelessWidget {
   final ChatController controller;
@@ -88,21 +89,44 @@ class ChatEmojiPicker extends StatelessWidget {
                           StickerPickerDialog(
                             room: controller.room,
                             onSelected: (sticker) async {
+                              final room = controller.room;
+                              final reply = controller.replyEvent;
+                              final threadId = controller.activeThreadId;
+                              final replyId =
+                                  reply?.eventId ??
+                                  controller.threadLastEventId;
                               final proceed = await showTrustUserInRoomDialog(
                                 context,
-                                controller.room,
+                                room,
                               );
-                              if (!proceed) return;
-                              controller.room.sendEvent(
-                                {
-                                  'body': sticker.body,
-                                  'info': sticker.info ?? {},
-                                  'url': sticker.url.toString(),
-                                },
-                                type: EventTypes.Sticker,
-                                threadRootEventId: controller.activeThreadId,
-                                threadLastEventId: controller.threadLastEventId,
-                              );
+                              if (!proceed || !context.mounted) return;
+                              final eventId = await room.sendEvent({
+                                'body': sticker.body,
+                                'info': sticker.info ?? {},
+                                'url': sticker.url.toString(),
+                                // SDK reply options add text fallbacks to the
+                                // sticker's description. Only add relations.
+                                if (replyId != null || threadId != null)
+                                  'm.relates_to': {
+                                    if (threadId != null) ...{
+                                      'event_id': threadId,
+                                      'rel_type': RelationshipTypes.thread,
+                                      'is_falling_back': reply == null,
+                                    },
+                                    if (replyId != null)
+                                      'm.in_reply_to': {'event_id': replyId},
+                                  },
+                                if (reply != null)
+                                  'm.mentions': {
+                                    'user_ids': [reply.senderId],
+                                  },
+                              }, type: EventTypes.Sticker);
+                              if (eventId != null &&
+                                  controller.mounted &&
+                                  reply != null &&
+                                  identical(controller.replyEvent, reply)) {
+                                controller.cancelReplyEventAction();
+                              }
                             },
                             onEscape: () {
                               controller.hideEmojiPicker();

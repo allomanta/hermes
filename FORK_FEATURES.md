@@ -31,6 +31,7 @@ Added features on top of upstream that need to be maintained through any merges 
 - Drag to reorder spaces in the navigation rail [5373d33b6]
 - Open space actions from navigation rail icons [d96f91ce4]
 - Sort space chats like the all chats list [e74b1a1dd]
+- Reply with stickers
 
 ## UI tweaks
 - Nav rail resizes [8b642d768, c57b7f39d, 82352a97e, adb6b0dde, 927c18d4b]
