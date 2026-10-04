@@ -12,6 +12,7 @@ import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat_list/chat_list_view.dart';
+import 'package:hermes/utils/android_incoming_shares.dart';
 import 'package:hermes/utils/android_share_shortcuts.dart';
 import 'package:hermes/utils/error_reporter.dart';
 import 'package:hermes/utils/localized_exception_extension.dart';
@@ -57,11 +58,17 @@ class ChatList extends StatefulWidget {
 }
 
 class ChatListController extends State<ChatList>
-    with TickerProviderStateMixin, RouteAware {
+    with TickerProviderStateMixin, RouteAware, WidgetsBindingObserver {
   StreamSubscription? _intentDataStreamSubscription;
 
   StreamSubscription? _intentFileStreamSubscription;
   bool _receivingShareIntents = false;
+  StreamSubscription<void>? _androidShareSubscription;
+  bool _drainingShares = false;
+  bool _shareRefreshRequested = false;
+  (String, Object)? _activeShareClaim;
+  final _shareDisposed = Completer<void>();
+  ModalRoute<dynamic>? _incomingShareRoute;
   StreamSubscription<bool>? _directShareShortcutSubscription;
   List<Client> _directShareShortcutClients = [];
 
@@ -247,34 +254,29 @@ class ChatListController extends State<ChatList>
   String? get activeChat =>
       PantheonThemes.isColumnMode(context) ? widget.activeChat : null;
 
-  Future<void> _processIncomingSharedMedia(
-    List<SharedMediaFile> files, [
-    Uri? routeAtDelivery,
-  ]) async {
+  Future<void> _processIncomingSharedMedia(List<SharedMediaFile> files) async {
     if (!mounted) return;
-    routeAtDelivery ??= GoRouter.of(context).routeInformationProvider.value.uri;
-    final sharedFiles = List<SharedMediaFile>.of(files);
+    final sharedFiles = files
+        .where((file) => !file.path.startsWith(AppConfig.deepLinkPrefix))
+        .toList();
+    if (sharedFiles.isEmpty) return;
     try {
       await ReceiveSharingIntent.instance.reset();
     } catch (e, s) {
       Logs().w('Unable to reset received share intent', e, s);
     }
     if (!mounted) return;
-    await _handleIncomingSharedMedia(sharedFiles, routeAtDelivery);
+    await handleIncomingSharedMedia(sharedFiles);
   }
 
-  Future<void> _handleIncomingSharedMedia(
-    List<SharedMediaFile> files,
-    Uri routeAtDelivery,
-  ) async {
-    files.removeWhere(
-      (file) => file.path.startsWith(AppConfig.deepLinkPrefix) == true,
-    );
-    if (files.isEmpty || !mounted) return;
-    if (GoRouter.of(context).routeInformationProvider.value.uri !=
-        routeAtDelivery) {
-      return;
-    }
+  Future<bool> handleIncomingSharedMedia(
+    List<SharedMediaFile> files, {
+    ({String clientName, String roomId})? target,
+  }) async {
+    if (files.isEmpty || !mounted) return false;
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return false;
+    final router = GoRouter.of(context);
     final shareItems = files.map((file) {
       if ({SharedMediaType.text, SharedMediaType.url}.contains(file.type)) {
         return TextShareItem(file.path);
@@ -284,69 +286,142 @@ class ChatListController extends State<ChatList>
       );
     }).toList();
 
-    if (PlatformInfos.isAndroid) {
-      final target = await AndroidShareShortcuts.takePendingShortcut();
-      if (!mounted) return;
+    if (target != null) {
       final client = Matrix.of(context).widget.clients.firstWhereOrNull(
-        (client) =>
-            client.clientName == target?.clientName && client.isLogged(),
+        (client) => client.clientName == target.clientName && client.isLogged(),
       );
-      if (client != null) await client.roomsLoading;
-      if (!mounted) return;
-      if (GoRouter.of(context).routeInformationProvider.value.uri !=
-          routeAtDelivery) {
-        return;
+      if (client != null) {
+        try {
+          await client.roomsLoading?.timeout(const Duration(seconds: 10));
+        } catch (e, s) {
+          Logs().w('Unable to load Direct Share account', e, s);
+        }
       }
-      final room = target == null || client?.isLogged() != true
+      if (!mounted) return false;
+      final room = client?.isLogged() != true
           ? null
           : client!.getRoomById(target.roomId);
       if (room != null &&
           room.membership == Membership.join &&
           !room.isSpace &&
           room.canSendDefaultMessages) {
-        final currentUri = routeAtDelivery;
-        final alreadyInTargetChat =
-            currentUri.path == '/rooms/${room.id}' &&
-            Matrix.of(context).client == client;
-        if (!alreadyInTargetChat) {
-          while (context.canPop()) {
-            context.pop();
-          }
+        final previous = _incomingShareRoute;
+        if (previous?.isActive == true) {
+          Navigator.of(context, rootNavigator: true).removeRoute(previous!);
         }
-        context.go(
-          alreadyInTargetChat
-              ? currentUri.toString()
-              : Uri(
-                  path: '/rooms/${room.id}',
-                  queryParameters: {'client': client!.clientName},
-                ).toString(),
+        router.go(
+          Uri(
+            path: '/rooms/${room.id}',
+            queryParameters: {'client': client!.clientName},
+          ).toString(),
           extra: shareItems,
         );
-        return;
+        return true;
       }
     }
 
-    showScaffoldDialog(
-      context: context,
-      builder: (context) => ShareScaffoldDialog(items: shareItems),
+    final previous = _incomingShareRoute;
+    if (previous?.isActive == true) {
+      Navigator.of(context, rootNavigator: true).removeRoute(previous!);
+    }
+    _incomingShareRoute = null;
+    ModalRoute<dynamic>? current;
+    final shown = Completer<void>();
+    unawaited(
+      showScaffoldDialog<void>(
+        context: context,
+        builder: (dialogContext) {
+          current = ModalRoute.of(dialogContext);
+          _incomingShareRoute = current;
+          if (!shown.isCompleted) shown.complete();
+          return ShareScaffoldDialog(items: shareItems);
+        },
+      ).whenComplete(() {
+        if (identical(_incomingShareRoute, current)) {
+          _incomingShareRoute = null;
+        }
+      }),
     );
+    await Future.any([shown.future, _shareDisposed.future]);
+    return mounted && shown.isCompleted;
+  }
+
+  Future<void> _drainAndroidShares() async {
+    if (!mounted ||
+        (WidgetsBinding.instance.lifecycleState != null &&
+            WidgetsBinding.instance.lifecycleState !=
+                AppLifecycleState.resumed)) {
+      return;
+    }
+    if (_drainingShares) {
+      _shareRefreshRequested = true;
+      return;
+    }
+    _drainingShares = true;
+    _shareRefreshRequested = false;
+    try {
+      final shares = await AndroidIncomingShares.getPending();
+      for (final share in shares) {
+        if (!mounted) break;
+        final lease = AndroidIncomingShares.claim(share.id);
+        if (lease == null) continue;
+        _activeShareClaim = (share.id, lease);
+        try {
+          final handled =
+              share.error != null ||
+              await handleIncomingSharedMedia(
+                share.files,
+                target: share.target,
+              );
+          if (share.error != null && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(L10n.of(context).oopsSomethingWentWrong)),
+            );
+            Logs().w('Unable to read Android share: ${share.error}');
+          }
+          if (handled && mounted) {
+            await AndroidIncomingShares.complete(share.id, lease);
+            await WidgetsBinding.instance.endOfFrame;
+          }
+        } finally {
+          AndroidIncomingShares.release(share.id, lease);
+          if (_activeShareClaim?.$2 == lease) _activeShareClaim = null;
+        }
+      }
+    } catch (e, s) {
+      Logs().w('Unable to receive Android share', e, s);
+    } finally {
+      _drainingShares = false;
+      if (mounted && _shareRefreshRequested) unawaited(_drainAndroidShares());
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && PlatformInfos.isAndroid) {
+      unawaited(_drainAndroidShares());
+    }
   }
 
   void _initReceiveSharingIntent() {
     if (!PlatformInfos.isMobile) return;
 
-    // For sharing images coming from outside the app while the app is in the memory
-    _intentFileStreamSubscription = ReceiveSharingIntent.instance
-        .getMediaStream()
-        .listen(_processIncomingSharedMedia, onError: print);
+    if (PlatformInfos.isAndroid) {
+      _androidShareSubscription = AndroidIncomingShares.changes.listen(
+        (_) => unawaited(_drainAndroidShares()),
+      );
+      unawaited(_drainAndroidShares());
+    } else {
+      // For sharing images coming from outside the app while the app is in the memory
+      _intentFileStreamSubscription = ReceiveSharingIntent.instance
+          .getMediaStream()
+          .listen(_processIncomingSharedMedia, onError: print);
 
-    // For sharing images coming from outside the app while the app is closed
-    final initialRoute = GoRouter.of(
-      context,
-    ).routeInformationProvider.value.uri;
-    ReceiveSharingIntent.instance.getInitialMedia().then(
-      (files) => _processIncomingSharedMedia(files, initialRoute),
-    );
+      // For sharing images coming from outside the app while the app is closed
+      ReceiveSharingIntent.instance.getInitialMedia().then(
+        _processIncomingSharedMedia,
+      );
+    }
 
     if (PlatformInfos.isAndroid) {
       final shortcuts = FlutterShortcuts();
@@ -414,6 +489,7 @@ class ChatListController extends State<ChatList>
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     _activeSpaceId = widget.activeSpace;
 
     scrollController.addListener(_onScroll);
@@ -489,6 +565,13 @@ class ChatListController extends State<ChatList>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _shareDisposed.complete();
+    _androidShareSubscription?.cancel();
+    final claim = _activeShareClaim;
+    if (claim != null) {
+      AndroidIncomingShares.release(claim.$1, claim.$2, notify: true);
+    }
     _intentDataStreamSubscription?.cancel();
     _intentFileStreamSubscription?.cancel();
     _callEventSubscription?.cancel();

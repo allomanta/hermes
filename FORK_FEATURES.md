@@ -66,8 +66,11 @@ Added features on top of upstream that need to be maintained through any merges 
     - Notifications on macos (weren't working for me before) [0a00dacd4, a6d962f9b, 3e05215bb]
     - Deliver fresh notification taps when Android recreates the Activity on a retained Flutter engine
 - Clear pending Android shares after use [cb80b234b]
-    - Clear the Activity's share intent after plugin delivery and ignore shares restored from recent-apps history
-    - Keep SEND/SEND_MULTIPLE content URIs out of Flutter navigation so fresh shares survive the stale-route safeguards
+    - Queue fresh SEND payloads with their Direct Share destination until the UI accepts them
+    - Copy granted content URIs to separate cache files and handle read failures before plugin attachment
+    - Preserve shares through startup navigation; replace only the previous share picker or file preview
+    - Clear the Activity's share intent after capture and ignore shares restored from recent-apps history
+    - Keep SEND/SEND_MULTIPLE content URIs out of Flutter navigation
 - Restart stalled desktop sync after sleep or network loss [ec3867fab, 74398aa56, 2687eec6e]
 - Prevent back swipes from the chat list to a blank page [82cd2cbc2, 957ac4394]
 - Sanitize malformed UTF-16 in rail labels and avatars [8cb8dcaa1]

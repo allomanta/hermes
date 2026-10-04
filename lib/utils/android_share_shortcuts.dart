@@ -232,6 +232,16 @@ class AndroidShareShortcuts {
     if (!_supported) return null;
     try {
       final id = await _channel.invokeMethod<String>('takePendingShortcut');
+      return parseShortcut(id);
+    } catch (error, stackTrace) {
+      debugPrint('Failed to obtain pending Direct Share shortcut: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+    return null;
+  }
+
+  static ({String clientName, String roomId})? parseShortcut(String? id) {
+    try {
       if (id == null || !id.startsWith(_idPrefix)) return null;
       final target = jsonDecode(id.substring(_idPrefix.length));
       if (target case [final String clientName, final String roomId]) {

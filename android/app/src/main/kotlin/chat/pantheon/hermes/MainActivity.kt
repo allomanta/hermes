@@ -29,8 +29,9 @@ class MainActivity : FlutterFragmentActivity() {
             if ((intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) {
                 clearShareIntent()
             } else {
-                // SEND content is in the extras, not a navigation deep link.
-                intent.setDataAndType(null, intent.type)
+                IncomingShares.receive(applicationContext, intent)
+                // Our queued receiver owns SEND; plugins and Flutter see a normal launch.
+                clearShareIntent()
             }
         }
         if (savedInstanceState == null &&
@@ -49,7 +50,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onPostResume() {
         super.onPostResume()
-        // Activity-aware plugins have now captured the initial share.
+        // Shares have already been queued independently of Activity/plugin attachment.
         clearShareIntent()
         val notificationIntent = pendingNotificationIntent ?: return
         pendingNotificationIntent = null
@@ -62,7 +63,11 @@ class MainActivity : FlutterFragmentActivity() {
     override fun onNewIntent(intent: Intent) {
         pendingNotificationIntent = null
         if (intent.action in shareActions) {
-            intent.setDataAndType(null, intent.type)
+            if ((intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0) {
+                IncomingShares.receive(applicationContext, intent)
+            }
+            setIntent(intent)
+            clearShareIntent()
         }
         DirectShareShortcuts.handleIntent(intent)
         setIntent(intent)
@@ -88,6 +93,7 @@ class MainActivity : FlutterFragmentActivity() {
                 DirectShareShortcuts.register(it, applicationContext)
             }
             engine = eng
+            IncomingShares.register(eng)
             return eng
         }
     }

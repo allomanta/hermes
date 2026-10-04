@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
+
 import 'package:cross_file/cross_file.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
@@ -45,6 +47,8 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
   final TextEditingController _filterController = TextEditingController();
 
   String? selectedRoomId;
+  Client? _syncClient;
+  StreamSubscription<SyncUpdate>? _syncSubscription;
 
   void _toggleRoom(String roomId) {
     setState(() {
@@ -69,14 +73,26 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
       if (consent != OkCancelResult.ok) return;
     }
     if (!mounted) return;
-    while (context.canPop()) {
-      context.pop();
-    }
-    context.go('/rooms/$roomId', extra: widget.items);
+    final router = GoRouter.of(context);
+    Navigator.of(context).pop();
+    router.go('/rooms/$roomId', extra: widget.items);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final client = Matrix.of(context).client;
+    if (identical(_syncClient, client)) return;
+    _syncClient = client;
+    _syncSubscription?.cancel();
+    _syncSubscription = client.onSync.stream.listen((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
+    _syncSubscription?.cancel();
     _filterController.dispose();
     super.dispose();
   }

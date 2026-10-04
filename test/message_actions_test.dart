@@ -11,9 +11,12 @@ import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/share_scaffold_dialog.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
 
 class _Client extends Fake implements Client {
+  @override
+  final onSync = CachedStreamController<SyncUpdate>();
   _Client(this.userID);
   @override
   final String userID;
