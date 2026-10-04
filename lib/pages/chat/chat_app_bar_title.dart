@@ -32,7 +32,7 @@ class ChatAppBarTitle extends StatelessWidget {
       highlightColor: Colors.transparent,
       onTap: controller.isArchived
           ? null
-          : () => PantheonThemes.isThreeColumnMode(context)
+          : () => controller.canDisplayChatDetailsColumn
                 ? controller.toggleDisplayChatDetailsColumn()
                 : context.go('/rooms/${room.id}/details'),
       child: Row(

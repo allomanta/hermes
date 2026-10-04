@@ -5,6 +5,7 @@
 
 import 'dart:async';
 
+import 'package:go_router/go_router.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/pages/archive/archive.dart';
 import 'package:hermes/pages/bootstrap/bootstrap_page.dart';
@@ -33,14 +34,13 @@ import 'package:hermes/pages/settings_password/settings_password.dart';
 import 'package:hermes/pages/settings_security/settings_security.dart';
 import 'package:hermes/pages/settings_style/settings_style.dart';
 import 'package:hermes/pages/sign_in/sign_in_page.dart';
+import 'package:hermes/utils/swipeable_page.dart';
 import 'package:hermes/widgets/config_viewer.dart';
 import 'package:hermes/widgets/layouts/empty_page.dart';
 import 'package:hermes/widgets/layouts/two_column_layout.dart';
 import 'package:hermes/widgets/log_view.dart';
 import 'package:hermes/widgets/matrix.dart';
 import 'package:hermes/widgets/share_scaffold_dialog.dart';
-import 'package:hermes/utils/swipeable_page.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
@@ -124,7 +124,7 @@ abstract class AppRoutes {
       pageBuilder: (context, state, child) => noTransitionPageBuilder(
         context,
         state,
-        PantheonThemes.isColumnMode(context) &&
+        PantheonThemes.isColumnModeByWidth(MediaQuery.sizeOf(context).width) &&
                 state.fullPath?.startsWith('/rooms/settings') == false
             ? TwoColumnLayout(
                 mainView: ChatList(
@@ -142,7 +142,7 @@ abstract class AppRoutes {
           pageBuilder: (context, state) => defaultPageBuilder(
             context,
             state,
-            PantheonThemes.isColumnMode(context)
+            PantheonThemes.isMainColumnVisible(context)
                 ? const EmptyPage()
                 : ChatList(
                     activeChat: state.pathParameters['roomid'],
@@ -207,10 +207,12 @@ abstract class AppRoutes {
               redirect: loggedOutRedirect,
             ),
             ShellRoute(
-              pageBuilder: (context, state, child) => defaultPageBuilder(
+              pageBuilder: (context, state, child) => noTransitionPageBuilder(
                 context,
                 state,
-                PantheonThemes.isColumnMode(context)
+                PantheonThemes.isColumnModeByWidth(
+                      MediaQuery.sizeOf(context).width,
+                    )
                     ? TwoColumnLayout(
                         mainView: Settings(key: state.pageKey),
                         sideView: child,
@@ -224,7 +226,7 @@ abstract class AppRoutes {
                   pageBuilder: (context, state) => defaultPageBuilder(
                     context,
                     state,
-                    PantheonThemes.isColumnMode(context)
+                    PantheonThemes.isMainColumnVisible(context)
                         ? const EmptyPage()
                         : const Settings(),
                   ),
@@ -520,7 +522,8 @@ abstract class AppRoutes {
       final client = matrix.getClientByName(clientName);
       if (client != null) matrix.setActiveClient(client);
     }
-    return PantheonThemes.isColumnMode(context)
+    // Collapsing a pane keeps the existing routes and their state alive.
+    return PantheonThemes.isColumnModeByWidth(MediaQuery.sizeOf(context).width)
         ? noTransitionPageBuilder(context, state, child)
         : SwipePopPage(
             key: state.pageKey,

@@ -6,19 +6,21 @@
 import 'dart:async';
 
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/routes.dart';
 import 'package:hermes/config/setting_keys.dart';
 import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
+import 'package:hermes/utils/column_layout_controller.dart';
 import 'package:hermes/widgets/app_lock.dart';
 import 'package:hermes/widgets/escape_back_handler.dart';
 import 'package:hermes/widgets/interface_scale.dart';
 import 'package:hermes/widgets/layouts/call_overlay.dart';
 import 'package:hermes/widgets/theme_builder.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/custom_scroll_behaviour.dart';
@@ -106,6 +108,17 @@ class HermesApp extends StatelessWidget {
         ),
       ),
     );
-    return InterfaceScale(child: app);
+    return InterfaceScale(
+      child: ChangeNotifierProvider(
+        create: (_) => ColumnLayoutController(
+          columnWidth: PantheonThemes.columnWidth,
+          navigation: router.routeInformationProvider,
+        ),
+        child: Consumer<ColumnLayoutController>(
+          builder: (_, controller, _) =>
+              ColumnLayoutScope(controller: controller, child: app),
+        ),
+      ),
+    );
   }
 }

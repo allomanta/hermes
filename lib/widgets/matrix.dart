@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:hermes/config/themes.dart';
 import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/utils/android_share_shortcuts.dart';
 import 'package:hermes/utils/client_manager.dart';
@@ -231,6 +232,10 @@ class MatrixState extends State<Matrix> {
   }
 
   String? get activeRoomId {
+    if (PantheonThemes.isMainColumnVisible(context) &&
+        !PantheonThemes.isColumnMode(context)) {
+      return null;
+    }
     final route = HermesApp.router.routeInformationProvider.value.uri.path;
     if (!route.startsWith('/rooms/')) return null;
     return route.split('/')[2];

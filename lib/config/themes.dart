@@ -3,9 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:flutter/services.dart';
 import 'package:hermes/config/app_config.dart';
 import 'package:hermes/config/setting_keys.dart';
-import 'package:flutter/services.dart';
+import 'package:hermes/utils/column_layout_controller.dart';
 import 'package:material_ui/material_ui.dart';
 
 abstract class PantheonThemes {
@@ -19,6 +20,11 @@ abstract class PantheonThemes {
       width > columnWidth * 2 + navRailWidth;
 
   static bool isColumnMode(BuildContext context) =>
+      ColumnLayoutScope.maybeOf(context)?.value == null &&
+      isColumnModeByWidth(MediaQuery.sizeOf(context).width);
+
+  static bool isMainColumnVisible(BuildContext context) =>
+      ColumnLayoutScope.maybeOf(context)?.value != CollapsedPane.main &&
       isColumnModeByWidth(MediaQuery.sizeOf(context).width);
 
   static bool isThreeColumnMode(BuildContext context) =>

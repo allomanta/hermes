@@ -32,6 +32,7 @@ Added features on top of upstream that need to be maintained through any merges 
 - Open space actions from navigation rail icons [d96f91ce4]
 - Sort space chats like the all chats list [e74b1a1dd]
 - Reply with stickers
+- Draggable divider between the chat list and chat, with automatic pane collapse and edge handles to reopen
 
 ## UI tweaks
 - Nav rail resizes [8b642d768, c57b7f39d, 82352a97e, adb6b0dde, 927c18d4b]

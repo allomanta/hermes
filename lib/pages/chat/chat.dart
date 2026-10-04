@@ -464,6 +464,20 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
+  bool _chatVisible = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final visible = TickerMode.valuesOf(context).enabled;
+    if (visible && !_chatVisible) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setReadMarker();
+      });
+    }
+    _chatVisible = visible;
+  }
+
   @override
   void initState() {
     inputFocus = FocusNode(onKeyEvent: _customEnterKeyHandling);
@@ -761,6 +775,9 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void>? _setReadMarkerFuture;
 
   void setReadMarker({String? eventId}) {
+    // A collapsed chat stays mounted, but its messages are not visible.
+    if (!TickerMode.valuesOf(context).enabled) return;
+
     // Do not send read markers when app is not in foreground
     if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
       return;
@@ -1860,9 +1877,15 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   late final ValueNotifier<bool> _displayChatDetailsColumn;
+  double _chatPaneWidth = double.infinity;
+
+  bool get canDisplayChatDetailsColumn =>
+      PantheonThemes.isThreeColumnMode(context) &&
+      PantheonThemes.isColumnMode(context) &&
+      _chatPaneWidth >= PantheonThemes.columnWidth * 2;
 
   bool get hasOpenChatDetails =>
-      PantheonThemes.isThreeColumnMode(context) &&
+      canDisplayChatDetailsColumn &&
       _displayChatDetailsColumn.value &&
       room.membership == Membership.join;
 
@@ -1888,34 +1911,40 @@ class ChatController extends State<ChatPageWithRoom>
                     _handleClipboardImagePaste(),
               ),
             },
-      child: Row(
-        children: [
-          Expanded(child: ChatView(this)),
-          ValueListenableBuilder(
-            valueListenable: _displayChatDetailsColumn,
-            builder: (context, displayChatDetailsColumn, _) =>
-                !PantheonThemes.isThreeColumnMode(context) ||
-                    room.membership != Membership.join ||
-                    !displayChatDetailsColumn
-                ? const SizedBox(height: double.infinity, width: 0)
-                : Container(
-                    width: PantheonThemes.columnWidth,
-                    clipBehavior: Clip.hardEdge,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(width: 1, color: theme.dividerColor),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          _chatPaneWidth = constraints.maxWidth;
+          return Row(
+            children: [
+              Expanded(child: ChatView(this)),
+              ValueListenableBuilder(
+                valueListenable: _displayChatDetailsColumn,
+                builder: (context, displayChatDetailsColumn, _) =>
+                    !hasOpenChatDetails
+                    ? const SizedBox(height: double.infinity, width: 0)
+                    : Container(
+                        width: PantheonThemes.columnWidth,
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(
+                              width: 1,
+                              color: theme.dividerColor,
+                            ),
+                          ),
+                        ),
+                        child: ChatDetails(
+                          roomId: roomId,
+                          embeddedCloseButton: IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: toggleDisplayChatDetailsColumn,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: ChatDetails(
-                      roomId: roomId,
-                      embeddedCloseButton: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: toggleDisplayChatDetailsColumn,
-                      ),
-                    ),
-                  ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
