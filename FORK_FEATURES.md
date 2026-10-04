@@ -69,6 +69,7 @@ Added features on top of upstream that need to be maintained through any merges 
     - Queue fresh SEND payloads with their Direct Share destination until the UI accepts them
     - Copy granted content URIs to separate cache files and handle read failures before plugin attachment
     - Preserve shares through startup navigation; replace only the previous share picker or file preview
+    - Show file previews without waiting for server-backed verification; verify when Send is pressed
     - Clear the Activity's share intent after capture and ignore shares restored from recent-apps history
     - Keep SEND/SEND_MULTIPLE content URIs out of Flutter navigation
 - Restart stalled desktop sync after sleep or network loss [ec3867fab, 74398aa56, 2687eec6e]

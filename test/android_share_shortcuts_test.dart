@@ -5,14 +5,18 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:cross_file/cross_file.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hermes/l10n/l10n.dart';
 import 'package:hermes/pages/chat/chat.dart';
+import 'package:hermes/pages/chat/send_file_dialog.dart';
 import 'package:hermes/utils/android_share_shortcuts.dart';
 import 'package:hermes/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:hermes/widgets/share_scaffold_dialog.dart';
+import 'package:material_ui/material_ui.dart' as material;
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -97,6 +101,21 @@ class _ShareController extends ChatController {
   late BuildContext context;
   @override
   bool get mounted => context.mounted;
+}
+
+class _EncryptedRoom extends _Room {
+  _EncryptedRoom(super.client, super.id);
+  int participantRequests = 0;
+  @override
+  bool get encrypted => true;
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #requestParticipants) {
+      participantRequests++;
+      return Completer<List<User>>().future;
+    }
+    return super.noSuchMethod(invocation);
+  }
 }
 
 String _id(Room room) =>
@@ -226,6 +245,66 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
   }
+
+  testWidgets(
+    'file previews open offline and fresh shares replace the previous preview',
+    (tester) async {
+      final room = _EncryptedRoom(_Client('account'), '!room');
+      final controller = _ShareController()
+        ..widget = ChatPageWithRoom(room: room);
+      addTearDown(controller.scrollController.dispose);
+      addTearDown(controller.sendController.dispose);
+      await tester.pumpWidget(
+        material.MaterialApp(
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          home: material.Scaffold(
+            body: Builder(
+              builder: (context) {
+                controller.context = context;
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      );
+      for (final name in ['first.mp4', 'second.mp4']) {
+        final previous = controller.widget;
+        controller.widget = ChatPageWithRoom(
+          room: room,
+          shareItems: [
+            FileShareItem(
+              XFile.fromData(
+                Uint8List.fromList([0]),
+                path: name,
+                name: name,
+                mimeType: 'video/mp4',
+              ),
+            ),
+          ],
+        );
+        controller.didUpdateWidget(previous);
+        tester.binding.scheduleFrame();
+        await tester.pumpAndSettle();
+        expect(find.byType(SendFileDialog), findsOneWidget);
+        expect(
+          tester
+              .widget<SendFileDialog>(find.byType(SendFileDialog))
+              .files
+              .single
+              .name,
+          name,
+        );
+        expect(
+          room.participantRequests,
+          0,
+          reason: 'Verification belongs to Send, not opening the preview',
+        );
+        expect(room.sent, isEmpty);
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
 
   group('publisher', () {
     setUp(() => debugDefaultTargetPlatformOverride = TargetPlatform.android);

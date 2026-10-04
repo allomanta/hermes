@@ -120,6 +120,8 @@ class ChatPageWithRoom extends StatefulWidget {
 class ChatController extends State<ChatPageWithRoom>
     with WidgetsBindingObserver {
   static final Expando<bool> _consumedShareItems = Expando<bool>();
+  ModalRoute<dynamic>? _shareFileDialogRoute;
+  int _shareGeneration = 0;
 
   Room get room => sendingClient.getRoomById(roomId) ?? widget.room;
 
@@ -311,7 +313,41 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
     _consumedShareItems[shareItems] = true;
+    final generation = ++_shareGeneration;
     final shareRoom = widget.room;
+    final files = shareItems
+        .whereType<FileShareItem>()
+        .map((item) => item.value)
+        .toList();
+    if (files.isNotEmpty) {
+      final previous = _shareFileDialogRoute;
+      if (previous?.isActive == true) {
+        Navigator.of(context, rootNavigator: true).removeRoute(previous!);
+      }
+      ModalRoute<dynamic>? current;
+      unawaited(
+        showAdaptiveDialog<void>(
+          context: context,
+          builder: (c) {
+            current = ModalRoute.of(c);
+            _shareFileDialogRoute = current;
+            return SendFileDialog(
+              files: files,
+              room: shareRoom,
+              onSent: () => AndroidShareShortcuts.recordShare(shareRoom),
+              outerContext: context,
+              threadRootEventId: activeThreadId,
+              threadLastEventId: threadLastEventId,
+            );
+          },
+        ).whenComplete(() {
+          if (identical(_shareFileDialogRoute, current)) {
+            _shareFileDialogRoute = null;
+          }
+        }),
+      );
+    }
+    if (shareItems.every((item) => item is FileShareItem)) return;
     if (!shareRoom.otherPartyCanReceiveMessages) {
       final theme = Theme.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -327,8 +363,19 @@ class ChatController extends State<ChatPageWithRoom>
       );
       return;
     }
-    final proceed = await showTrustUserInRoomDialog(context, shareRoom);
-    if (!mounted || !proceed) return;
+    bool proceed;
+    try {
+      proceed = await showTrustUserInRoomDialog(context, shareRoom);
+    } catch (e, s) {
+      if (mounted) {
+        ErrorReporter(
+          context,
+          'Unable to verify shared message',
+        ).onErrorCallback(e, s);
+      }
+      return;
+    }
+    if (!mounted || generation != _shareGeneration || !proceed) return;
     for (final item in shareItems) {
       final send = switch (item) {
         TextShareItem() => shareRoom.sendTextEvent(item.value),
@@ -336,29 +383,22 @@ class ChatController extends State<ChatPageWithRoom>
         _ => null,
       };
       unawaited(
-        send?.then((eventId) async {
-          if (eventId != null) {
-            await AndroidShareShortcuts.recordShare(shareRoom);
-          }
-        }),
+        send
+            ?.then((eventId) async {
+              if (eventId != null) {
+                await AndroidShareShortcuts.recordShare(shareRoom);
+              }
+            })
+            .onError((Object e, StackTrace s) {
+              if (mounted) {
+                ErrorReporter(
+                  context,
+                  'Unable to forward shared message',
+                ).onErrorCallback(e, s);
+              }
+            }),
       );
     }
-    final files = shareItems
-        .whereType<FileShareItem>()
-        .map((item) => item.value)
-        .toList();
-    if (files.isEmpty) return;
-    showAdaptiveDialog(
-      context: context,
-      builder: (c) => SendFileDialog(
-        files: files,
-        room: shareRoom,
-        onSent: () => AndroidShareShortcuts.recordShare(shareRoom),
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
-    );
   }
 
   KeyEventResult _customEnterKeyHandling(FocusNode node, KeyEvent evt) {
